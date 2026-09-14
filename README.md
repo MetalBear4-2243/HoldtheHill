@@ -1,6 +1,6 @@
 # Hold the Hill
 
-A 2D Unity game by **Turbulent Towers Studio**.
+A single-player 2D hybrid tower defense by **Turbulent Towers Studio**: control your character and build defenses to hold the hill against waves.
 
 ## Setup (do this once)
 
@@ -27,22 +27,88 @@ A 2D Unity game by **Turbulent Towers Studio**.
 
 ## Where things go
 
+We organize **by feature**: everything for one system (scripts, prefabs, sprites, data) lives together, so it's obvious who's working on what and merges stay small.
+
 ```
 Hold the Hill/Assets/
-  _Game/            the real game - shared by everyone
-    Scenes/         shared scenes (edit only after telling the group)
-    Scripts/
-    Prefabs/
-    Art/
-    Audio/
-  _Sandbox/         personal test areas - only edit your own folder
-    1103-Montgomery-Adam/
-    MetalBear4-2243/
-    nilly-ctrl/
-  Settings/         render pipeline and input settings (leave alone)
+  _Game/                  all of our game
+    Core/                 shared systems every feature can use
+      Audio/  Bootstrap/  Events/  GameFeel/  Pooling/  Save/  Utilities/
+    Features/             one folder per game system
+      Player/             player character, camera
+      GameFlow/           hill health, build phase <-> wave phase, win/lose
+      Enemies/            enemy types, waves, difficulty scaling, pathfinding
+      Towers/             towers and buildings, grid placement
+      Combat/             targeting, damage, status effects, power-ups
+      Economy/            currency, harvestables, loot drops
+      Progression/        upgrade tree, stats, achievements
+      Levels/             level data, level select, tutorial
+      UI/                 HUD, menus, settings
+      DebugTools/         cheat console and test helpers (development builds only)
+    Shared/               assets used by 2+ features
+      Art/Tilesets/  Audio/Music/  VFX/  Fonts/  Materials/
+    Scenes/               Bootstrap, UI, and Levels/<LevelName>/
+    Editor/               custom Unity editor tools
+    Tests/                EditMode/ and PlayMode/ automated tests
+  _Sandbox/<github-username>/   your personal test area - only edit your own
+  ThirdParty/             Asset Store imports, kept apart from our code
+  Settings/               render pipeline + input settings (leave alone)
 ```
 
-**Build features as prefabs in your sandbox.** Test them in your own sandbox scene, then drop the finished prefab into a shared scene. Three people editing the same scene is the #1 cause of lost work in Unity.
+**Inside a feature**, only create the subfolders you need:
+
+```
+Features/Towers/
+  Scripts/      ArcherTower.cs, TowerPlacer.cs
+  Prefabs/      ArcherTower.prefab, ArcherTower_Tier2.prefab (variant)
+  Art/          ArcherTower.aseprite
+  Data/         ArcherTowerData.asset (ScriptableObject stats)
+  Animations/  Audio/
+```
+
+**Rules of thumb**
+- **Used by one feature?** Put it in that feature. **Used by two or more?** Move it to `Shared/` (or `Core/` for code).
+- **`Core/` never depends on `Features/`.** Features can use Core, not the other way round.
+- **ScriptableObjects:** the script goes in `Scripts/`, the `.asset` files with actual numbers go in `Data/`.
+- **Tower/enemy tiers** are prefab variants of the base prefab, not copies.
+- **Build features as prefabs in your `_Sandbox/`**, test them there, then move the finished folder into `Features/`.
+- **Don't use `Resources/` folders.** Reference assets directly or through ScriptableObjects.
+
+## Naming
+
+- **PascalCase, no spaces** for all files and folders: `ArcherTower.prefab`, not `archer tower.prefab`.
+- **Script file name = class name**: `ArcherTower.cs` contains `class ArcherTower`.
+- **Namespaces follow folders**: `HoldTheHill.Core`, `HoldTheHill.Features.Towers`, etc.
+- Add a suffix only where names would clash: `ArcherTower.prefab` + `ArcherTowerData.asset`.
+
+## Scenes
+
+Levels are split into scenes that load together, so painting tiles and placing gameplay objects don't conflict:
+
+| Scene | What goes in it |
+|---|---|
+| `Scenes/Bootstrap` | `SceneLoader` and managers that live for the whole game |
+| `Scenes/UI` | HUD, menus, EventSystem |
+| `Levels/Hill01/Hill01_Terrain` | Tilemaps only |
+| `Levels/Hill01/Hill01_Gameplay` | Camera, light, spawners, hill, player start |
+
+**Press Play in any of these scenes** and `SceneLoader` opens the rest automatically.
+
+**To add a level:** make `Scenes/Levels/Hill02/` with `Hill02_Terrain` and `Hill02_Gameplay`, add both to **File > Build Profiles > Scene List**, and load them from the level select.
+
+## Code
+
+Our scripts compile into these assemblies (the `.asmdef` files), which keeps recompiles fast:
+
+| Assembly | Folder | For |
+|---|---|---|
+| `HoldTheHill.Runtime` | `_Game/` | all game code (Core + Features) |
+| `HoldTheHill.Editor` | `_Game/Editor/` | editor tools (can't be used in builds) |
+| `HoldTheHill.Tests.EditMode` / `.PlayMode` | `_Game/Tests/` | automated tests (**Window > General > Test Runner**) |
+
+**"The type or namespace could not be found"** after using a new package? Select `_Game/HoldTheHill.Runtime.asmdef` and add that package's assembly under **Assembly Definition References**. Input System, URP, 2D Animation, SpriteShape, Tilemap Extras, TextMeshPro, UI, and Timeline are already added.
+
+**Play Mode settings:** domain reload is **on**, so every Play starts with fresh values. Don't change **Project Settings > Editor > Enter Play Mode Settings**.
 
 ## How we work
 
@@ -50,16 +116,16 @@ Hold the Hill/Assets/
 2. **Make a branch for each task**, named `yourname/what-it-does`, e.g. `adam/enemy-spawner`.
 3. **Keep branches small and short** - merge within a day or two.
 4. **Open a pull request into `main`.** Don't push straight to `main`.
-5. **Say in Discord before editing a shared scene**, and push it as soon as you're done.
+5. **Say in Discord before editing a shared scene or prefab**, and push it as soon as you're done.
 
 ## Art files are locked while you edit them
 
-Aseprite, Photoshop, Krita, Affinity, and Blender files can't be merged. If two people edit the same one, someone's work is lost. So these files are **read-only until you lock them**:
+Aseprite (`.aseprite`/`.ase`), Photoshop, Krita, Affinity, and Blender files can't be merged. If two people edit the same one, someone's work is lost. So these files are **read-only until you lock them**:
 
 ```
-git lfs lock "Hold the Hill/Assets/_Game/Art/player.aseprite"     # claim it
-git lfs locks                                                      # see who has what
-git lfs unlock "Hold the Hill/Assets/_Game/Art/player.aseprite"   # release it after you push
+git lfs lock "Hold the Hill/Assets/_Game/Features/Player/Art/Player.aseprite"     # claim it
+git lfs locks                                                                      # see who has what
+git lfs unlock "Hold the Hill/Assets/_Game/Features/Player/Art/Player.aseprite"   # release it after you push
 ```
 
 Only lock what you're actively editing, and unlock as soon as your change is pushed.
