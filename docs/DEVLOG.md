@@ -29,7 +29,7 @@ Copy this to the top of the log:
 ---
 
 ## 2026-09-13 — Project setup, team conventions, and folder structure
-**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI devlog](AI_DEVLOG.md#2026-09-13--project-setup-and-folder-structure)
+**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
 **Branch:** `BryceTest` (not merged into `main`)
 
 **Worked on**

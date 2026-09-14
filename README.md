@@ -5,7 +5,7 @@ A single-player 2D hybrid tower defense by **Turbulent Towers Studio**: control 
 ## Docs
 
 - **[Devlog](docs/DEVLOG.md)** — what we worked on, what we decided, and why. Add an entry when you finish a task.
-- **[AI devlog](docs/AI_DEVLOG.md)** — every change made with AI help, what people decided, and how it was checked. Log any AI-assisted work here too.
+- **[AI use log](docs/AI_DEVLOG.md)** — short disclosure of AI-assisted work (our instructor asks for it). Add one row whenever AI helps.
 
 ## Setup (do this once)
 
