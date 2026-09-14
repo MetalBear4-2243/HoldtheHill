@@ -2,6 +2,11 @@
 
 A single-player 2D hybrid tower defense by **Turbulent Towers Studio**: control your character and build defenses to hold the hill against waves.
 
+## Docs
+
+- **[Devlog](docs/DEVLOG.md)** — what we worked on, what we decided, and why. Add an entry when you finish a task.
+- **[AI devlog](docs/AI_DEVLOG.md)** — every change made with AI help, what people decided, and how it was checked. Log any AI-assisted work here too.
+
 ## Setup (do this once)
 
 1. **Install Unity 6000.6.0f1 exactly** through Unity Hub. Opening the project in any other version rewrites dozens of files and causes conflicts for everyone.
