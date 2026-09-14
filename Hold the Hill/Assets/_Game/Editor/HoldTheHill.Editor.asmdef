@@ -1,0 +1,19 @@
+{
+    "name": "HoldTheHill.Editor",
+    "rootNamespace": "HoldTheHill.EditorTools",
+    "references": [
+        "HoldTheHill.Runtime",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
