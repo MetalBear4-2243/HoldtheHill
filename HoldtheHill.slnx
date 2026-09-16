@@ -3,8 +3,8 @@
   <Project Path="Unity.AppUI.csproj" />
   <Project Path="Unity.2D.Aseprite.Editor.csproj" />
   <Project Path="Unity.AI.Assistant.Editor.csproj" />
-  <Project Path="Unity.InferenceEngine.Tokenization.csproj" />
   <Project Path="Unity.AI.Assistant.UI.Editor.csproj" />
+  <Project Path="Unity.InferenceEngine.Tokenization.csproj" />
   <Project Path="Unity.2D.Common.Path.Editor.csproj" />
   <Project Path="Unity.Collections.csproj" />
   <Project Path="Unity.InferenceEngine.csproj" />
@@ -19,9 +19,9 @@
   <Project Path="Unity.AI.Toolkit.Utility.csproj" />
   <Project Path="Unity.AI.Generators.Redux.csproj" />
   <Project Path="Unity.AppUI.Redux.csproj" />
+  <Project Path="Unity.AI.MCP.Editor.csproj" />
   <Project Path="Unity.2D.Tilemap.Editor.csproj" />
   <Project Path="Unity.AI.Generators.UI.csproj" />
-  <Project Path="Unity.AI.MCP.Editor.csproj" />
   <Project Path="Unity.InferenceEngine.Editor.Visualizer.csproj" />
   <Project Path="Unity.AI.Image.csproj" />
   <Project Path="Unity.AI.Mesh.csproj" />
