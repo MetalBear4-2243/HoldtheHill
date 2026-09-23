@@ -3,8 +3,13 @@
 Single-player 2D hybrid tower defense by Turbulent Towers Studio. **`README.md` is the team's source of truth** for setup, folder layout, naming, scenes, assemblies and workflow; read it before changing anything and follow it exactly.
 
 ## Repo rules for Claude
-- GitHub `MetalBear4-2243/HoldtheHill` is a **group repo**. Never commit, push, merge, or open auto-merge PRs into `main` without the user's explicit approval for that specific change.
-- The user's working branch is `BryceTest`. Team convention for new work is `name/what-it-does` branches with PRs into `main`.
+- GitHub `MetalBear4-2243/HoldtheHill` is a **group repo**. `Indev` and `main` are both shared. Never commit, push, merge, or open auto-merge PRs into either without the user's explicit approval for that specific change.
+- Branches, in order of stability:
+  - **`Indev` is the group integration and test branch.** This is where the team's work actually lands and gets tested together. Branch from it, PR into it, treat it as shared.
+  - **`main` is the stable branch and is currently stale** — three commits of empty Unity template. It gets brought up to date deliberately, once documentation and structure are settled. Don't target it or assume it reflects the project.
+  - **Your own work:** branch off `Indev` named `name/what-it-does` (e.g. `nilly/enemy-spawner`), PR back into `Indev`. Keep them small.
+- PRs open against `MetalBear4-2243/HoldtheHill` (the team repo) with `--base Indev`. `nilly-ctrl/HoldtheHill` is the user's fork and is the `origin` remote; the team repo is `upstream`. Cross-fork head is `nilly-ctrl:<branch>`.
+- Commits here must use the user's GitHub noreply email (`322642514+nilly-ctrl@users.noreply.github.com`), already set as this repo's local `user.email`. Their global git identity is a private address and GitHub rejects pushes that would expose it (`GH007`).
 - AI-assisted changes to this repo get a one-line row in `docs/AI_DEVLOG.md` (Date, Who, Tool, What the AI helped with, What we decided, Not tested yet) in the same commit set, and commits keep their `Co-Authored-By` line.
 - Unity project root is the `Hold the Hill/` subfolder (with a space), not the repo root. Quote paths.
 - Unity **6000.6.0f1** exactly. Don't touch `ProjectSettings/ProjectVersion.txt`.
