@@ -117,11 +117,13 @@ Our scripts compile into these assemblies (the `.asmdef` files), which keeps rec
 
 ## How we work
 
-1. **Pull `main` before starting anything.**
-2. **Make a branch for each task**, named `yourname/what-it-does`, e.g. `adam/enemy-spawner`.
+1. **Pull `Indev` before starting anything.** `Indev` is our integration branch - it's where everyone's work comes together and gets tested.
+2. **Make a branch for each task**, named `yourname/what-it-does`, e.g. `adam/enemy-spawner`. Branch it off `Indev`.
 3. **Keep branches small and short** - merge within a day or two.
-4. **Open a pull request into `main`.** Don't push straight to `main`.
+4. **Open a pull request into `Indev`.** Don't push straight to `Indev` or `main` - both are shared.
 5. **Say in Discord before editing a shared scene or prefab**, and push it as soon as you're done.
+
+> `main` is our stable branch. It is deliberately behind `Indev` right now - we'll bring it up to date in one pass once the documentation and folder structure are settled. Until then, `Indev` is the branch that reflects the project.
 
 ## Art files are locked while you edit them
 
