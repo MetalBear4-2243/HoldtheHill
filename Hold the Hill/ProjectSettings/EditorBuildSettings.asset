@@ -6,7 +6,16 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/_Game/Scenes/Bootstrap.unity
+    guid: 12466f550a0a8444da34a3cc5284b1a6
+  - enabled: 1
+    path: Assets/_Game/Scenes/UI.unity
+    guid: 9daeb49accea849f58dc3aae9558e6c7
+  - enabled: 1
+    path: Assets/_Game/Scenes/Levels/Hill01/Hill01_Terrain.unity
+    guid: 2bd1f64108f254a3f8463ccb4a421f06
+  - enabled: 1
+    path: Assets/_Game/Scenes/Levels/Hill01/Hill01_Gameplay.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
