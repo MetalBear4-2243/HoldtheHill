@@ -1,6 +1,6 @@
 # Hold the Hill (team repo)
 
-Single-player 2D hybrid tower defense by Turbulent Towers Studio. **`README.md` is the team's source of truth** for setup, folder layout, naming, scenes, assemblies and workflow; read it before changing anything and follow it exactly. One known exception: its "Team workflow" section still says to branch from and PR into `main`. That is out of date — the team integrates on `Indev` (see below). Everything else in the README stands.
+Single-player 2D hybrid tower defense by Turbulent Towers Studio. **`README.md` is the team's source of truth** for setup, folder layout, naming, scenes, assemblies and workflow; read it before changing anything and follow it exactly.
 
 ## Repo rules for Claude
 - GitHub `MetalBear4-2243/HoldtheHill` is a **group repo**. `Indev` and `main` are both shared. Never commit, push, merge, or open auto-merge PRs into either without the user's explicit approval for that specific change.
