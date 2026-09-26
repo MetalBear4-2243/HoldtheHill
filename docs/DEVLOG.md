@@ -28,7 +28,34 @@ Copy this to the top of the log:
 
 ---
 
+## 2026-09-23 — Baseline BasicEnemy Script and Tests
+**Who:** Jason_Kimoto (MetalBear4-2243), with AI assistance — see [AI use log](AI_DEVLOG.md)
+**Branch:** `BasicEnemyScript`
+
+**Worked on**
+- Created `BasicEnemy.cs` in `Hold the Hill/Assets/_Game/Features/Enemies/Scripts/` as the baseline component for all basic enemies.
+- Configured health as a `double` (`_maxHealth`, `_currentHealth`, `TakeDamage(double)`, `Heal(double)`).
+- Configured damage as an `int` (`_damage`, `Damage`).
+- Implemented path traversal based on world coordinates (`_pathCoordinates`, `SetPath(...)`), with overloads for `Vector3`, `Vector2`, and `EnemyPath`.
+- Added automatic sprite facing direction flip on the X-axis based on travel direction.
+- Added event hooks (`OnDied`, `OnDestinationReached`, `OnHealthChanged`) and Scene view path gizmos.
+- Added EditMode tests in `Hold the Hill/Assets/_Game/Tests/EditMode/BasicEnemyTests.cs`.
+- Wrote comprehensive technical documentation in `Documentation/EnemyScripts_Documentation.md`.
+
+**Decisions**
+- Kept movement transform-based (`Vector3.MoveTowards`) for reliable 2D grid/road waypoint traversal.
+- Supported both direct coordinate lists (`Vector2`/`Vector3`) and scene `EnemyPath` components for flexible spawning and testing.
+
+**Problems / blockers**
+- None.
+
+**Next**
+- Integrate `BasicEnemy` prefab variants into `EnemySpawner` wave definitions and test in Play mode.
+
+---
+
 ## 2026-09-13 — Project setup, team conventions, and folder structure
+
 **Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
 **Branch:** `BryceTest` (not merged into `main`)
 
