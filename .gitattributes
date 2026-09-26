@@ -44,3 +44,12 @@
 *.so      filter=lfs diff=lfs merge=lfs -text
 *.a       filter=lfs diff=lfs merge=lfs -text
 *.zip     filter=lfs diff=lfs merge=lfs -text
+
+# --- Exemptions ---
+# TextMesh Pro's package assets were committed as plain Git blobs before the LFS
+# rules above existed. The rules match them by extension, so Git cleans them to
+# pointers when diffing, they never match the stored blobs, and every fresh clone
+# reports ~26 modified files under Assets/TextMesh Pro/ that nobody changed.
+# Unsetting the filters here makes Git compare them as ordinary binaries again.
+# Imported package content, never hand-edited, so LFS buys us nothing on it.
+"Hold the Hill/Assets/TextMesh Pro/**" -filter -diff -merge
