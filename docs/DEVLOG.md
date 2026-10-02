@@ -26,6 +26,28 @@ Copy this to the top of the log:
 - What you or the team should do next
 ```
 
+## 2026-10-02 — Dynamic Tower Card UI & Prefab Setup
+**Who:** Adam Montgomery, with AI assistance — see [AI use log](AI_DEVLOG.md)
+**Branch:** `Sandbox/Montgomery-Adam`
+
+**Worked on**
+- Fixed asset transparency issues by establishing a PNG pipeline and using the Unity Sprite Editor for non-square icons.
+- Built the `TowerCardBase` UI template and saved it as a prefab in the `_Indev/Features/UI/` folder.
+- Wrote `TowerCardDisplay.cs` to link UI elements (`Image`, `TextMeshProUGUI`) via the Inspector using `[Header]` organization.
+- Fixed a VS Code `.NET SDK not found` error to restore C# IntelliSense and error checking.
+- Created `TowerCardTester.cs` to successfully validate dynamic data injection (name, cost, sprite) when entering Play mode.
+
+**Decisions**
+- Enforced transparent PNGs over JPGs for all UI sprites to eliminate solid background boxes.
+- Used `Image` variable types in scripts for UI framework slots and `Sprite` types for passing the actual art assets.
+
+**Problems / blockers**
+- None currently, but the underlying data architecture for storing the actual tower stats (health, damage, etc.) doesn't exist yet.
+
+**Next**
+- Establish the data structure for tower stats.
+- Build out the Tower list menu to instantiate and populate these card prefabs dynamically.
+
 ---
 
 ## 2026-09-23 — Baseline BasicEnemy Script and Tests
