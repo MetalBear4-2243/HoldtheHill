@@ -9,24 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e4b9c1f8a204652a135e89d6e4b1049, type: 3}
+  m_Script: {fileID: 11500000, guid: e8e72427ccb6015419f699ec1ae52799, type: 3}
   m_Name: Map_01
-  m_EditorClassIdentifier: Assembly-CSharp::MapWaveDataSO
+  m_EditorClassIdentifier: HoldTheHill.Runtime::MapWaveDataSO
   mapId: Map_01
   waves:
   - waveName: Wave 1
     enemies:
-    - enemyPrefab: {fileID: 3661181027019537082, guid: e7170b0ef79bc62438440313ffdc82eb, type: 3}
-      delayBeforeNext: 1
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 4161659559217258833, guid: 965b73bd7b1207744baeb811260fc40c, type: 3}
-      delayBeforeNext: 1
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 4130370315041535110, guid: e54959a2905603d4ebbbf26049236ca9, type: 3}
-      delayBeforeNext: 1
-      spawnPointOverride: {fileID: 0}
-  - waveName: Wave 2
-    enemies:
-    - enemyPrefab: {fileID: 7604806601361737569, guid: c831b7d93cd3c5044bc7de5d74341b9d, type: 3}
-      delayBeforeNext: 1
+    - enemyPrefab: {fileID: 5057799100556310380, guid: 834d34e7e7e759745b9a90d4889a17e6, type: 3}
+      delayBeforeNext: 0
       spawnPointOverride: {fileID: 0}

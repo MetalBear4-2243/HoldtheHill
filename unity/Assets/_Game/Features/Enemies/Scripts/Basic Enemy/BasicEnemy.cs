@@ -39,6 +39,7 @@ namespace HoldTheHill.Features.Enemies
         // Events for decoupled listeners (UI, spawner tracking, audio, combat)
         public event Action<BasicEnemy> OnDied;
         public event Action<BasicEnemy> OnDestinationReached;
+        public static event Action<BasicEnemy> OnAnyDestinationReached;
         public event Action<double, double> OnHealthChanged;
 
         /// <summary>Maximum health value as a double.</summary>
@@ -237,7 +238,16 @@ namespace HoldTheHill.Features.Enemies
         protected virtual void OnReachedDestination()
         {
             OnDestinationReached?.Invoke(this);
+            OnAnyDestinationReached?.Invoke(this);
             Destroy(gameObject);
+        }
+
+        /// <summary>
+        /// Triggers the destination reached sequence manually (useful for testing or external events).
+        /// </summary>
+        public void ReachDestination()
+        {
+            OnReachedDestination();
         }
 
         /// <summary>
