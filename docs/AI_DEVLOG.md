@@ -18,3 +18,5 @@ Short disclosure of AI-assisted work on this project. Our instructor encourages 
 | 2026-09-27 | MetalBear4-2243 | Gemini 3.8 Flash (High) | Created `AGENTS.md`, a standardized guide for AI agents summarizing project rules, Git workflow, Unity constraints, and code conventions | Repo-level `AGENTS.md` mirroring `CLAUDE.md` and README rules | — |
 
 | 2026-09-28 | nilly-ctrl | Claude Code (Claude Opus 5.5) | Found why TextMesh Pro fonts/textures broke on `Indev`: 26 files had become ~130-byte Git LFS pointers (came in with PR #7's history, carried over by the PR #8 merge). Restored the real files from `a67936a`; removed orphaned `Assets/Scripts.meta` | Keep TMP as plain Git files, as decided in PR #4 (not LFS) | Opening the project in Unity after merge |
+
+| 2026-10-02 | adammontgomery | Gemini | Explained 2D sprite transparency (PNGs vs JPGs) and Sprite Editor slicing; wrote `TowerCardDisplay.cs` for UI updates; debugged VS Code .NET SDK error; wrote `TowerCardTester.cs` to validate dynamic prefab data injection. | Use transparent PNGs for UI icons; use `Image` components for UI slots; saved `TowerCardBase` as a prefab in the `_Sandbox` folder. |
