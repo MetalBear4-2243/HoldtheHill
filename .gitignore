@@ -38,3 +38,6 @@
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Per-computer AI rules, see AGENTS.md
+AGENTS.local.md
