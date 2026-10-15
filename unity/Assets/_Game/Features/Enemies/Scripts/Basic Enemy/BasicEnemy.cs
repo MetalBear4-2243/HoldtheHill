@@ -13,28 +13,28 @@ namespace HoldTheHill.Features.Enemies
     {
         [Header("Health & Combat")]
         [Tooltip("Maximum health of this enemy.")]
-        [SerializeField] private double _maxHealth = 100.0;
+        [SerializeField] protected double _maxHealth = 100.0;
 
         [Tooltip("Damage dealt by this enemy (e.g. to the hill or player base upon reaching destination).")]
-        [SerializeField] private int _damage = 1;
+        [SerializeField] protected int _damage = 1;
 
         [Header("Path & Movement")]
         [Tooltip("Movement speed along the path in world units per second.")]
-        [SerializeField] private float _moveSpeed = 2f;
+        [SerializeField] protected float _moveSpeed = 2f;
 
         [Tooltip("Distance threshold to consider a waypoint coordinate reached.")]
-        [SerializeField] private float _waypointTolerance = 0.05f;
+        [SerializeField] protected float _waypointTolerance = 0.05f;
 
         [Tooltip("Initial path coordinates in world space. Can also be assigned dynamically via SetPath().")]
-        [SerializeField] private List<Vector3> _pathCoordinates = new List<Vector3>();
+        [SerializeField] protected List<Vector3> _pathCoordinates = new List<Vector3>();
 
         [Header("Visuals")]
         [Tooltip("If true and a SpriteRenderer is present, flips sprite on the X axis to match movement direction.")]
-        [SerializeField] private bool _flipSpriteFacing = true;
+        [SerializeField] protected bool _flipSpriteFacing = true;
 
-        private double _currentHealth;
-        private int _currentWaypointIndex;
-        private SpriteRenderer _spriteRenderer;
+        protected double _currentHealth;
+        protected int _currentWaypointIndex;
+        protected SpriteRenderer _spriteRenderer;
 
         // Events for decoupled listeners (UI, spawner tracking, audio, combat)
         public event Action<BasicEnemy> OnDied;
@@ -66,10 +66,14 @@ namespace HoldTheHill.Features.Enemies
         public IReadOnlyList<Vector3> PathCoordinates => _pathCoordinates;
 
         /// <summary>Index of the next waypoint coordinate being pursued.</summary>
-        public int CurrentWaypointIndex => _currentWaypointIndex;
+        public int CurrentWaypointIndex
+        {
+            get => _currentWaypointIndex;
+            set => _currentWaypointIndex = Mathf.Max(0, value);
+        }
 
         /// <summary>True if health has been depleted and death sequence has started.</summary>
-        public bool IsDead { get; private set; }
+        public bool IsDead { get; protected set; }
 
         protected virtual void Awake()
         {
@@ -179,6 +183,25 @@ namespace HoldTheHill.Features.Enemies
         }
 
         /// <summary>
+        /// Sets the maximum health and optionally resets current health to match.
+        /// </summary>
+        /// <param name="newMaxHealth">New maximum health value.</param>
+        /// <param name="resetCurrentHealth">If true, sets current health equal to new max health.</param>
+        public virtual void SetMaxHealth(double newMaxHealth, bool resetCurrentHealth = true)
+        {
+            _maxHealth = Math.Max(0.0, newMaxHealth);
+            if (resetCurrentHealth)
+            {
+                _currentHealth = _maxHealth;
+            }
+            else
+            {
+                _currentHealth = Math.Min(_currentHealth, _maxHealth);
+            }
+            OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+        }
+
+        /// <summary>
         /// Assigns a new ordered sequence of coordinates for the enemy to traverse.
         /// </summary>
         /// <param name="coordinates">The coordinates in world space.</param>
@@ -196,6 +219,24 @@ namespace HoldTheHill.Features.Enemies
             if (teleportToStart && _pathCoordinates.Count > 0)
             {
                 transform.position = _pathCoordinates[0];
+            }
+        }
+
+        /// <summary>
+        /// Assigns a new ordered sequence of coordinates and specifies the starting waypoint index.
+        /// </summary>
+        /// <param name="coordinates">The coordinates in world space.</param>
+        /// <param name="startingWaypointIndex">Index of the waypoint to pursue first.</param>
+        /// <param name="teleportToStart">If true, positions the enemy at the starting waypoint immediately.</param>
+        public void SetPath(IEnumerable<Vector3> coordinates, int startingWaypointIndex, bool teleportToStart = false)
+        {
+            SetPath(coordinates, teleportToStart: false);
+            _currentWaypointIndex = Mathf.Clamp(startingWaypointIndex, 0, _pathCoordinates.Count);
+
+            if (teleportToStart && _pathCoordinates.Count > 0)
+            {
+                int index = Mathf.Clamp(startingWaypointIndex, 0, _pathCoordinates.Count - 1);
+                transform.position = _pathCoordinates[index];
             }
         }
 
