@@ -6,14 +6,15 @@ namespace HoldTheHill.Features.GameFlow
     /// <summary>
     /// Reads the run keys from the game's actions asset and hands them to the
     /// <see cref="LevelRun"/> beside it: NextWave sends a wave, ToggleSpeed switches 1x / 2x,
-    /// Pause opens or closes the pause menu. Keys keep working while paused because the Input
-    /// System does not follow <c>Time.timeScale</c>.
+    /// Pause opens or closes the pause menu, Upgrade buys the selected tower's next level.
+    /// Keys keep working while paused because the Input System does not follow
+    /// <c>Time.timeScale</c>.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(LevelRun))]
     public class RunControls : MonoBehaviour
     {
-        [Tooltip("The game's actions asset. Uses its Gameplay map: NextWave, ToggleSpeed, Pause.")]
+        [Tooltip("The game's actions asset. Uses its Gameplay map: NextWave, ToggleSpeed, Pause, Upgrade.")]
         [SerializeField] private InputActionAsset _actions;
 
         private LevelRun _run;
@@ -21,6 +22,7 @@ namespace HoldTheHill.Features.GameFlow
         private InputAction _nextWave;
         private InputAction _toggleSpeed;
         private InputAction _pause;
+        private InputAction _upgrade;
 
         private void Awake()
         {
@@ -36,6 +38,7 @@ namespace HoldTheHill.Features.GameFlow
             _nextWave = _gameplay.FindAction("NextWave", throwIfNotFound: true);
             _toggleSpeed = _gameplay.FindAction("ToggleSpeed", throwIfNotFound: true);
             _pause = _gameplay.FindAction("Pause", throwIfNotFound: true);
+            _upgrade = _gameplay.FindAction("Upgrade", throwIfNotFound: true);
         }
 
         private void OnEnable()
@@ -74,6 +77,11 @@ namespace HoldTheHill.Features.GameFlow
             if (_pause.WasPressedThisFrame())
             {
                 _run.TogglePause();
+            }
+
+            if (_upgrade.WasPressedThisFrame())
+            {
+                _run.UpgradeSelectedTower();
             }
         }
     }

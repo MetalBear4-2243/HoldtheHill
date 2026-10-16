@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using HoldTheHill.Features.Economy;
 using HoldTheHill.Features.Enemies;
 using HoldTheHill.Features.GameFlow;
+using HoldTheHill.Features.Towers;
 using HoldTheHill.Features.UI;
 using TMPro;
 using UnityEditor;
@@ -153,6 +154,7 @@ namespace HoldTheHill.EditorTools
             runSo.FindProperty("_queen").objectReferenceValue = queen;
             runSo.FindProperty("_spawner").objectReferenceValue = spawner;
             runSo.FindProperty("_wallet").objectReferenceValue = wallet;
+            runSo.FindProperty("_placer").objectReferenceValue = FindInScene<TowerPlacer>(scene);
             runSo.ApplyModifiedPropertiesWithoutUndo();
 
             RunControls controls = run.GetComponent<RunControls>();
