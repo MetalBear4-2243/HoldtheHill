@@ -14,6 +14,17 @@ namespace HoldTheHill.Features.UI
         public const string Victory = "The hill is held!";
         public const string Defeat = "The Queen has fallen";
 
+        // Tower card, for the selected standing tower.
+        public const string TowerLevelFormat = "Level {0} / {1}";
+        public const string UpgradeFormat = "Upgrade  {0}";
+        public const string MaxLevel = "Max level";
+        public const string StandingOrder = "Target";
+        public const string OrderFirst = "First";
+        public const string OrderLast = "Last";
+        public const string OrderClosest = "Closest";
+        public const string CurrentOrderMark = "▸ ";
+        public const string UnknownTower = "Tower";
+
         // Home screen. Level titles come from Core's LevelCatalogue, beside their scene ids.
         public const string GameTitle = "Hold the Hill";
         public const string Play = "Play";
