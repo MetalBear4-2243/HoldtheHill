@@ -3,7 +3,9 @@
     "rootNamespace": "HoldTheHill.EditorTools",
     "references": [
         "HoldTheHill.Runtime",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"
