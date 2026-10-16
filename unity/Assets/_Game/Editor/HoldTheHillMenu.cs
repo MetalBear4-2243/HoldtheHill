@@ -39,16 +39,25 @@ namespace HoldTheHill.EditorTools
         {
             var pathObject = new GameObject("Enemy Path");
             pathObject.AddComponent<EnemyPath>();
+            SetRoute(pathObject.transform, ExampleRoute);
+            return pathObject;
+        }
 
-            for (int i = 0; i < ExampleRoute.Length; i++)
+        /// <summary>Replaces a path's waypoints with one per grid cell of <paramref name="route"/>.</summary>
+        internal static void SetRoute(Transform path, Vector2Int[] route)
+        {
+            for (int i = path.childCount - 1; i >= 0; i--)
             {
-                Transform waypoint = new GameObject($"Waypoint {i}").transform;
-                waypoint.SetParent(pathObject.transform);
-                // Waypoints sit in the middle of grid cells (cell size 1).
-                waypoint.position = new Vector3(ExampleRoute[i].x + 0.5f, ExampleRoute[i].y + 0.5f, 0f);
+                Object.DestroyImmediate(path.GetChild(i).gameObject);
             }
 
-            return pathObject;
+            for (int i = 0; i < route.Length; i++)
+            {
+                Transform waypoint = new GameObject($"Waypoint {i}").transform;
+                waypoint.SetParent(path);
+                // Waypoints sit in the middle of grid cells (cell size 1).
+                waypoint.position = new Vector3(route[i].x + 0.5f, route[i].y + 0.5f, 0f);
+            }
         }
     }
 }
