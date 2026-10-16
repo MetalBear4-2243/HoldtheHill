@@ -6,8 +6,9 @@ using UnityEngine.SceneManagement;
 namespace HoldTheHill.Core
 {
     /// <summary>
-    /// Lives in the Bootstrap scene. Loads the persistent scenes (UI) and a level's scenes additively,
-    /// so pressing Play in ANY scene (Bootstrap, UI, Terrain or Gameplay) starts the full game.
+    /// Lives in the Bootstrap scene. Loads the persistent scenes (UI), then either the home screen or
+    /// a level's scene pair additively, so pressing Play in ANY scene (Bootstrap, UI, Home, a Terrain
+    /// or a Gameplay scene) starts the full game. Menus reach it through <see cref="Current"/>.
     /// </summary>
     public class SceneLoader : MonoBehaviour
     {
@@ -16,8 +17,8 @@ namespace HoldTheHill.Core
         [Tooltip("Scenes that stay loaded for the whole game.")]
         [SerializeField] private string[] _persistentScenes = { "UI" };
 
-        [Tooltip("Scenes for the level to load when none is open. The last one becomes the active scene.")]
-        [SerializeField] private string[] _defaultLevelScenes = { "Hill01_Terrain", "Hill01_Gameplay" };
+        [Tooltip("The home screen scene, shown when no level is open.")]
+        [SerializeField] private string _homeScene = "Home";
 
         private static SceneLoader s_current;
 
@@ -25,6 +26,26 @@ namespace HoldTheHill.Core
 
         /// <summary>The loader in the Bootstrap scene, for menus that live in other scenes.</summary>
         public static SceneLoader Current => s_current;
+
+        /// <summary>True while scenes are being swapped; calls made meanwhile are ignored.</summary>
+        public bool Busy => _busy;
+
+        /// <summary>The id of the level whose scenes are open, or null on the home screen.</summary>
+        public string OpenLevelId
+        {
+            get
+            {
+                for (int i = 0; i < SceneManager.sceneCount; i++)
+                {
+                    Scene scene = SceneManager.GetSceneAt(i);
+                    if (scene.isLoaded && LevelScenes.TryGetLevelId(scene.name, out string levelId))
+                    {
+                        return levelId;
+                    }
+                }
+                return null;
+            }
+        }
 
         private void OnEnable()
         {
@@ -39,57 +60,72 @@ namespace HoldTheHill.Core
             }
         }
 
-        /// <summary>Unloads the level scenes that are open and loads the same ones again.</summary>
+        /// <summary>Leaves whatever is open (home screen or level) and opens the level's scene pair.</summary>
+        public void LoadLevel(string levelId)
+        {
+            if (string.IsNullOrEmpty(levelId))
+            {
+                Debug.LogError("LoadLevel needs a level id.", this);
+                return;
+            }
+
+            if (!_busy)
+            {
+                StartCoroutine(SwitchRoutine(levelId));
+            }
+        }
+
+        /// <summary>Unloads the level that is open and loads the same one again.</summary>
         public void RestartLevel()
+        {
+            string levelId = OpenLevelId;
+            if (levelId == null)
+            {
+                Debug.LogWarning("No level is open, so there is nothing to restart.", this);
+                return;
+            }
+
+            LoadLevel(levelId);
+        }
+
+        /// <summary>Leaves the level for the home screen.</summary>
+        public void GoHome()
         {
             if (!_busy)
             {
-                StartCoroutine(RestartLevelRoutine());
+                StartCoroutine(SwitchRoutine(null));
             }
         }
 
-        /// <summary>
-        /// Leaves the level. Until the home screen exists (Alpha step 3) this reloads the game from
-        /// Bootstrap, which brings the default level back.
-        /// </summary>
-        public void GoHome()
-        {
-            SceneManager.LoadScene(BootstrapSceneName, LoadSceneMode.Single);
-        }
-
-        private IEnumerator RestartLevelRoutine()
+        // Unloads every scene that is not Bootstrap or persistent, then loads the level pair, or the
+        // home screen when levelId is null.
+        private IEnumerator SwitchRoutine(string levelId)
         {
             _busy = true;
 
-            var levelScenes = new List<string>();
-            var nonLevel = new HashSet<string>(_persistentScenes) { BootstrapSceneName };
-            string activeName = SceneManager.GetActiveScene().name;
-            for (int i = 0; i < SceneManager.sceneCount; i++)
-            {
-                Scene scene = SceneManager.GetSceneAt(i);
-                if (scene.isLoaded && !nonLevel.Contains(scene.name))
-                {
-                    levelScenes.Add(scene.name);
-                }
-            }
-
-            foreach (string sceneName in levelScenes)
+            foreach (string sceneName in LoadedSwappableScenes())
             {
                 yield return SceneManager.UnloadSceneAsync(sceneName);
             }
 
-            foreach (string sceneName in levelScenes)
+            if (levelId == null)
             {
-                yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+                yield return LoadIfMissing(_homeScene);
+                Activate(_homeScene);
             }
-
-            Scene active = SceneManager.GetSceneByName(activeName);
-            if (active.isLoaded)
+            else
             {
-                SceneManager.SetActiveScene(active);
+                yield return LoadLevelScenes(levelId);
             }
 
             _busy = false;
+        }
+
+        private static IEnumerator LoadLevelScenes(string levelId)
+        {
+            yield return LoadIfMissing(LevelScenes.Terrain(levelId));
+            yield return LoadIfMissing(LevelScenes.Gameplay(levelId));
+            Activate(LevelScenes.Gameplay(levelId));
         }
 
         // Domain reload is on, but clearing keeps Play mode safe if that ever changes.
@@ -116,24 +152,38 @@ namespace HoldTheHill.Core
                 yield return LoadIfMissing(sceneName);
             }
 
-            // If no level scene is open (e.g. Play pressed in Bootstrap or UI), open the default level.
-            // If part of the default level is open (e.g. Play pressed in Hill01_Gameplay), open the rest of it.
-            if (!AnyLevelSceneLoaded() || AnyLoaded(_defaultLevelScenes))
+            // Play pressed in one scene of a level (e.g. Hill01_Gameplay): open the rest of that level.
+            string openLevel = OpenLevelId;
+            if (openLevel != null)
             {
-                foreach (string sceneName in _defaultLevelScenes)
-                {
-                    yield return LoadIfMissing(sceneName);
-                }
+                yield return LoadLevelScenes(openLevel);
+                yield break;
+            }
 
-                if (_defaultLevelScenes.Length > 0)
+            // Play pressed in Bootstrap, UI or Home: show the home screen. Any other scene (a sandbox
+            // scene, say) is left alone, so a teammate can play their own scene with just the UI on top.
+            if (LoadedSwappableScenes().Count == 0)
+            {
+                yield return LoadIfMissing(_homeScene);
+                Activate(_homeScene);
+            }
+        }
+
+        // Every loaded scene that is not Bootstrap or persistent: the home screen, level scenes,
+        // or a scene someone pressed Play in.
+        private List<string> LoadedSwappableScenes()
+        {
+            var keep = new HashSet<string>(_persistentScenes) { BootstrapSceneName };
+            var result = new List<string>();
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                Scene scene = SceneManager.GetSceneAt(i);
+                if (scene.isLoaded && !keep.Contains(scene.name))
                 {
-                    Scene active = SceneManager.GetSceneByName(_defaultLevelScenes[^1]);
-                    if (active.isLoaded)
-                    {
-                        SceneManager.SetActiveScene(active);
-                    }
+                    result.Add(scene.name);
                 }
             }
+            return result;
         }
 
         private static IEnumerator LoadIfMissing(string sceneName)
@@ -144,30 +194,13 @@ namespace HoldTheHill.Core
             }
         }
 
-        private bool AnyLevelSceneLoaded()
+        private static void Activate(string sceneName)
         {
-            var nonLevel = new HashSet<string>(_persistentScenes) { BootstrapSceneName };
-            for (int i = 0; i < SceneManager.sceneCount; i++)
+            Scene scene = SceneManager.GetSceneByName(sceneName);
+            if (scene.isLoaded)
             {
-                Scene scene = SceneManager.GetSceneAt(i);
-                if (scene.isLoaded && !nonLevel.Contains(scene.name))
-                {
-                    return true;
-                }
+                SceneManager.SetActiveScene(scene);
             }
-            return false;
-        }
-
-        private static bool AnyLoaded(IEnumerable<string> sceneNames)
-        {
-            foreach (string sceneName in sceneNames)
-            {
-                if (IsLoaded(sceneName))
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         private static bool IsLoaded(string sceneName)
