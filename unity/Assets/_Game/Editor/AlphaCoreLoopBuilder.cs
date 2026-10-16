@@ -64,7 +64,7 @@ namespace HoldTheHill.EditorTools
         }
 
         // A flat white square or disc, 32 pixels = 1 world unit, so prefabs can reference a real asset.
-        private static Sprite EnsureSprite(string name, bool circle)
+        internal static Sprite EnsureSprite(string name, bool circle)
         {
             EnsureFolder(PlaceholderArtFolder);
             string path = $"{PlaceholderArtFolder}/{name}.png";

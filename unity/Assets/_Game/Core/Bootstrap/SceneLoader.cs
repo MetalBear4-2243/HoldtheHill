@@ -19,6 +19,86 @@ namespace HoldTheHill.Core
         [Tooltip("Scenes for the level to load when none is open. The last one becomes the active scene.")]
         [SerializeField] private string[] _defaultLevelScenes = { "Hill01_Terrain", "Hill01_Gameplay" };
 
+        private static SceneLoader s_current;
+
+        private bool _busy;
+
+        /// <summary>The loader in the Bootstrap scene, for menus that live in other scenes.</summary>
+        public static SceneLoader Current => s_current;
+
+        private void OnEnable()
+        {
+            s_current = this;
+        }
+
+        private void OnDisable()
+        {
+            if (s_current == this)
+            {
+                s_current = null;
+            }
+        }
+
+        /// <summary>Unloads the level scenes that are open and loads the same ones again.</summary>
+        public void RestartLevel()
+        {
+            if (!_busy)
+            {
+                StartCoroutine(RestartLevelRoutine());
+            }
+        }
+
+        /// <summary>
+        /// Leaves the level. Until the home screen exists (Alpha step 3) this reloads the game from
+        /// Bootstrap, which brings the default level back.
+        /// </summary>
+        public void GoHome()
+        {
+            SceneManager.LoadScene(BootstrapSceneName, LoadSceneMode.Single);
+        }
+
+        private IEnumerator RestartLevelRoutine()
+        {
+            _busy = true;
+
+            var levelScenes = new List<string>();
+            var nonLevel = new HashSet<string>(_persistentScenes) { BootstrapSceneName };
+            string activeName = SceneManager.GetActiveScene().name;
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                Scene scene = SceneManager.GetSceneAt(i);
+                if (scene.isLoaded && !nonLevel.Contains(scene.name))
+                {
+                    levelScenes.Add(scene.name);
+                }
+            }
+
+            foreach (string sceneName in levelScenes)
+            {
+                yield return SceneManager.UnloadSceneAsync(sceneName);
+            }
+
+            foreach (string sceneName in levelScenes)
+            {
+                yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+            }
+
+            Scene active = SceneManager.GetSceneByName(activeName);
+            if (active.isLoaded)
+            {
+                SceneManager.SetActiveScene(active);
+            }
+
+            _busy = false;
+        }
+
+        // Domain reload is on, but clearing keeps Play mode safe if that ever changes.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            s_current = null;
+        }
+
         // Runs after the first scene loads, in the Editor and in builds.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void EnsureBootstrapLoaded()
