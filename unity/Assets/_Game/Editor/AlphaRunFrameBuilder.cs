@@ -87,6 +87,16 @@ namespace HoldTheHill.EditorTools
                 Debug.LogError($"The actions asset is missing at {ActionsPath}.");
             }
 
+            // The Indev scene's camera sits at z = +10, behind everything it should look at, so the
+            // Game view shows only its clear colour. A 2D camera looks down +z from z = -10.
+            Camera camera = FindInScene<Camera>(scene);
+            if (camera != null && camera.transform.position.z >= 0f)
+            {
+                Vector3 position = camera.transform.position;
+                camera.transform.position = new Vector3(position.x, position.y, -10f);
+                Debug.Log($"Moved '{camera.name}' from z = {position.z} to z = -10 so it sees the map.");
+            }
+
             EnemyPath path = FindInScene<EnemyPath>(scene);
             EnemySpawner spawner = FindInScene<EnemySpawner>(scene);
             HoneydewWallet wallet = FindInScene<HoneydewWallet>(scene);
