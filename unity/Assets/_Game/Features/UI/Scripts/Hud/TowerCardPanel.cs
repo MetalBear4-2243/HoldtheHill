@@ -10,7 +10,7 @@ namespace HoldTheHill.Features.UI
     /// <summary>
     /// The card for the selected standing tower: its name and level, an upgrade button with the
     /// price, the burrow order, and the standing order (First / Last / Closest). Shown while a
-    /// tower is selected. No sell, no stats page (the Alpha plan).
+    /// tower is selected, plus a sell button that refunds part of what was spent. No stats page.
     /// </summary>
     public class TowerCardPanel : LevelRunListener
     {
@@ -25,6 +25,10 @@ namespace HoldTheHill.Features.UI
         [Tooltip("Burrows the tower or brings it back up. Its label says which.")]
         [SerializeField] private Button _burrow;
         [SerializeField] private TMP_Text _burrowLabel;
+
+        [Tooltip("Sells the tower for part of what was spent on it. Its label shows the refund.")]
+        [SerializeField] private Button _sell;
+        [SerializeField] private TMP_Text _sellLabel;
 
         [Tooltip("One button per standing order, in enum order: First, Last, Closest.")]
         [SerializeField] private Button[] _orderButtons = new Button[3];
@@ -41,6 +45,10 @@ namespace HoldTheHill.Features.UI
             if (_burrow != null)
             {
                 _burrow.onClick.AddListener(ToggleBurrow);
+            }
+            if (_sell != null)
+            {
+                _sell.onClick.AddListener(Sell);
             }
             for (int i = 0; i < _orderButtons.Length; i++)
             {
@@ -59,6 +67,10 @@ namespace HoldTheHill.Features.UI
             if (_burrow != null)
             {
                 _burrow.onClick.RemoveListener(ToggleBurrow);
+            }
+            if (_sell != null)
+            {
+                _sell.onClick.RemoveListener(Sell);
             }
             for (int i = 0; i < _orderButtons.Length; i++)
             {
@@ -144,6 +156,11 @@ namespace HoldTheHill.Features.UI
                 _burrowLabel.text = _tower.Burrowed ? UiStrings.Unburrow : UiStrings.Burrow;
             }
 
+            if (_sellLabel != null && _placer != null)
+            {
+                _sellLabel.text = string.Format(UiStrings.SellFormat, _placer.SellValue(_tower));
+            }
+
             for (int i = 0; i < _orderButtons.Length; i++)
             {
                 bool current = (int)_tower.Priority == i;
@@ -177,6 +194,14 @@ namespace HoldTheHill.Features.UI
             if (_placer != null)
             {
                 _placer.UpgradeSelectedTower();
+            }
+        }
+
+        private void Sell()
+        {
+            if (_placer != null)
+            {
+                _placer.SellSelectedTower();
             }
         }
 

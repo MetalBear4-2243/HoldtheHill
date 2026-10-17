@@ -87,6 +87,9 @@ namespace HoldTheHill.Features.Towers
         /// <summary>The shop entry this tower was bought from, for its name on the card. Set by the placer.</summary>
         public TowerData ShopData { get; set; }
 
+        /// <summary>Every Honeydew paid for this tower so far: the build price plus each upgrade. The placer keeps it.</summary>
+        public int HoneydewSpent { get; set; }
+
         /// <summary>Current level, from 1.</summary>
         public int Level { get; private set; } = 1;
 
