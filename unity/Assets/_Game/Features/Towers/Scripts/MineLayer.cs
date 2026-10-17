@@ -64,7 +64,8 @@ namespace HoldTheHill.Features.Towers
         private void Update()
         {
             _cooldown -= Time.deltaTime;
-            if (_cooldown > 0f || _minePrefab == null || _spots.Count == 0 || _mines.Count >= _maxMines)
+            // A burrowed or stunned tower lays nothing; mines already down stay armed.
+            if (_cooldown > 0f || !_tower.CanAct || _minePrefab == null || _spots.Count == 0 || _mines.Count >= _maxMines)
             {
                 return;
             }

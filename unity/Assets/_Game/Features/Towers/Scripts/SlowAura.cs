@@ -42,7 +42,11 @@ namespace HoldTheHill.Features.Towers
             }
 
             _untilNextTick = _tickInterval;
-            ApplyToEnemiesInRange();
+            // A burrowed or stunned tower slows nobody; the effect wears off on its own.
+            if (_tower.CanAct)
+            {
+                ApplyToEnemiesInRange();
+            }
         }
 
         private void ApplyToEnemiesInRange()
