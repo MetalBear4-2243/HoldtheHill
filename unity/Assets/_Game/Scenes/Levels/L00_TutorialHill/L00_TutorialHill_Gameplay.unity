@@ -195,6 +195,7 @@ MonoBehaviour:
     Prefab: {fileID: 4314983547922285816, guid: 1ce2686849838f34592faa43bba26739, type: 3}
   - Data: {fileID: 11400000, guid: dcf97a14bf070e64fb9d1714123395f0, type: 2}
     Prefab: {fileID: 6340939830100537182, guid: a08c1bbaff98a014fbf8bb54ad0bae4b, type: 3}
+  _sellRefund: 0.75
   _actions: {fileID: -944628639613478452, guid: 333f2a6034804908bf9f41289bd5a047, type: 3}
   _freeCellColor: {r: 1, g: 1, b: 1, a: 0.35}
   _blockedCellColor: {r: 1, g: 0.3, b: 0.3, a: 0.35}
