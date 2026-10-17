@@ -44,6 +44,9 @@ namespace HoldTheHill.Features.Towers
         private Vector3 _landing;
         private float _flightTime;
 
+        /// <summary>True for a shot that lands and splashes rather than chasing its target.</summary>
+        public bool IsLobbed => _lobbed;
+
         /// <summary>Aims the shot. Called by the tower right after it is spawned.</summary>
         public void Launch(BasicEnemy target, double damage)
         {
@@ -111,7 +114,8 @@ namespace HoldTheHill.Features.Towers
             Destroy(gameObject);
         }
 
-        // Damages every living enemy near the point. The target itself counts only if it is still there.
+        // Damages every living enemy on the ground near the point; a splash on the ground misses
+        // anything flying (the wasp rule). The target itself counts only if it is still there.
         private void Splash(Vector3 centre)
         {
             float radiusSqr = _splashRadius * _splashRadius;
@@ -121,10 +125,17 @@ namespace HoldTheHill.Features.Towers
             for (int i = 0; i < enemies.Count; i++)
             {
                 BasicEnemy enemy = enemies[i];
-                if (enemy != null && !enemy.IsDead && (enemy.transform.position - centre).sqrMagnitude <= radiusSqr)
+                if (enemy == null || enemy.IsDead || (enemy.transform.position - centre).sqrMagnitude > radiusSqr)
                 {
-                    s_splashBuffer.Add(enemy);
+                    continue;
                 }
+
+                if (enemy is IFlyingEnemy flyer && flyer.IsFlying)
+                {
+                    continue;
+                }
+
+                s_splashBuffer.Add(enemy);
             }
 
             // Damage after collecting: a death removes the enemy from the registry while it is read.

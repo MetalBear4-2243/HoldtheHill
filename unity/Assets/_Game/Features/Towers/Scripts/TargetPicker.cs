@@ -56,6 +56,16 @@ namespace HoldTheHill.Features.Towers
         }
 
         /// <summary>
+        /// The wasp rule: a tower reaches a flying enemy only with a straight shot. Melee towers
+        /// (no projectile) and lobbed shots, which land on the ground, skip anything flying.
+        /// Everything on the ground is reachable by every tower.
+        /// </summary>
+        public static bool CanReach(bool enemyFlying, bool hasProjectile, bool lobbed)
+        {
+            return !enemyFlying || (hasProjectile && !lobbed);
+        }
+
+        /// <summary>
         /// How far along <paramref name="path"/> something at <paramref name="position"/> has walked,
         /// given that it is heading for waypoint <paramref name="nextWaypointIndex"/>: the path length
         /// up to that waypoint minus the distance still to go. Past the last waypoint it is the whole
