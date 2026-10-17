@@ -9,8 +9,8 @@ namespace HoldTheHill.Features.UI
 {
     /// <summary>
     /// The card for the selected standing tower: its name and level, an upgrade button with the
-    /// price, and the standing order (First / Last / Closest). Shown while a tower is selected.
-    /// No sell, no stats page (the Alpha plan).
+    /// price, the burrow order, and the standing order (First / Last / Closest). Shown while a
+    /// tower is selected. No sell, no stats page (the Alpha plan).
     /// </summary>
     public class TowerCardPanel : LevelRunListener
     {
@@ -21,6 +21,10 @@ namespace HoldTheHill.Features.UI
         [SerializeField] private TMP_Text _level;
         [SerializeField] private Button _upgrade;
         [SerializeField] private TMP_Text _upgradeLabel;
+
+        [Tooltip("Burrows the tower or brings it back up. Its label says which.")]
+        [SerializeField] private Button _burrow;
+        [SerializeField] private TMP_Text _burrowLabel;
 
         [Tooltip("One button per standing order, in enum order: First, Last, Closest.")]
         [SerializeField] private Button[] _orderButtons = new Button[3];
@@ -34,6 +38,10 @@ namespace HoldTheHill.Features.UI
         protected override void OnEnable()
         {
             _upgrade.onClick.AddListener(Upgrade);
+            if (_burrow != null)
+            {
+                _burrow.onClick.AddListener(ToggleBurrow);
+            }
             for (int i = 0; i < _orderButtons.Length; i++)
             {
                 TargetingPriority order = (TargetingPriority)i;
@@ -48,6 +56,10 @@ namespace HoldTheHill.Features.UI
         {
             base.OnDisable();
             _upgrade.onClick.RemoveListener(Upgrade);
+            if (_burrow != null)
+            {
+                _burrow.onClick.RemoveListener(ToggleBurrow);
+            }
             for (int i = 0; i < _orderButtons.Length; i++)
             {
                 _orderButtons[i].onClick.RemoveAllListeners();
@@ -94,6 +106,7 @@ namespace HoldTheHill.Features.UI
             if (_tower != null)
             {
                 _tower.Upgraded -= HandleUpgraded;
+                _tower.BurrowChanged -= HandleBurrowChanged;
             }
 
             _tower = tower;
@@ -104,6 +117,7 @@ namespace HoldTheHill.Features.UI
             }
 
             _tower.Upgraded += HandleUpgraded;
+            _tower.BurrowChanged += HandleBurrowChanged;
             _name.text = tower.ShopData != null ? tower.ShopData.towerName : UiStrings.UnknownTower;
             Refresh();
         }
@@ -124,6 +138,11 @@ namespace HoldTheHill.Features.UI
             _upgradeLabel.text = verdict == TowerUpgradeRule.Verdict.AtMaxLevel
                 ? UiStrings.MaxLevel
                 : string.Format(UiStrings.UpgradeFormat, _tower.NextUpgradeCost);
+
+            if (_burrowLabel != null)
+            {
+                _burrowLabel.text = _tower.Burrowed ? UiStrings.Unburrow : UiStrings.Burrow;
+            }
 
             for (int i = 0; i < _orderButtons.Length; i++)
             {
@@ -148,11 +167,24 @@ namespace HoldTheHill.Features.UI
             Refresh();
         }
 
+        private void HandleBurrowChanged(bool burrowed)
+        {
+            Refresh();
+        }
+
         private void Upgrade()
         {
             if (_placer != null)
             {
                 _placer.UpgradeSelectedTower();
+            }
+        }
+
+        private void ToggleBurrow()
+        {
+            if (_tower != null)
+            {
+                _tower.Burrowed = !_tower.Burrowed;
             }
         }
 

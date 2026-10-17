@@ -46,12 +46,31 @@ namespace HoldTheHill.Features.Towers
         [Tooltip("How much bigger the tower is drawn with each level, so an upgrade is visible.")]
         [SerializeField, Min(1f)] private float _scalePerLevel = 1.12f;
 
+        [Header("Condition")]
+        [Tooltip("How the sprite is tinted while burrowed: sunk into the ground, out of the fight.")]
+        [SerializeField] private Color _burrowedTint = new Color(0.5f, 0.45f, 0.4f, 0.6f);
+
+        [Tooltip("How the sprite is tinted while stunned by a hazard.")]
+        [SerializeField] private Color _stunnedTint = new Color(0.55f, 0.7f, 1f, 1f);
+
+        [Tooltip("How the sprite is tinted while a hazard makes the tower miss.")]
+        [SerializeField] private Color _missingTint = new Color(1f, 0.85f, 0.45f, 1f);
+
         private readonly List<TargetPicker.Candidate> _candidates = new List<TargetPicker.Candidate>();
         private readonly List<BasicEnemy> _inRange = new List<BasicEnemy>();
+        private readonly TowerCondition _condition = new TowerCondition();
+        private SpriteRenderer _sprite;
+        private Color _baseColor = Color.white;
         private float _cooldown;
 
         /// <summary>Raised after an upgrade, with the new level. The card and visuals listen.</summary>
         public event Action<int> Upgraded;
+
+        /// <summary>Raised when the tower is burrowed or brought back up, with the new state.</summary>
+        public event Action<bool> BurrowChanged;
+
+        /// <summary>Raised just before a hazard removes the tower, so the placer can free its cell.</summary>
+        public event Action<Tower> Removed;
 
         /// <summary>How far this tower can reach, in world units.</summary>
         public float Range => _range;
@@ -87,6 +106,37 @@ namespace HoldTheHill.Features.Towers
         /// <summary>The enemy being attacked this frame, or null.</summary>
         public BasicEnemy CurrentTarget { get; private set; }
 
+        /// <summary>What is being done to this tower and what it may still do.</summary>
+        public TowerCondition Condition => _condition;
+
+        /// <summary>
+        /// The burrow order. A burrowed tower does not act and is safe from the bird and the
+        /// pesticide. Set from the tower card or the B key.
+        /// </summary>
+        public bool Burrowed
+        {
+            get => _condition.Burrowed;
+            set
+            {
+                if (_condition.Burrowed == value)
+                {
+                    return;
+                }
+
+                _condition.Burrowed = value;
+                CurrentTarget = null;
+                RefreshTint();
+                BurrowChanged?.Invoke(value);
+            }
+        }
+
+        /// <summary>True when the tower may aim, fire, slow or lay mines. Companions check this.</summary>
+        public bool CanAct => _condition.CanAct;
+
+        public bool IsStunned => _condition.IsStunned;
+
+        public bool IsMissing => _condition.IsMissing;
+
         /// <summary>
         /// False for a melee or lobbed tower: it cannot reach a flying enemy (the wasp rule).
         /// Follows from how the tower attacks, so no prefab needs a flag.
@@ -103,13 +153,39 @@ namespace HoldTheHill.Features.Towers
             {
                 _muzzle = transform;
             }
+
+            _sprite = GetComponentInChildren<SpriteRenderer>();
+            if (_sprite != null)
+            {
+                _baseColor = _sprite.color;
+            }
+        }
+
+        private void OnEnable()
+        {
+            TowerRegistry.Add(this);
+        }
+
+        private void OnDisable()
+        {
+            TowerRegistry.Remove(this);
         }
 
         private void Update()
         {
-            CurrentTarget = AcquireTarget();
+            if (_condition.Tick(Time.deltaTime))
+            {
+                RefreshTint();
+            }
 
             _cooldown -= Time.deltaTime;
+            if (!_condition.CanAct)
+            {
+                CurrentTarget = null;
+                return;
+            }
+
+            CurrentTarget = AcquireTarget();
             if (CurrentTarget == null || _cooldown > 0f || !Attacks)
             {
                 return;
@@ -117,6 +193,43 @@ namespace HoldTheHill.Features.Towers
 
             _cooldown = _fireInterval;
             Attack(CurrentTarget);
+        }
+
+        /// <summary>A hazard stuns the tower for <paramref name="seconds"/>: it does nothing meanwhile.</summary>
+        public void Stun(float seconds)
+        {
+            _condition.Stun(seconds);
+            RefreshTint();
+        }
+
+        /// <summary>A hazard makes the tower miss for <paramref name="seconds"/>: it fires, to no effect.</summary>
+        public void Miss(float seconds)
+        {
+            _condition.Miss(seconds);
+            RefreshTint();
+        }
+
+        /// <summary>A hazard takes the tower off the map. Tells the placer first, then destroys it.</summary>
+        public void Remove()
+        {
+            Removed?.Invoke(this);
+            Destroy(gameObject);
+        }
+
+        // One tint at a time, worst first, so every state is visible and not by colour alone:
+        // a burrowed tower is also faded, a stunned one stops moving its target line.
+        private void RefreshTint()
+        {
+            if (_sprite == null)
+            {
+                return;
+            }
+
+            Color tint = _condition.Burrowed ? _burrowedTint
+                : _condition.IsStunned ? _stunnedTint
+                : _condition.IsMissing ? _missingTint
+                : Color.white;
+            _sprite.color = _baseColor * tint;
         }
 
         /// <summary>
@@ -187,14 +300,17 @@ namespace HoldTheHill.Features.Towers
 
         private void Attack(BasicEnemy target)
         {
+            // A missing tower goes through the motions; its hits carry no damage.
+            float damage = _condition.HitsLand ? _damage : 0f;
+
             if (_projectilePrefab == null)
             {
-                target.TakeDamage(_damage);
+                target.TakeDamage(damage);
                 return;
             }
 
             Projectile shot = Instantiate(_projectilePrefab, _muzzle.position, Quaternion.identity);
-            shot.Launch(target, _damage);
+            shot.Launch(target, damage);
         }
 
         // Draws the range circle, and the current target, in the Scene view when the tower is selected.
