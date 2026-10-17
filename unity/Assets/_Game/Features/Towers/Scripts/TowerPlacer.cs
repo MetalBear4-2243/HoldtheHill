@@ -45,6 +45,10 @@ namespace HoldTheHill.Features.Towers
         [Tooltip("Towers for sale, in number-key order (1 is the first).")]
         [SerializeField] private List<Offer> _offers = new List<Offer>();
 
+        [Header("Selling")]
+        [Tooltip("Share of everything spent on a tower that comes back when it is sold.")]
+        [SerializeField, Range(0f, 1f)] private float _sellRefund = 0.75f;
+
         [Header("Input")]
         [Tooltip("The game's actions asset. Uses its Gameplay map: Point, Place, Cancel, SelectTower1-6.")]
         [SerializeField] private InputActionAsset _actions;
@@ -215,12 +219,41 @@ namespace HoldTheHill.Features.Towers
                 return verdict;
             }
 
-            if (_wallet == null || _wallet.Honeydew.TrySpend(_selectedTower.NextUpgradeCost))
+            int cost = _selectedTower.NextUpgradeCost;
+            if (_wallet == null || _wallet.Honeydew.TrySpend(cost))
             {
                 _selectedTower.Upgrade();
+                _selectedTower.HoneydewSpent += cost;
             }
 
             return verdict;
+        }
+
+        /// <summary>Honeydew the player would get back for selling <paramref name="tower"/> now.</summary>
+        public int SellValue(Tower tower)
+        {
+            return tower != null ? TowerSellRule.Refund(tower.HoneydewSpent, _sellRefund) : 0;
+        }
+
+        /// <summary>
+        /// Sells the selected tower: refunds its <see cref="SellValue"/> and takes it off the map.
+        /// Removing it frees the cell and clears the selection through its Removed event. The card comes here.
+        /// </summary>
+        public bool SellSelectedTower()
+        {
+            if (_selectedTower == null)
+            {
+                return false;
+            }
+
+            int refund = SellValue(_selectedTower);
+            if (_wallet != null)
+            {
+                _wallet.Honeydew.Earn(refund);
+            }
+
+            _selectedTower.Remove();
+            return true;
         }
 
         /// <summary>
@@ -323,6 +356,7 @@ namespace HoldTheHill.Features.Towers
             Tower tower = Instantiate(offer.Prefab, CellToWorld(cell), Quaternion.identity, transform);
             tower.Cell = cell;
             tower.ShopData = offer.Data;
+            tower.HoneydewSpent = offer.Data != null ? offer.Data.honeydewCost : 0;
             tower.Removed += HandleTowerRemoved;
             _towers.Add(cell, tower);
             TowerPlaced?.Invoke(tower);

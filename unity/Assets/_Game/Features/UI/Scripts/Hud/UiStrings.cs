@@ -26,6 +26,22 @@ namespace HoldTheHill.Features.UI
         public const string Burrow = "Burrow";
         public const string Unburrow = "Come up";
         public const string UnknownTower = "Tower";
+        public const string SellFormat = "Sell  +{0}";
+
+        // Developer help box listing the controls.
+        public const string ControlsTitle = "Controls  (F1 hides this)";
+        public static readonly string[] ControlsLines =
+        {
+            "1-6  pick a tower to build",
+            "Left click  build, or select a placed tower",
+            "Right click  cancel",
+            "Space  next wave",
+            "T  speed 1x / 2x",
+            "Esc  pause",
+            "U  upgrade the selected tower",
+            "B  burrow or raise all towers",
+            "Click a drop to collect it, click the slot to use it",
+        };
 
         // The power-up slot.
         public const string PowerUpEmpty = "No power-up";
