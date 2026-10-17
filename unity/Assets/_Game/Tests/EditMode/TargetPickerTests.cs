@@ -48,6 +48,19 @@ namespace HoldTheHill.Tests
         }
 
         [Test]
+        public void CanReach_OnlyAStraightShotReachesAFlyer_EverythingReachesTheGround()
+        {
+            // The wasp rule.
+            Assert.IsFalse(TargetPicker.CanReach(enemyFlying: true, hasProjectile: false, lobbed: false), "Melee skips a flyer.");
+            Assert.IsFalse(TargetPicker.CanReach(enemyFlying: true, hasProjectile: true, lobbed: true), "A lobbed shot lands on the ground.");
+            Assert.IsTrue(TargetPicker.CanReach(enemyFlying: true, hasProjectile: true, lobbed: false), "A straight shot hits a flyer.");
+
+            Assert.IsTrue(TargetPicker.CanReach(enemyFlying: false, hasProjectile: false, lobbed: false));
+            Assert.IsTrue(TargetPicker.CanReach(enemyFlying: false, hasProjectile: true, lobbed: true));
+            Assert.IsTrue(TargetPicker.CanReach(enemyFlying: false, hasProjectile: true, lobbed: false));
+        }
+
+        [Test]
         public void PathProgress_IsDistanceWalked_FromWaypointIndexAndPosition()
         {
             // An L-shaped path: 4 units right, then 3 units up.
