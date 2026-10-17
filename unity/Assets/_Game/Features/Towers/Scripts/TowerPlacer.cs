@@ -245,6 +245,12 @@ namespace HoldTheHill.Features.Towers
             }
         }
 
+        /// <summary>The standing tower on the cell under <paramref name="world"/>, or null.</summary>
+        public Tower TowerAt(Vector3 world)
+        {
+            return _towers.TryGetValue(WorldToCell(world), out Tower tower) ? tower : null;
+        }
+
         private void HandleTowerRemoved(Tower tower)
         {
             tower.Removed -= HandleTowerRemoved;

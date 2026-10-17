@@ -32,6 +32,9 @@ namespace HoldTheHill.Features.GameFlow
         [Tooltip("Places and selects towers; the tower card and the U key reach it through the run.")]
         [SerializeField] private TowerPlacer _placer;
 
+        [Tooltip("Drops, the slot and the two power-ups; the HUD slot reaches it through the run.")]
+        [SerializeField] private PowerUps.LevelPowerUps _powerUps;
+
         [Header("Speed")]
         [Tooltip("Time scale while the fast speed is on.")]
         [SerializeField, Min(1f)] private float _fastTimeScale = 2f;
@@ -63,6 +66,9 @@ namespace HoldTheHill.Features.GameFlow
 
         /// <summary>The level's tower placer, for the tower card. May be null in a scene without one.</summary>
         public TowerPlacer Placer => _placer;
+
+        /// <summary>The level's power-ups, for the HUD slot. May be null in a scene without them.</summary>
+        public PowerUps.LevelPowerUps PowerUps => _powerUps;
 
         /// <summary>Pause and speed. Created in Awake.</summary>
         public RunClock Clock { get; private set; }
@@ -173,6 +179,15 @@ namespace HoldTheHill.Features.GameFlow
             if (Outcome == RunOutcome.Playing && !Clock.Paused && _placer != null)
             {
                 _placer.ToggleBurrowAll();
+            }
+        }
+
+        /// <summary>Uses the power-up in the HUD slot, if any. The slot button comes here.</summary>
+        public void UsePowerUp()
+        {
+            if (Outcome == RunOutcome.Playing && !Clock.Paused && _powerUps != null)
+            {
+                _powerUps.Use();
             }
         }
 
