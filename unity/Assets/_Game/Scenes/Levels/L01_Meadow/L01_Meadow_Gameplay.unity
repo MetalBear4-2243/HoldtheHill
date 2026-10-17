@@ -565,6 +565,7 @@ MonoBehaviour:
   _spawner: {fileID: 1456482060}
   _wallet: {fileID: 2087705354}
   _placer: {fileID: 491186562}
+  _powerUps: {fileID: 1981618194}
   _fastTimeScale: 2
 --- !u!4 &947532756
 Transform:
@@ -971,6 +972,54 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1729843957}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1981618193
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1981618195}
+  - component: {fileID: 1981618194}
+  m_Layer: 0
+  m_Name: Power Ups
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1981618194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1981618193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b09f1040c03432c951247db2ad0e4d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.PowerUps.LevelPowerUps
+  _settings: {fileID: 11400000, guid: 3cf4bb9a7a1904e43a471ed643d43c64, type: 2}
+  _pickupPrefab: {fileID: 3346537522657965348, guid: c58af20280bf5034aa6a7e41c92f59b3, type: 3}
+  _placer: {fileID: 491186562}
+  _actions: {fileID: -944628639613478452, guid: 333f2a6034804908bf9f41289bd5a047, type: 3}
+--- !u!4 &1981618195
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1981618193}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2087705353
 GameObject:
   m_ObjectHideFlags: 0
@@ -1137,3 +1186,4 @@ SceneRoots:
   - {fileID: 947532756}
   - {fileID: 2129309807}
   - {fileID: 2146985033}
+  - {fileID: 1981618195}

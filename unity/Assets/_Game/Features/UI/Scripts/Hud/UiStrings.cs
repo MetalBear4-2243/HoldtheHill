@@ -27,6 +27,14 @@ namespace HoldTheHill.Features.UI
         public const string Unburrow = "Come up";
         public const string UnknownTower = "Tower";
 
+        // The power-up slot.
+        public const string PowerUpEmpty = "No power-up";
+        public const string SwarmFrenzy = "Swarm Frenzy";
+        public const string RoyalGift = "Royal Gift";
+        public const string PickTowerForGift = "Pick a tower";
+        public const string GiftAtMaxLevel = "Already max level";
+        public const string FrenzyActiveFormat = "Frenzy {0} s";
+
         // Home screen. Level titles come from Core's LevelCatalogue, beside their scene ids.
         public const string GameTitle = "Hold the Hill";
         public const string Play = "Play";
