@@ -160,5 +160,8 @@ MonoBehaviour:
       delayBeforeNext: 0.8
       spawnPointOverride: {fileID: 0}
     - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 0.8
+      delayBeforeNext: 3
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 4302541855062827728, guid: 3eab374bac63d1c43903f26738e9a783, type: 3}
+      delayBeforeNext: 0
       spawnPointOverride: {fileID: 0}

@@ -388,7 +388,7 @@ namespace HoldTheHill.EditorTools
         }
 
         // "Enemy_Basic x4, Enemy_Scarab x8", in order of first appearance.
-        private static string Describe(Wave wave)
+        internal static string Describe(Wave wave)
         {
             var names = new List<string>();
             var counts = new Dictionary<string, int>();
