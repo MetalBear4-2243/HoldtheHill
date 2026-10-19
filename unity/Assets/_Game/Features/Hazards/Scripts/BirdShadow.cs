@@ -8,7 +8,8 @@ namespace HoldTheHill.Features.Hazards
     /// <summary>
     /// A bird's shadow drifting across the map. It is placed on the spot it will strike, flies in
     /// from one side, and when it passes over that spot it takes whatever is under it: towers that
-    /// are not burrowed are removed, enemies are killed. Then it drifts off the other side.
+    /// are not burrowed are removed, enemies are killed (a centipede whole, without splitting).
+    /// Then it drifts off the other side.
     /// The approach is the warning: time enough to burrow.
     /// </summary>
     [DisallowMultipleComponent]
@@ -97,6 +98,12 @@ namespace HoldTheHill.Features.Hazards
             // Taken by the bird counts as a kill, so the bounty is paid and the wave can still clear.
             for (int i = 0; i < _enemiesTaken.Count; i++)
             {
+                // The bird takes a centipede whole: no halves split off under the shadow.
+                if (_enemiesTaken[i] is CentipedeEnemy centipede)
+                {
+                    centipede.SplitsRemaining = 0;
+                }
+
                 _enemiesTaken[i].TakeDamage(double.MaxValue);
             }
         }

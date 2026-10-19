@@ -12,9 +12,9 @@ namespace HoldTheHill.Features.Towers
     /// one set per level; <see cref="Upgrade"/> moves to the next set.
     /// </summary>
     /// <remarks>
-    /// Towers that do something else in range (slow, lay mines) carry a second component that
-    /// reads <see cref="Range"/> and <see cref="Damage"/>; a tower with no damage and no
-    /// projectile does not attack on its own.
+    /// Towers that do something else in range (slow, lay mines) carry an <see cref="ITowerAbility"/>
+    /// component that reads <see cref="Range"/> and <see cref="Damage"/>; such a tower, or one with
+    /// no damage and no projectile, does not attack on its own.
     /// </remarks>
     public class Tower : MonoBehaviour
     {
@@ -62,6 +62,7 @@ namespace HoldTheHill.Features.Towers
         private SpriteRenderer _sprite;
         private Color _baseColor = Color.white;
         private float _cooldown;
+        private bool _hasAbility;
 
         /// <summary>Raised after an upgrade, with the new level. The card and visuals listen.</summary>
         public event Action<int> Upgraded;
@@ -148,7 +149,8 @@ namespace HoldTheHill.Features.Towers
             enemyFlying: true, hasProjectile: _projectilePrefab != null,
             lobbed: _projectilePrefab != null && _projectilePrefab.IsLobbed);
 
-        private bool Attacks => _damage > 0f || _projectilePrefab != null;
+        // A mine layer or a slow aura does the work; the tower only lends it its numbers.
+        private bool Attacks => !_hasAbility && (_damage > 0f || _projectilePrefab != null);
 
         private void Awake()
         {
@@ -156,6 +158,8 @@ namespace HoldTheHill.Features.Towers
             {
                 _muzzle = transform;
             }
+
+            _hasAbility = GetComponent<ITowerAbility>() != null;
 
             _sprite = GetComponentInChildren<SpriteRenderer>();
             if (_sprite != null)

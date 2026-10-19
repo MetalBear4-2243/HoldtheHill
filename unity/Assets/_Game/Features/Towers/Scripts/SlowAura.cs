@@ -12,7 +12,7 @@ namespace HoldTheHill.Features.Towers
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Tower))]
-    public class SlowAura : MonoBehaviour
+    public class SlowAura : MonoBehaviour, ITowerAbility
     {
         private const string EffectName = "Sap";
 
@@ -42,8 +42,8 @@ namespace HoldTheHill.Features.Towers
             }
 
             _untilNextTick = _tickInterval;
-            // A burrowed or stunned tower slows nobody; the effect wears off on its own.
-            if (_tower.CanAct)
+            // A burrowed, stunned or missing tower slows nobody; the effect wears off on its own.
+            if (_tower.CanAct && !_tower.IsMissing)
             {
                 ApplyToEnemiesInRange();
             }

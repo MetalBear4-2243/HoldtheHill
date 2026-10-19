@@ -1,17 +1,18 @@
 using System.Collections.Generic;
 using HoldTheHill.Features.Enemies;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace HoldTheHill.Features.Towers
 {
     /// <summary>
     /// The Carpenter Ant: keeps a few <see cref="Mine"/>s lying on the stretch of path inside the
     /// tower's range, laying a new one on the tower's cooldown whenever one has gone off. Each mine
-    /// carries the tower's damage at the time it was laid.
+    /// carries the tower's damage at the time it was laid. The mines go when the tower goes.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Tower))]
-    public class MineLayer : MonoBehaviour
+    public class MineLayer : MonoBehaviour, ITowerAbility
     {
         [Tooltip("The mine laid on the path.")]
         [SerializeField] private Mine _minePrefab;
@@ -57,6 +58,7 @@ namespace HoldTheHill.Features.Towers
                 if (_mines[i] != null)
                 {
                     _mines[i].Exploded -= HandleExploded;
+                    Destroy(_mines[i].gameObject);
                 }
             }
         }
@@ -64,19 +66,23 @@ namespace HoldTheHill.Features.Towers
         private void Update()
         {
             _cooldown -= Time.deltaTime;
-            // A burrowed or stunned tower lays nothing; mines already down stay armed.
-            if (_cooldown > 0f || !_tower.CanAct || _minePrefab == null || _spots.Count == 0 || _mines.Count >= _maxMines)
+            // A burrowed, stunned or missing tower lays nothing; mines already down stay armed.
+            if (_cooldown > 0f || !_tower.CanAct || _tower.IsMissing || _minePrefab == null || _spots.Count == 0
+                || _mines.Count >= _maxMines)
             {
                 return;
             }
 
-            _cooldown = _tower.FireInterval;
+            // Same tempo as a tower's own cooldown, so the Swarm Frenzy speeds mine laying too.
+            _cooldown = _tower.FireInterval / TowerTempo.FireRateFactor;
             Lay(_spots[Random.Range(0, _spots.Count)]);
         }
 
         private void Lay(Vector3 spot)
         {
-            Mine mine = Instantiate(_minePrefab, spot, Quaternion.identity, transform);
+            // Not a child of the tower: an upgrade scales the tower, which would push its mines off the path.
+            Mine mine = Instantiate(_minePrefab, spot, Quaternion.identity);
+            SceneManager.MoveGameObjectToScene(mine.gameObject, gameObject.scene);
             mine.Arm(_tower.Damage);
             mine.Exploded += HandleExploded;
             _mines.Add(mine);
