@@ -126,10 +126,10 @@ namespace HoldTheHill.Features.GameFlow
             }
         }
 
-        /// <summary>Sends the next wave. Does nothing once the run is over.</summary>
+        /// <summary>Sends the next wave. Does nothing while paused or once the run is over.</summary>
         public void StartNextWave()
         {
-            if (Outcome == RunOutcome.Playing && _spawner != null)
+            if (Outcome == RunOutcome.Playing && !Clock.Paused && _spawner != null)
             {
                 _spawner.StartNextWave();
             }
@@ -248,6 +248,13 @@ namespace HoldTheHill.Features.GameFlow
         private void ApplyTimeScale()
         {
             Time.timeScale = Clock.TimeScale;
+
+            // The Input System doesn't follow the time scale, so the placer is told: no building,
+            // picking or cancelling under the pause menu or the result panel.
+            if (_placer != null)
+            {
+                _placer.AcceptsInput = !Clock.Paused;
+            }
         }
 
         // Domain reload is on, but clearing keeps Play mode safe if that ever changes.

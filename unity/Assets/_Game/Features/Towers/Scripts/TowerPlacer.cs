@@ -6,6 +6,7 @@ using HoldTheHill.Features.Enemies;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 namespace HoldTheHill.Features.Towers
 {
@@ -13,9 +14,10 @@ namespace HoldTheHill.Features.Towers
     /// Places and selects towers. A tower is picked from the shop (<see cref="Select(TowerData)"/>)
     /// or with the number keys; a ghost then follows the mouse, snapped to the grid. Left-click
     /// builds it on a free cell if the player can afford it, right-click puts the ghost away.
-    /// With no ghost, left-click on a standing tower selects it for the tower card,
+    /// Left-click on a standing tower selects it for the tower card (and puts any ghost away),
     /// <see cref="UpgradeSelectedTower"/> buys its next level and <see cref="ToggleBurrowAll"/>
-    /// is the B key. A tower a hazard removes frees its cell through its Removed event.
+    /// is the B key. What a click does is <see cref="TowerClickRule"/>. A tower a hazard removes
+    /// frees its cell through its Removed event.
     /// </summary>
     public class TowerPlacer : MonoBehaviour
     {
@@ -93,6 +95,12 @@ namespace HoldTheHill.Features.Towers
         /// <summary>Towers currently standing, by grid cell.</summary>
         public IReadOnlyDictionary<Vector2Int, Tower> Towers => _towers;
 
+        /// <summary>
+        /// False while the run is paused or over: keys and clicks then leave towers alone.
+        /// The level's run sets it.
+        /// </summary>
+        public bool AcceptsInput { get; set; } = true;
+
         private void Awake()
         {
             _camera = Camera.main;
@@ -125,6 +133,9 @@ namespace HoldTheHill.Features.Towers
         private SpriteRenderer MakeMarker(string name, int sortingOrder)
         {
             var marker = new GameObject(name).AddComponent<SpriteRenderer>();
+            // A new object goes into the active scene, which during a level load is still Bootstrap or
+            // UI. Moved into the level's own scene, the marker unloads with it on Restart and Home.
+            SceneManager.MoveGameObjectToScene(marker.gameObject, gameObject.scene);
             marker.sprite = SpriteUtil.Square;
             marker.sortingOrder = sortingOrder;
             marker.transform.localScale = Vector3.one * _cellSize;
@@ -296,7 +307,7 @@ namespace HoldTheHill.Features.Towers
 
         private void Update()
         {
-            if (_gameplay == null || _camera == null)
+            if (_gameplay == null || _camera == null || !AcceptsInput)
             {
                 return;
             }
@@ -319,30 +330,44 @@ namespace HoldTheHill.Features.Towers
             bool clicked = _place.WasPressedThisFrame() && !overUi;
             Vector3 mouseWorld = _camera.ScreenToWorldPoint(_point.ReadValue<Vector2>());
             Vector2Int cell = WorldToCell(mouseWorld);
+            bool armed = _selected >= 0;
+            _towers.TryGetValue(cell, out Tower standing);
 
-            if (_selected < 0)
+            int cost = 0;
+            bool blocked = false;
+            bool affordable = true;
+            if (armed)
             {
-                if (clicked)
-                {
-                    SelectTower(_towers.TryGetValue(cell, out Tower hit) ? hit : null);
-                }
+                Offer armedOffer = _offers[_selected];
+                cost = armedOffer.Data != null ? armedOffer.Data.honeydewCost : 0;
+                blocked = standing != null || IsOnPath(cell);
+                affordable = _wallet == null || _wallet.Honeydew.CanAfford(cost);
+
+                _preview.transform.position = CellToWorld(cell);
+                _preview.color = blocked ? _blockedCellColor : affordable ? _freeCellColor : _unaffordableColor;
+            }
+
+            if (!clicked)
+            {
                 return;
             }
 
-            Offer offer = _offers[_selected];
-            int cost = offer.Data != null ? offer.Data.honeydewCost : 0;
-            bool blocked = _towers.ContainsKey(cell) || IsOnPath(cell);
-            bool affordable = _wallet == null || _wallet.Honeydew.CanAfford(cost);
-
-            _preview.transform.position = CellToWorld(cell);
-            _preview.color = blocked ? _blockedCellColor : affordable ? _freeCellColor : _unaffordableColor;
-
-            if (clicked && !blocked && affordable)
+            switch (TowerClickRule.Decide(armed, standing != null, blocked, affordable))
             {
-                if (_wallet == null || _wallet.Honeydew.TrySpend(cost))
-                {
-                    PlaceTower(offer, cell);
-                }
+                case TowerClickRule.Outcome.SelectStanding:
+                    // With a tower in hand too: the card, U and Sell then act on the tower clicked.
+                    Select(-1);
+                    SelectTower(standing);
+                    break;
+                case TowerClickRule.Outcome.ClearSelection:
+                    SelectTower(null);
+                    break;
+                case TowerClickRule.Outcome.Build:
+                    if (_wallet == null || _wallet.Honeydew.TrySpend(cost))
+                    {
+                        PlaceTower(_offers[_selected], cell);
+                    }
+                    break;
             }
         }
 
