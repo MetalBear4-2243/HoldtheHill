@@ -17,5 +17,20 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Game/Scenes/Levels/Hill01/Hill01_Gameplay.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/_Game/Scenes/Levels/L00_TutorialHill/L00_TutorialHill_Terrain.unity
+    guid: f287d3704f7f36044a6cd0a8da6f5043
+  - enabled: 1
+    path: Assets/_Game/Scenes/Levels/L00_TutorialHill/L00_TutorialHill_Gameplay.unity
+    guid: a842bd806d8a08d4f8d92642723861a9
+  - enabled: 1
+    path: Assets/_Game/Scenes/Levels/L01_Meadow/L01_Meadow_Terrain.unity
+    guid: e050393549862d74589f7f4b307784fa
+  - enabled: 1
+    path: Assets/_Game/Scenes/Levels/L01_Meadow/L01_Meadow_Gameplay.unity
+    guid: 69427d06af5f1464c9d5e38b4be14b14
+  - enabled: 1
+    path: Assets/_Game/Scenes/Home.unity
+    guid: e9a793a1debaf5a42893abc22d9285f5
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

@@ -30,8 +30,30 @@ namespace HoldTheHill.EditorTools
         private const string EnemyDataFolder = "Assets/_Game/Features/Enemies/Data";
         private const string ActionsPath = "Assets/_Game/Input/HoldTheHill.inputactions";
         private const string GameplayScenePath = "Assets/_Game/Scenes/Levels/Hill01/Hill01_Gameplay.unity";
+        private const string Hill01WavesPath = EnemyDataFolder + "/Hill01_Waves.asset";
 
         private const int SpriteSize = 32;
+
+        /// <summary>The basic enemy prefab the placeholder waves use.</summary>
+        internal const string EnemyPrefabPath = EnemyPrefabFolder + "/Enemy_Basic.prefab";
+
+        /// <summary>One placeholder wave: how many basic enemies, and the gap between them.</summary>
+        internal readonly struct WaveSpec
+        {
+            public WaveSpec(int count, float delay)
+            {
+                Count = count;
+                Delay = delay;
+            }
+
+            public int Count { get; }
+            public float Delay { get; }
+        }
+
+        private static readonly WaveSpec[] Hill01Waves =
+        {
+            new WaveSpec(5, 1.2f), new WaveSpec(8, 0.9f), new WaveSpec(12, 0.6f),
+        };
 
         [MenuItem("Tools/Hold the Hill/Alpha/Build Core Loop (Hill01)")]
         private static void Build()
@@ -49,9 +71,9 @@ namespace HoldTheHill.EditorTools
             TowerData bulletAntData = EnsureTowerData("BulletAnt", "Bullet Ant", 100, square);
 
             GameObject enemy = EnsureEnemyPrefab(circle);
-            MapWaveDataSO waves = EnsureWaves(enemy);
+            EnsureWaves(Hill01WavesPath, "Hill01", enemy, Hill01Waves);
 
-            WireGameplayScene(waves, antData, ant, bulletAntData, bulletAnt);
+            WireGameplayScene(GameplayScenePath, Hill01WavesPath);
 
             AssetDatabase.SaveAssets();
             Debug.Log("Alpha core loop built: open Hill01_Gameplay and press Play. Keys 1 and 2 pick a tower, left-click builds, right-click cancels.");
@@ -173,10 +195,10 @@ namespace HoldTheHill.EditorTools
             return AssetDatabase.LoadAssetAtPath<T>(path);
         }
 
-        private static GameObject EnsureEnemyPrefab(Sprite sprite)
+        internal static GameObject EnsureEnemyPrefab(Sprite sprite)
         {
             EnsureFolder(EnemyPrefabFolder);
-            string path = $"{EnemyPrefabFolder}/Enemy_Basic.prefab";
+            string path = EnemyPrefabPath;
 
             GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             if (existing != null)
@@ -197,22 +219,24 @@ namespace HoldTheHill.EditorTools
             return SavePrefab(go, path);
         }
 
-        private static MapWaveDataSO EnsureWaves(GameObject enemyPrefab)
+        /// <summary>
+        /// A wave list asset for one level, made only if it is missing so Inspector tuning survives.
+        /// Placeholder contents: every wave is <paramref name="enemyPrefab"/> repeated.
+        /// </summary>
+        internal static MapWaveDataSO EnsureWaves(string path, string mapId, GameObject enemyPrefab, IReadOnlyList<WaveSpec> specs)
         {
-            EnsureFolder(EnemyDataFolder);
-            string path = $"{EnemyDataFolder}/Hill01_Waves.asset";
+            EnsureFolder(Path.GetDirectoryName(path).Replace('\\', '/'));
 
             MapWaveDataSO waves = AssetDatabase.LoadAssetAtPath<MapWaveDataSO>(path);
             if (waves == null)
             {
                 waves = ScriptableObject.CreateInstance<MapWaveDataSO>();
-                waves.mapId = "Hill01";
-                waves.waves = new List<Wave>
+                waves.mapId = mapId;
+                waves.waves = new List<Wave>(specs.Count);
+                for (int i = 0; i < specs.Count; i++)
                 {
-                    MakeWave("Wave 1", enemyPrefab, count: 5, delay: 1.2f),
-                    MakeWave("Wave 2", enemyPrefab, count: 8, delay: 0.9f),
-                    MakeWave("Wave 3", enemyPrefab, count: 12, delay: 0.6f),
-                };
+                    waves.waves.Add(MakeWave($"Wave {i + 1}", enemyPrefab, specs[i].Count, specs[i].Delay));
+                }
                 AssetDatabase.CreateAsset(waves, path);
                 waves = Reimport<MapWaveDataSO>(path);
             }
@@ -230,19 +254,26 @@ namespace HoldTheHill.EditorTools
             return wave;
         }
 
-        private static void WireGameplayScene(MapWaveDataSO waves,
-            TowerData antData, GameObject antPrefab, TowerData bulletAntData, GameObject bulletAntPrefab)
+        /// <summary>
+        /// Opens a level's gameplay scene and makes sure it has a path, a spawner on the given wave
+        /// list, a wallet with the wave reward, and a placer offering the Ant and Bullet Ant. Objects
+        /// that exist are kept and only their references are refreshed. Saves the scene.
+        /// </summary>
+        internal static void WireGameplayScene(string scenePath, string wavesAssetPath)
         {
-            Scene scene = EditorSceneManager.OpenScene(GameplayScenePath, OpenSceneMode.Single);
+            Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
 
             // Opening a scene unloads assets nothing in a scene points at, which includes ScriptableObjects
-            // held only in a local variable, so load them again now.
-            antData = AssetDatabase.LoadAssetAtPath<TowerData>($"{TowerDataFolder}/Ant.asset");
-            bulletAntData = AssetDatabase.LoadAssetAtPath<TowerData>($"{TowerDataFolder}/BulletAnt.asset");
-            waves = AssetDatabase.LoadAssetAtPath<MapWaveDataSO>($"{EnemyDataFolder}/Hill01_Waves.asset");
-            if (waves == null || antData == null || bulletAntData == null)
+            // held only in a local variable, so load them now, after the scene is open.
+            var antData = AssetDatabase.LoadAssetAtPath<TowerData>($"{TowerDataFolder}/Ant.asset");
+            var bulletAntData = AssetDatabase.LoadAssetAtPath<TowerData>($"{TowerDataFolder}/BulletAnt.asset");
+            var antPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{TowerPrefabFolder}/Tower_Ant.prefab");
+            var bulletAntPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{TowerPrefabFolder}/Tower_BulletAnt.prefab");
+            var waves = AssetDatabase.LoadAssetAtPath<MapWaveDataSO>(wavesAssetPath);
+            if (waves == null || antData == null || bulletAntData == null || antPrefab == null || bulletAntPrefab == null)
             {
-                Debug.LogError("The wave or tower data assets could not be loaded after opening the scene.");
+                Debug.LogError($"The wave or tower assets could not be loaded after opening {scenePath}. Run Build Core Loop first.");
+                return;
             }
 
             RemoveBrokenObjects(scene);
@@ -329,7 +360,7 @@ namespace HoldTheHill.EditorTools
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
-            ReportOffersAfterReload();
+            ReportOffersAfterReload(scenePath);
         }
 
         // False when Unity's type check refused the TowerData asset.
@@ -360,13 +391,13 @@ namespace HoldTheHill.EditorTools
         }
 
         // Opens the saved scene again and says what the placer actually holds, so a batch log shows the truth.
-        private static void ReportOffersAfterReload()
+        private static void ReportOffersAfterReload(string scenePath)
         {
-            EditorSceneManager.OpenScene(GameplayScenePath, OpenSceneMode.Single);
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
             TowerPlacer placer = Object.FindAnyObjectByType<TowerPlacer>();
             if (placer == null)
             {
-                Debug.LogError("Tower Placer is missing after the scene was saved and reopened.");
+                Debug.LogError($"Tower Placer is missing after {scenePath} was saved and reopened.");
                 return;
             }
 
@@ -382,8 +413,8 @@ namespace HoldTheHill.EditorTools
             EnemySpawner spawner = Object.FindAnyObjectByType<EnemySpawner>();
             if (spawner != null)
             {
-                Object waves = new SerializedObject(spawner).FindProperty("activeMapConfigOverride").objectReferenceValue;
-                Debug.Log($"Spawner waves = {(waves != null ? waves.name : "none")}");
+                var waves = new SerializedObject(spawner).FindProperty("activeMapConfigOverride").objectReferenceValue as MapWaveDataSO;
+                Debug.Log($"Spawner waves = {(waves != null ? $"{waves.name} ({waves.waves.Count} waves)" : "none")}");
             }
         }
 
@@ -493,7 +524,7 @@ namespace HoldTheHill.EditorTools
             return prefab;
         }
 
-        private static void EnsureFolder(string path)
+        internal static void EnsureFolder(string path)
         {
             if (AssetDatabase.IsValidFolder(path))
             {

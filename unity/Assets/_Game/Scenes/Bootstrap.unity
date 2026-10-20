@@ -150,9 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.SceneLoader
   _persistentScenes:
   - UI
-  _defaultLevelScenes:
-  - Hill01_Terrain
-  - Hill01_Gameplay
+  _homeScene: Home
 --- !u!4 &589534793
 Transform:
   m_ObjectHideFlags: 0

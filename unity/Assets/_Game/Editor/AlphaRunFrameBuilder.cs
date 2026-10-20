@@ -33,7 +33,7 @@ namespace HoldTheHill.EditorTools
         private const string UiScenePath = "Assets/_Game/Scenes/UI.unity";
         private const string ActionsPath = "Assets/_Game/Input/HoldTheHill.inputactions";
 
-        private static readonly Vector2 ReferenceResolution = new Vector2(1920f, 1080f);
+        internal static readonly Vector2 ReferenceResolution = new Vector2(1920f, 1080f);
         private static readonly Color DimColor = new Color(0f, 0f, 0f, 0.6f);
         private static readonly Color BarBackColor = new Color(0.1f, 0.1f, 0.12f, 0.9f);
         private static readonly Color BarFillColor = new Color(0.85f, 0.35f, 0.55f, 1f);
@@ -41,9 +41,9 @@ namespace HoldTheHill.EditorTools
 
         private const float Margin = 24f;
         private const int HudFontSize = 36;
-        private const int TitleFontSize = 64;
+        internal const int TitleFontSize = 64;
         private const int ButtonFontSize = 28;
-        private static readonly Vector2 MenuButtonSize = new Vector2(320f, 72f);
+        internal static readonly Vector2 MenuButtonSize = new Vector2(320f, 72f);
         private static readonly Vector2 NextWaveButtonSize = new Vector2(240f, 64f);
 
         [MenuItem("Tools/Hold the Hill/Alpha/Build Run Frame (HUD, keys, win and lose)")]
@@ -77,7 +77,26 @@ namespace HoldTheHill.EditorTools
 
         // ---- Gameplay scene -------------------------------------------------------------------
 
-        private static void WireGameplayScene(Scene scene, Sprite circle)
+        /// <summary>Opens one level's gameplay scene, wires its Queen, Level Run and Run Controls, and saves it.</summary>
+        internal static void WireLevelGameplay(string scenePath)
+        {
+            Sprite circle = AlphaCoreLoopBuilder.EnsureSprite("Circle", circle: true);
+            Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            WireGameplayScene(scene, circle);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+        }
+
+        /// <summary>Opens the UI scene, adds whatever HUD piece is missing, and saves it.</summary>
+        internal static void WireUiSceneFile()
+        {
+            Scene ui = EditorSceneManager.OpenScene(UiScenePath, OpenSceneMode.Single);
+            WireUiScene(ui);
+            EditorSceneManager.MarkSceneDirty(ui);
+            EditorSceneManager.SaveScene(ui);
+        }
+
+        internal static void WireGameplayScene(Scene scene, Sprite circle)
         {
             // Loaded after the scene opened: opening a scene unloads loose assets.
             circle = AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GetAssetPath(circle));
@@ -237,6 +256,22 @@ namespace HoldTheHill.EditorTools
             EnsureNextWaveButton(scene, canvas, hud, uiLayer);
             EnsurePauseMenu(scene, canvas.transform, uiLayer);
             EnsureResultPanel(scene, canvas.transform, uiLayer);
+            EnsureHudPanel(scene, canvas, hud);
+        }
+
+        // Hides the HUD between levels (Alpha step 3, when the home screen arrived). On the canvas,
+        // not on the HUD object: a piece that disables itself never hears the next run start.
+        private static void EnsureHudPanel(Scene scene, Canvas canvas, RectTransform hud)
+        {
+            HudPanel panel = FindInScene<HudPanel>(scene);
+            if (panel == null)
+            {
+                panel = canvas.gameObject.AddComponent<HudPanel>();
+            }
+
+            var so = new SerializedObject(panel);
+            so.FindProperty("_hud").objectReferenceValue = hud.gameObject;
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void EnsureHoneydewLabel(Scene scene, RectTransform hud, int layer)
@@ -402,7 +437,7 @@ namespace HoldTheHill.EditorTools
 
         // ---- uGUI helpers ---------------------------------------------------------------------
 
-        private static RectTransform EnsureStretchedChild(Transform parent, string name, int layer)
+        internal static RectTransform EnsureStretchedChild(Transform parent, string name, int layer)
         {
             Transform existing = parent.Find(name);
             if (existing != null)
@@ -418,14 +453,14 @@ namespace HoldTheHill.EditorTools
             return rect;
         }
 
-        private static GameObject MakeDimPanel(Transform parent, int layer)
+        internal static GameObject MakeDimPanel(Transform parent, int layer)
         {
             Image image = MakeImage(parent, "Panel", DimColor, layer);
             Stretch(image.rectTransform, Vector2.zero);
             return image.gameObject;
         }
 
-        private static Image MakeImage(Transform parent, string name, Color color, int layer)
+        internal static Image MakeImage(Transform parent, string name, Color color, int layer)
         {
             var go = new GameObject(name, typeof(RectTransform));
             go.layer = layer;
@@ -435,7 +470,7 @@ namespace HoldTheHill.EditorTools
             return image;
         }
 
-        private static TextMeshProUGUI MakeText(Transform parent, string name, string content, int fontSize,
+        internal static TextMeshProUGUI MakeText(Transform parent, string name, string content, int fontSize,
             TextAlignmentOptions alignment, int layer)
         {
             var go = new GameObject(name, typeof(RectTransform));
@@ -450,7 +485,7 @@ namespace HoldTheHill.EditorTools
             return text;
         }
 
-        private static Button MakeButton(Transform parent, string name, string label, int layer)
+        internal static Button MakeButton(Transform parent, string name, string label, int layer)
         {
             Image image = MakeImage(parent, name, Color.white, layer);
             image.sprite = BuiltinSprite("UI/Skin/UISprite.psd");
@@ -465,13 +500,13 @@ namespace HoldTheHill.EditorTools
             return button;
         }
 
-        private static Sprite BuiltinSprite(string path)
+        internal static Sprite BuiltinSprite(string path)
         {
             return AssetDatabase.GetBuiltinExtraResource<Sprite>(path);
         }
 
         // Pins a rect to one anchor point; the position is measured from that corner or edge.
-        private static void Anchor(RectTransform rect, Vector2 anchor, Vector2 position, Vector2 size)
+        internal static void Anchor(RectTransform rect, Vector2 anchor, Vector2 position, Vector2 size)
         {
             rect.anchorMin = anchor;
             rect.anchorMax = anchor;
@@ -480,7 +515,7 @@ namespace HoldTheHill.EditorTools
             rect.sizeDelta = size;
         }
 
-        private static void Stretch(RectTransform rect, Vector2 padding)
+        internal static void Stretch(RectTransform rect, Vector2 padding)
         {
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
@@ -489,7 +524,7 @@ namespace HoldTheHill.EditorTools
             rect.offsetMax = -padding;
         }
 
-        private static T FindInScene<T>(Scene scene) where T : Component
+        internal static T FindInScene<T>(Scene scene) where T : Component
         {
             foreach (GameObject root in scene.GetRootGameObjects())
             {
@@ -530,6 +565,8 @@ namespace HoldTheHill.EditorTools
             Debug.Log($"UI scene: EventSystem {(FindInScene<EventSystem>(ui) != null ? "present" : "MISSING")}, "
                       + $"Canvas {(canvas != null ? canvas.renderMode.ToString() : "MISSING")}, "
                       + $"scaler {(scaler != null ? $"{scaler.uiScaleMode} {scaler.referenceResolution}" : "MISSING")}");
+            HudPanel hudPanel = FindInScene<HudPanel>(ui);
+            Debug.Log($"HUD panel: {(hudPanel != null ? "hud = " + Name(new SerializedObject(hudPanel), "_hud") : "MISSING")}");
             Debug.Log($"HUD: Honeydew {(FindInScene<HoneydewLabel>(ui) != null ? "present" : "MISSING")}, "
                       + $"Wave {(FindInScene<WaveLabel>(ui) != null ? "present" : "MISSING")}, "
                       + $"Next Wave button {(FindInScene<NextWaveButton>(ui) != null ? "present" : "MISSING")}");
@@ -560,7 +597,7 @@ namespace HoldTheHill.EditorTools
             }
         }
 
-        private static string Name(SerializedObject so, string field)
+        internal static string Name(SerializedObject so, string field)
         {
             Object value = so.FindProperty(field).objectReferenceValue;
             return value != null ? value.name : "none";
