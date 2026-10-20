@@ -28,6 +28,15 @@ namespace HoldTheHill.EditorTools
                 return;
             }
 
+            GameObject pathObject = CreateExamplePathObject();
+            Undo.RegisterCreatedObjectUndo(pathObject, "Create Example Path");
+            Selection.activeGameObject = pathObject;
+            EditorSceneManager.MarkSceneDirty(pathObject.scene);
+        }
+
+        /// <summary>Makes an Enemy Path object following the example route, in the active scene.</summary>
+        internal static GameObject CreateExamplePathObject()
+        {
             var pathObject = new GameObject("Enemy Path");
             pathObject.AddComponent<EnemyPath>();
 
@@ -39,9 +48,7 @@ namespace HoldTheHill.EditorTools
                 waypoint.position = new Vector3(ExampleRoute[i].x + 0.5f, ExampleRoute[i].y + 0.5f, 0f);
             }
 
-            Undo.RegisterCreatedObjectUndo(pathObject, "Create Example Path");
-            Selection.activeGameObject = pathObject;
-            EditorSceneManager.MarkSceneDirty(pathObject.scene);
+            return pathObject;
         }
     }
 }
