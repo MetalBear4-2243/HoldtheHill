@@ -10,9 +10,11 @@ using UnityEngine.InputSystem;
 namespace HoldTheHill.Features.Towers
 {
     /// <summary>
-    /// Places towers. A tower is picked from the shop (<see cref="Select(TowerData)"/>) or with the
-    /// number keys; a ghost then follows the mouse, snapped to the grid. Left-click builds it on a
-    /// free cell if the player can afford it, right-click puts the ghost away.
+    /// Places and selects towers. A tower is picked from the shop (<see cref="Select(TowerData)"/>)
+    /// or with the number keys; a ghost then follows the mouse, snapped to the grid. Left-click
+    /// builds it on a free cell if the player can afford it, right-click puts the ghost away.
+    /// With no ghost, left-click on a standing tower selects it for the tower card, and
+    /// <see cref="UpgradeSelectedTower"/> buys its next level.
     /// </summary>
     public class TowerPlacer : MonoBehaviour
     {
@@ -50,6 +52,7 @@ namespace HoldTheHill.Features.Towers
         [SerializeField] private Color _freeCellColor = new Color(1f, 1f, 1f, 0.35f);
         [SerializeField] private Color _blockedCellColor = new Color(1f, 0.3f, 0.3f, 0.35f);
         [SerializeField] private Color _unaffordableColor = new Color(1f, 0.8f, 0.2f, 0.35f);
+        [SerializeField] private Color _selectionColor = new Color(0.4f, 0.9f, 1f, 0.45f);
 
         private const int SelectKeys = 6;
 
@@ -59,17 +62,28 @@ namespace HoldTheHill.Features.Towers
 
         private Camera _camera;
         private SpriteRenderer _preview;
+        private SpriteRenderer _selectionMark;
         private InputActionMap _gameplay;
         private InputAction _point;
         private InputAction _place;
         private InputAction _cancel;
         private int _selected = -1;
+        private Tower _selectedTower;
 
         /// <summary>Raised when a tower has been built and paid for.</summary>
         public event Action<Tower> TowerPlaced;
 
+        /// <summary>Raised when the selected tower changes; null means nothing is selected.</summary>
+        public event Action<Tower> SelectedTowerChanged;
+
         /// <summary>The offer the ghost shows, or null when nothing is selected.</summary>
         public Offer? Selected => _selected >= 0 ? _offers[_selected] : (Offer?)null;
+
+        /// <summary>The standing tower the card shows, or null.</summary>
+        public Tower SelectedTower => _selectedTower;
+
+        /// <summary>The wallet towers and upgrades are paid from.</summary>
+        public HoneydewWallet Wallet => _wallet;
 
         /// <summary>Towers currently standing, by grid cell.</summary>
         public IReadOnlyDictionary<Vector2Int, Tower> Towers => _towers;
@@ -82,11 +96,9 @@ namespace HoldTheHill.Features.Towers
                 _path = FindAnyObjectByType<EnemyPath>();
             }
 
-            _preview = new GameObject("Placement Preview").AddComponent<SpriteRenderer>();
-            _preview.sprite = SpriteUtil.Square;
-            _preview.sortingOrder = 100;
-            _preview.transform.localScale = Vector3.one * _cellSize;
-            _preview.enabled = false;
+            _preview = MakeMarker("Placement Preview", 100);
+            _selectionMark = MakeMarker("Selection Mark", 99);
+            _selectionMark.color = _selectionColor;
 
             if (_actions != null)
             {
@@ -103,6 +115,16 @@ namespace HoldTheHill.Features.Towers
             {
                 Debug.LogError("TowerPlacer has no actions asset, so nothing can be placed.", this);
             }
+        }
+
+        private SpriteRenderer MakeMarker(string name, int sortingOrder)
+        {
+            var marker = new GameObject(name).AddComponent<SpriteRenderer>();
+            marker.sprite = SpriteUtil.Square;
+            marker.sortingOrder = sortingOrder;
+            marker.transform.localScale = Vector3.one * _cellSize;
+            marker.enabled = false;
+            return marker;
         }
 
         private void OnEnable()
@@ -142,12 +164,62 @@ namespace HoldTheHill.Features.Towers
             bool valid = index >= 0 && index < _offers.Count && _offers[index].Prefab != null;
             _selected = valid ? index : -1;
             _preview.enabled = valid;
+            if (valid)
+            {
+                SelectTower(null);
+            }
         }
 
-        /// <summary>Puts the ghost away without building anything.</summary>
+        /// <summary>Puts the ghost away without building anything, and drops the tower selection.</summary>
         public void Cancel()
         {
             Select(-1);
+            SelectTower(null);
+        }
+
+        /// <summary>Makes <paramref name="tower"/> the one the card shows; null clears it.</summary>
+        public void SelectTower(Tower tower)
+        {
+            if (_selectedTower == tower)
+            {
+                return;
+            }
+
+            _selectedTower = tower;
+            _selectionMark.enabled = tower != null;
+            if (tower != null)
+            {
+                _selectionMark.transform.position = CellToWorld(tower.Cell);
+            }
+
+            SelectedTowerChanged?.Invoke(tower);
+        }
+
+        /// <summary>
+        /// Buys the selected tower's next level if it has one and the wallet covers it.
+        /// The card and the U key both come here.
+        /// </summary>
+        public TowerUpgradeRule.Verdict UpgradeSelectedTower()
+        {
+            if (_selectedTower == null)
+            {
+                return TowerUpgradeRule.Verdict.AtMaxLevel;
+            }
+
+            int honeydew = _wallet != null ? _wallet.Honeydew.Amount : int.MaxValue;
+            TowerUpgradeRule.Verdict verdict = TowerUpgradeRule.Check(
+                _selectedTower.Level, _selectedTower.MaxLevel, _selectedTower.NextUpgradeCost, honeydew);
+            if (verdict != TowerUpgradeRule.Verdict.Ready)
+            {
+                return verdict;
+            }
+
+            if (_wallet == null || _wallet.Honeydew.TrySpend(_selectedTower.NextUpgradeCost))
+            {
+                _selectedTower.Upgrade();
+            }
+
+            return verdict;
         }
 
         private void Update()
@@ -170,29 +242,34 @@ namespace HoldTheHill.Features.Towers
                 Cancel();
             }
 
+            // A click on the HUD (the shop, a button, the card) is not a click on the map.
+            bool overUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+            bool clicked = _place.WasPressedThisFrame() && !overUi;
+            Vector3 mouseWorld = _camera.ScreenToWorldPoint(_point.ReadValue<Vector2>());
+            Vector2Int cell = WorldToCell(mouseWorld);
+
             if (_selected < 0)
             {
+                if (clicked)
+                {
+                    SelectTower(_towers.TryGetValue(cell, out Tower hit) ? hit : null);
+                }
                 return;
             }
 
             Offer offer = _offers[_selected];
             int cost = offer.Data != null ? offer.Data.honeydewCost : 0;
-
-            Vector3 mouseWorld = _camera.ScreenToWorldPoint(_point.ReadValue<Vector2>());
-            Vector2Int cell = WorldToCell(mouseWorld);
             bool blocked = _towers.ContainsKey(cell) || IsOnPath(cell);
             bool affordable = _wallet == null || _wallet.Honeydew.CanAfford(cost);
 
             _preview.transform.position = CellToWorld(cell);
             _preview.color = blocked ? _blockedCellColor : affordable ? _freeCellColor : _unaffordableColor;
 
-            // A click on the HUD (the shop, a button) is not a click on the map.
-            bool overUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
-            if (_place.WasPressedThisFrame() && !blocked && affordable && !overUi)
+            if (clicked && !blocked && affordable)
             {
                 if (_wallet == null || _wallet.Honeydew.TrySpend(cost))
                 {
-                    PlaceTower(offer.Prefab, cell);
+                    PlaceTower(offer, cell);
                 }
             }
         }
@@ -202,12 +279,14 @@ namespace HoldTheHill.Features.Towers
             return _path != null && _path.Blocks(CellToWorld(cell), _cellSize);
         }
 
-        private void PlaceTower(Tower prefab, Vector2Int cell)
+        private void PlaceTower(Offer offer, Vector2Int cell)
         {
-            Tower tower = Instantiate(prefab, CellToWorld(cell), Quaternion.identity, transform);
+            Tower tower = Instantiate(offer.Prefab, CellToWorld(cell), Quaternion.identity, transform);
             tower.Cell = cell;
+            tower.ShopData = offer.Data;
             _towers.Add(cell, tower);
             TowerPlaced?.Invoke(tower);
+            SelectTower(tower);
         }
 
         private Vector2Int WorldToCell(Vector3 world)

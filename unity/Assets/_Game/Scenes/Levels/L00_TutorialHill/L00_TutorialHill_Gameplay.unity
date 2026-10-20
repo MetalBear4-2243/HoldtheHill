@@ -187,10 +187,19 @@ MonoBehaviour:
     Prefab: {fileID: 2237086629921735221, guid: 15267746cc01eaf4b81c7afef0f65e67, type: 3}
   - Data: {fileID: 11400000, guid: 4a438d46cacba3e4087e8db3d9bf5bce, type: 2}
     Prefab: {fileID: 4765609885644046121, guid: 8925cef9ac51fb342901818f4fcccce5, type: 3}
+  - Data: {fileID: 11400000, guid: 6ed2cfab5c62a884fb47e39e274a2359, type: 2}
+    Prefab: {fileID: 1681274514025101029, guid: d27a3f265c9304e4291f644dc9e3aa88, type: 3}
+  - Data: {fileID: 11400000, guid: b039e0d9044826745a74e40464e8e8c5, type: 2}
+    Prefab: {fileID: 7333962735893383698, guid: b720628080511c64fbda8a9fab28e93a, type: 3}
+  - Data: {fileID: 11400000, guid: 8a09ea24cc014fa4490a12bcb2f01e2c, type: 2}
+    Prefab: {fileID: 4314983547922285816, guid: 1ce2686849838f34592faa43bba26739, type: 3}
+  - Data: {fileID: 11400000, guid: dcf97a14bf070e64fb9d1714123395f0, type: 2}
+    Prefab: {fileID: 6340939830100537182, guid: a08c1bbaff98a014fbf8bb54ad0bae4b, type: 3}
   _actions: {fileID: -944628639613478452, guid: 333f2a6034804908bf9f41289bd5a047, type: 3}
   _freeCellColor: {r: 1, g: 1, b: 1, a: 0.35}
   _blockedCellColor: {r: 1, g: 0.3, b: 0.3, a: 0.35}
   _unaffordableColor: {r: 1, g: 0.8, b: 0.2, a: 0.35}
+  _selectionColor: {r: 0.4, g: 0.9, b: 1, a: 0.45}
 --- !u!4 &491186563
 Transform:
   m_ObjectHideFlags: 0
@@ -524,6 +533,7 @@ MonoBehaviour:
   _queen: {fileID: 1510741317}
   _spawner: {fileID: 1456482060}
   _wallet: {fileID: 2087705354}
+  _placer: {fileID: 491186562}
   _fastTimeScale: 2
 --- !u!4 &947532756
 Transform:

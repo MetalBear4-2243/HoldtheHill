@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using HoldTheHill.Features.Economy;
 using HoldTheHill.Features.Enemies;
+using HoldTheHill.Features.GameFlow;
 using HoldTheHill.Features.Towers;
 using UnityEditor;
 using UnityEditor.Events;
@@ -55,28 +56,108 @@ namespace HoldTheHill.EditorTools
             new WaveSpec(5, 1.2f), new WaveSpec(8, 0.9f), new WaveSpec(12, 0.6f),
         };
 
+        /// <summary>How a tower attacks; decides which extra component or projectile its prefab gets.</summary>
+        internal enum TowerKind
+        {
+            Melee,
+            Shot,
+            Lob,
+            Slow,
+            Mines
+        }
+
+        /// <summary>One of the GDD's six towers: its prefab, shop data and numbers for all three levels.</summary>
+        internal readonly struct TowerSpec
+        {
+            public TowerSpec(string prefabName, string dataFile, string title, int cost, Color color, TowerKind kind,
+                float range, float damage, float interval, TowerUpgrade level2, TowerUpgrade level3)
+            {
+                PrefabName = prefabName;
+                DataFile = dataFile;
+                Title = title;
+                Cost = cost;
+                Color = color;
+                Kind = kind;
+                Range = range;
+                Damage = damage;
+                Interval = interval;
+                Level2 = level2;
+                Level3 = level3;
+            }
+
+            public string PrefabName { get; }
+            public string DataFile { get; }
+            public string Title { get; }
+            public int Cost { get; }
+            public Color Color { get; }
+            public TowerKind Kind { get; }
+            public float Range { get; }
+            public float Damage { get; }
+            public float Interval { get; }
+            public TowerUpgrade Level2 { get; }
+            public TowerUpgrade Level3 { get; }
+
+            public string PrefabPath => $"{TowerPrefabFolder}/{PrefabName}.prefab";
+            public string DataPath => $"{TowerDataFolder}/{DataFile}.asset";
+        }
+
+        private static TowerUpgrade Up(int cost, float range, float damage, float interval)
+        {
+            return new TowerUpgrade { Cost = cost, Range = range, Damage = damage, FireInterval = interval };
+        }
+
+        /// <summary>The six towers of the GDD, in number-key and shop order, at the GDD costs.</summary>
+        internal static readonly TowerSpec[] Towers =
+        {
+            new TowerSpec("Tower_Ant", "Ant", "Ant", 75, new Color(0.55f, 0.35f, 0.15f), TowerKind.Melee,
+                1.2f, 8f, 0.8f, Up(45, 1.3f, 12f, 0.7f), Up(70, 1.4f, 18f, 0.6f)),
+            new TowerSpec("Tower_BulletAnt", "BulletAnt", "Bullet Ant", 100, new Color(0.2f, 0.2f, 0.25f), TowerKind.Shot,
+                3f, 12f, 1.2f, Up(60, 3.3f, 18f, 1.1f), Up(90, 3.6f, 26f, 1f)),
+            new TowerSpec("Tower_CrazyAnt", "CrazyAnt", "Crazy Ant", 125, new Color(0.9f, 0.55f, 0.2f), TowerKind.Melee,
+                1.2f, 6f, 0.35f, Up(75, 1.3f, 9f, 0.3f), Up(110, 1.4f, 13f, 0.25f)),
+            new TowerSpec("Tower_FireAnt", "FireAnt", "Fire Ant", 200, new Color(0.85f, 0.2f, 0.1f), TowerKind.Lob,
+                2.8f, 14f, 1.6f, Up(120, 3f, 20f, 1.5f), Up(180, 3.3f, 30f, 1.4f)),
+            new TowerSpec("Tower_SapAnt", "SapAnt", "Sap Ant", 225, new Color(0.3f, 0.7f, 0.3f), TowerKind.Slow,
+                2f, 0f, 1f, Up(135, 2.4f, 0f, 1f), Up(200, 2.8f, 0f, 1f)),
+            new TowerSpec("Tower_CarpenterAnt", "CarpenterAnt", "Carpenter Ant", 250, new Color(0.45f, 0.3f, 0.5f), TowerKind.Mines,
+                2.5f, 30f, 3f, Up(150, 2.8f, 45f, 2.5f), Up(225, 3.1f, 65f, 2f)),
+        };
+
         [MenuItem("Tools/Hold the Hill/Alpha/Build Core Loop (Hill01)")]
         private static void Build()
         {
-            Sprite square = EnsureSprite("Square", circle: false);
+            EnsureTowerAssets();
+
             Sprite circle = EnsureSprite("Circle", circle: true);
-
-            GameObject bullet = EnsureProjectilePrefab(circle);
-            GameObject ant = EnsureTowerPrefab("Tower_Ant", square, new Color(0.55f, 0.35f, 0.15f),
-                range: 1.2f, damage: 8f, fireInterval: 0.8f, projectile: null);
-            GameObject bulletAnt = EnsureTowerPrefab("Tower_BulletAnt", square, new Color(0.2f, 0.2f, 0.25f),
-                range: 3f, damage: 12f, fireInterval: 1.2f, projectile: bullet.GetComponent<Projectile>());
-
-            TowerData antData = EnsureTowerData("Ant", "Ant", 75, square);
-            TowerData bulletAntData = EnsureTowerData("BulletAnt", "Bullet Ant", 100, square);
-
             GameObject enemy = EnsureEnemyPrefab(circle);
             EnsureWaves(Hill01WavesPath, "Hill01", enemy, Hill01Waves);
 
             WireGameplayScene(GameplayScenePath, Hill01WavesPath);
 
             AssetDatabase.SaveAssets();
-            Debug.Log("Alpha core loop built: open Hill01_Gameplay and press Play. Keys 1 and 2 pick a tower, left-click builds, right-click cancels.");
+            Debug.Log("Alpha core loop built: open Hill01_Gameplay and press Play. Keys 1 to 6 pick a tower, left-click builds, right-click cancels.");
+        }
+
+        /// <summary>Makes the sprites, projectiles, mine, the six tower prefabs and their shop data; keeps what exists.</summary>
+        internal static void EnsureTowerAssets()
+        {
+            Sprite square = EnsureSprite("Square", circle: false);
+            Sprite circle = EnsureSprite("Circle", circle: true);
+
+            GameObject bullet = EnsureProjectilePrefab("Projectile_Bullet", circle, new Color(1f, 0.9f, 0.3f), lobbed: false);
+            GameObject lob = EnsureProjectilePrefab("Projectile_Lob", circle, new Color(1f, 0.45f, 0.1f), lobbed: true);
+            GameObject mine = EnsureMinePrefab(circle);
+
+            for (int i = 0; i < Towers.Length; i++)
+            {
+                TowerSpec spec = Towers[i];
+                Projectile projectile = spec.Kind == TowerKind.Shot ? bullet.GetComponent<Projectile>()
+                    : spec.Kind == TowerKind.Lob ? lob.GetComponent<Projectile>() : null;
+                EnsureTowerPrefab(spec, square, projectile, mine.GetComponent<Mine>());
+                EnsureTowerData(spec.DataFile, spec.Title, spec.Cost, square);
+            }
+
+            AssetDatabase.SaveAssets();
         }
 
         /// <summary>Entry point for a batch run: <c>-executeMethod HoldTheHill.EditorTools.AlphaCoreLoopBuilder.BuildFromCommandLine</c>.</summary>
@@ -127,24 +208,7 @@ namespace HoldTheHill.EditorTools
             return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
-        private static GameObject EnsureProjectilePrefab(Sprite sprite)
-        {
-            EnsureFolder(TowerPrefabFolder);
-            string path = $"{TowerPrefabFolder}/Projectile_Bullet.prefab";
-
-            GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            if (existing != null)
-            {
-                return existing;
-            }
-
-            GameObject go = NewSpriteObject("Projectile_Bullet", sprite, new Color(1f, 0.9f, 0.3f), 0.2f, sortingOrder: 20);
-            go.AddComponent<Projectile>();
-            return SavePrefab(go, path);
-        }
-
-        private static GameObject EnsureTowerPrefab(string name, Sprite sprite, Color color,
-            float range, float damage, float fireInterval, Projectile projectile)
+        private static GameObject EnsureProjectilePrefab(string name, Sprite sprite, Color color, bool lobbed)
         {
             EnsureFolder(TowerPrefabFolder);
             string path = $"{TowerPrefabFolder}/{name}.prefab";
@@ -155,16 +219,96 @@ namespace HoldTheHill.EditorTools
                 return existing;
             }
 
-            GameObject go = NewSpriteObject(name, sprite, color, 0.8f, sortingOrder: 10);
+            GameObject go = NewSpriteObject(name, sprite, color, lobbed ? 0.3f : 0.2f, sortingOrder: 20);
+            var projectile = go.AddComponent<Projectile>();
+            var so = new SerializedObject(projectile);
+            so.FindProperty("_lobbed").boolValue = lobbed;
+            if (lobbed)
+            {
+                so.FindProperty("_speed").floatValue = 6f;
+                so.FindProperty("_arcHeight").floatValue = 1.5f;
+                so.FindProperty("_splashRadius").floatValue = 1f;
+            }
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return SavePrefab(go, path);
+        }
+
+        private static GameObject EnsureMinePrefab(Sprite sprite)
+        {
+            EnsureFolder(TowerPrefabFolder);
+            string path = $"{TowerPrefabFolder}/Mine_Carpenter.prefab";
+
+            GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (existing != null)
+            {
+                return existing;
+            }
+
+            GameObject go = NewSpriteObject("Mine_Carpenter", sprite, new Color(0.35f, 0.25f, 0.2f), 0.3f, sortingOrder: 3);
+            go.AddComponent<Mine>();
+            return SavePrefab(go, path);
+        }
+
+        // A new prefab gets everything; one that exists only gains the upgrade levels it lacks, so
+        // Inspector tuning of the level-1 numbers survives.
+        private static GameObject EnsureTowerPrefab(TowerSpec spec, Sprite sprite, Projectile projectile, Mine mine)
+        {
+            EnsureFolder(TowerPrefabFolder);
+
+            GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(spec.PrefabPath);
+            if (existing != null)
+            {
+                Tower existingTower = existing.GetComponent<Tower>();
+                var existingSo = new SerializedObject(existingTower);
+                if (existingSo.FindProperty("_upgrades").arraySize == 0)
+                {
+                    SetUpgrades(existingSo, spec);
+                    existingSo.ApplyModifiedPropertiesWithoutUndo();
+                    Debug.Log($"Added upgrade levels to the existing {spec.PrefabName}.");
+                }
+                return existing;
+            }
+
+            GameObject go = NewSpriteObject(spec.PrefabName, sprite, spec.Color, 0.8f, sortingOrder: 10);
             var tower = go.AddComponent<Tower>();
             var so = new SerializedObject(tower);
-            so.FindProperty("_range").floatValue = range;
-            so.FindProperty("_damage").floatValue = damage;
-            so.FindProperty("_fireInterval").floatValue = fireInterval;
+            so.FindProperty("_range").floatValue = spec.Range;
+            so.FindProperty("_damage").floatValue = spec.Damage;
+            so.FindProperty("_fireInterval").floatValue = spec.Interval;
             so.FindProperty("_projectilePrefab").objectReferenceValue = projectile;
+            SetUpgrades(so, spec);
             so.ApplyModifiedPropertiesWithoutUndo();
 
-            return SavePrefab(go, path);
+            switch (spec.Kind)
+            {
+                case TowerKind.Slow:
+                    go.AddComponent<SlowAura>();
+                    break;
+                case TowerKind.Mines:
+                    var layer = go.AddComponent<MineLayer>();
+                    var layerSo = new SerializedObject(layer);
+                    layerSo.FindProperty("_minePrefab").objectReferenceValue = mine;
+                    layerSo.ApplyModifiedPropertiesWithoutUndo();
+                    break;
+            }
+
+            return SavePrefab(go, spec.PrefabPath);
+        }
+
+        private static void SetUpgrades(SerializedObject tower, TowerSpec spec)
+        {
+            SerializedProperty upgrades = tower.FindProperty("_upgrades");
+            upgrades.arraySize = 2;
+            SetUpgrade(upgrades.GetArrayElementAtIndex(0), spec.Level2);
+            SetUpgrade(upgrades.GetArrayElementAtIndex(1), spec.Level3);
+        }
+
+        private static void SetUpgrade(SerializedProperty element, TowerUpgrade upgrade)
+        {
+            element.FindPropertyRelative("Cost").intValue = upgrade.Cost;
+            element.FindPropertyRelative("Range").floatValue = upgrade.Range;
+            element.FindPropertyRelative("Damage").floatValue = upgrade.Damage;
+            element.FindPropertyRelative("FireInterval").floatValue = upgrade.FireInterval;
         }
 
         private static TowerData EnsureTowerData(string fileName, string towerName, int cost, Sprite icon)
@@ -265,12 +409,17 @@ namespace HoldTheHill.EditorTools
 
             // Opening a scene unloads assets nothing in a scene points at, which includes ScriptableObjects
             // held only in a local variable, so load them now, after the scene is open.
-            var antData = AssetDatabase.LoadAssetAtPath<TowerData>($"{TowerDataFolder}/Ant.asset");
-            var bulletAntData = AssetDatabase.LoadAssetAtPath<TowerData>($"{TowerDataFolder}/BulletAnt.asset");
-            var antPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{TowerPrefabFolder}/Tower_Ant.prefab");
-            var bulletAntPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{TowerPrefabFolder}/Tower_BulletAnt.prefab");
             var waves = AssetDatabase.LoadAssetAtPath<MapWaveDataSO>(wavesAssetPath);
-            if (waves == null || antData == null || bulletAntData == null || antPrefab == null || bulletAntPrefab == null)
+            var datas = new TowerData[Towers.Length];
+            var prefabs = new GameObject[Towers.Length];
+            bool missing = waves == null;
+            for (int i = 0; i < Towers.Length; i++)
+            {
+                datas[i] = AssetDatabase.LoadAssetAtPath<TowerData>(Towers[i].DataPath);
+                prefabs[i] = AssetDatabase.LoadAssetAtPath<GameObject>(Towers[i].PrefabPath);
+                missing |= datas[i] == null || prefabs[i] == null;
+            }
+            if (missing)
             {
                 Debug.LogError($"The wave or tower assets could not be loaded after opening {scenePath}. Run Build Core Loop first.");
                 return;
@@ -340,22 +489,34 @@ namespace HoldTheHill.EditorTools
             placerSo.FindProperty("_actions").objectReferenceValue = AssetDatabase.LoadAssetAtPath<InputActionAsset>(ActionsPath);
 
             SerializedProperty offers = placerSo.FindProperty("_offers");
-            offers.arraySize = 2;
-            bool refused = !SetOffer(offers.GetArrayElementAtIndex(0), antData, antPrefab);
-            refused |= !SetOffer(offers.GetArrayElementAtIndex(1), bulletAntData, bulletAntPrefab);
+            offers.arraySize = Towers.Length;
+            bool refused = false;
+            for (int i = 0; i < Towers.Length; i++)
+            {
+                refused |= !SetOffer(offers.GetArrayElementAtIndex(i), datas[i], prefabs[i]);
+            }
             placerSo.ApplyModifiedPropertiesWithoutUndo();
 
             if (refused)
             {
                 // Same fallback as SetAssetReference: write the list straight into the field.
-                var list = new List<TowerPlacer.Offer>
+                var list = new List<TowerPlacer.Offer>(Towers.Length);
+                for (int i = 0; i < Towers.Length; i++)
                 {
-                    new TowerPlacer.Offer { Data = antData, Prefab = antPrefab.GetComponent<Tower>() },
-                    new TowerPlacer.Offer { Data = bulletAntData, Prefab = bulletAntPrefab.GetComponent<Tower>() },
-                };
+                    list.Add(new TowerPlacer.Offer { Data = datas[i], Prefab = prefabs[i].GetComponent<Tower>() });
+                }
                 typeof(TowerPlacer).GetField("_offers", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
                     ?.SetValue(placer, list);
                 EditorUtility.SetDirty(placer);
+            }
+
+            // The run reaches the placer for the tower card and the U key (Alpha step 4).
+            LevelRun run = Object.FindAnyObjectByType<LevelRun>();
+            if (run != null)
+            {
+                var runSo = new SerializedObject(run);
+                runSo.FindProperty("_placer").objectReferenceValue = placer;
+                runSo.ApplyModifiedPropertiesWithoutUndo();
             }
 
             EditorSceneManager.MarkSceneDirty(scene);

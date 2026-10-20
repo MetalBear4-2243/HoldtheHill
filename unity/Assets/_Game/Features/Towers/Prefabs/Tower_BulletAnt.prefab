@@ -111,3 +111,13 @@ MonoBehaviour:
   _projectilePrefab: {fileID: 745359060003485302, guid: a21e382f21c619a4f9e0068247c2c3ac, type: 3}
   _muzzle: {fileID: 0}
   _priority: 0
+  _upgrades:
+  - Cost: 60
+    Range: 3.3
+    Damage: 18
+    FireInterval: 1.1
+  - Cost: 90
+    Range: 3.6
+    Damage: 26
+    FireInterval: 1
+  _scalePerLevel: 1.12

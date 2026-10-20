@@ -2,6 +2,7 @@ using System;
 using HoldTheHill.Core;
 using HoldTheHill.Features.Economy;
 using HoldTheHill.Features.Enemies;
+using HoldTheHill.Features.Towers;
 using UnityEngine;
 
 namespace HoldTheHill.Features.GameFlow
@@ -27,6 +28,9 @@ namespace HoldTheHill.Features.GameFlow
 
         [Tooltip("The run's Honeydew, shown on the HUD.")]
         [SerializeField] private HoneydewWallet _wallet;
+
+        [Tooltip("Places and selects towers; the tower card and the U key reach it through the run.")]
+        [SerializeField] private TowerPlacer _placer;
 
         [Header("Speed")]
         [Tooltip("Time scale while the fast speed is on.")]
@@ -56,6 +60,9 @@ namespace HoldTheHill.Features.GameFlow
 
         /// <summary>The run's Honeydew.</summary>
         public HoneydewWallet Wallet => _wallet;
+
+        /// <summary>The level's tower placer, for the tower card. May be null in a scene without one.</summary>
+        public TowerPlacer Placer => _placer;
 
         /// <summary>Pause and speed. Created in Awake.</summary>
         public RunClock Clock { get; private set; }
@@ -146,6 +153,15 @@ namespace HoldTheHill.Features.GameFlow
             if (Outcome == RunOutcome.Playing)
             {
                 Clock.ToggleSpeed();
+            }
+        }
+
+        /// <summary>Buys the next level of the selected tower, if any. The U key comes here.</summary>
+        public void UpgradeSelectedTower()
+        {
+            if (Outcome == RunOutcome.Playing && !Clock.Paused && _placer != null)
+            {
+                _placer.UpgradeSelectedTower();
             }
         }
 
