@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,6 +16,12 @@ namespace HoldTheHill.Features.Enemies
         /// <summary>Enemies currently alive and enabled, in registration order.</summary>
         public static IReadOnlyList<BasicEnemy> All => s_all;
 
+        /// <summary>
+        /// A registered enemy was killed (not: reached the Queen). Raised by <see cref="RegisteredEnemy"/>
+        /// while the enemy's transform is still valid, so the Queen Mantis can note where it fell.
+        /// </summary>
+        public static event Action<BasicEnemy> EnemyDied;
+
         internal static void Add(BasicEnemy enemy)
         {
             if (!s_all.Contains(enemy))
@@ -28,11 +35,17 @@ namespace HoldTheHill.Features.Enemies
             s_all.Remove(enemy);
         }
 
+        internal static void NotifyDied(BasicEnemy enemy)
+        {
+            EnemyDied?.Invoke(enemy);
+        }
+
         // Domain reload is on, but clearing keeps Play mode safe if that ever changes.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics()
         {
             s_all.Clear();
+            EnemyDied = null;
         }
     }
 }
