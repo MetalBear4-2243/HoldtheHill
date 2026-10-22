@@ -165,6 +165,17 @@ namespace HoldTheHill.Features.GameFlow
             }
         }
 
+        /// <summary>
+        /// The B key: burrows every tower, or brings them all up when every one is already down.
+        /// </summary>
+        public void ToggleBurrowAll()
+        {
+            if (Outcome == RunOutcome.Playing && !Clock.Paused && _placer != null)
+            {
+                _placer.ToggleBurrowAll();
+            }
+        }
+
         /// <summary>Reloads this level from the start.</summary>
         public void RestartLevel()
         {

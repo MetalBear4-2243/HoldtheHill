@@ -23,6 +23,8 @@ namespace HoldTheHill.Features.UI
         public const string OrderLast = "Last";
         public const string OrderClosest = "Closest";
         public const string CurrentOrderMark = "▸ ";
+        public const string Burrow = "Burrow";
+        public const string Unburrow = "Come up";
         public const string UnknownTower = "Tower";
 
         // Home screen. Level titles come from Core's LevelCatalogue, beside their scene ids.

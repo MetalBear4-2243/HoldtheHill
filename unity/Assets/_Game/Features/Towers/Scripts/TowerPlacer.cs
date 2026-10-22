@@ -13,8 +13,9 @@ namespace HoldTheHill.Features.Towers
     /// Places and selects towers. A tower is picked from the shop (<see cref="Select(TowerData)"/>)
     /// or with the number keys; a ghost then follows the mouse, snapped to the grid. Left-click
     /// builds it on a free cell if the player can afford it, right-click puts the ghost away.
-    /// With no ghost, left-click on a standing tower selects it for the tower card, and
-    /// <see cref="UpgradeSelectedTower"/> buys its next level.
+    /// With no ghost, left-click on a standing tower selects it for the tower card,
+    /// <see cref="UpgradeSelectedTower"/> buys its next level and <see cref="ToggleBurrowAll"/>
+    /// is the B key. A tower a hazard removes frees its cell through its Removed event.
     /// </summary>
     public class TowerPlacer : MonoBehaviour
     {
@@ -222,6 +223,38 @@ namespace HoldTheHill.Features.Towers
             return verdict;
         }
 
+        /// <summary>
+        /// Burrows every tower, or brings every tower up when all of them are already down.
+        /// The B key comes here.
+        /// </summary>
+        public void ToggleBurrowAll()
+        {
+            int burrowed = 0;
+            foreach (Tower tower in _towers.Values)
+            {
+                if (tower.Burrowed)
+                {
+                    burrowed++;
+                }
+            }
+
+            bool burrow = TowerCondition.BurrowAllNext(burrowed, _towers.Count);
+            foreach (Tower tower in _towers.Values)
+            {
+                tower.Burrowed = burrow;
+            }
+        }
+
+        private void HandleTowerRemoved(Tower tower)
+        {
+            tower.Removed -= HandleTowerRemoved;
+            _towers.Remove(tower.Cell);
+            if (_selectedTower == tower)
+            {
+                SelectTower(null);
+            }
+        }
+
         private void Update()
         {
             if (_gameplay == null || _camera == null)
@@ -284,6 +317,7 @@ namespace HoldTheHill.Features.Towers
             Tower tower = Instantiate(offer.Prefab, CellToWorld(cell), Quaternion.identity, transform);
             tower.Cell = cell;
             tower.ShopData = offer.Data;
+            tower.Removed += HandleTowerRemoved;
             _towers.Add(cell, tower);
             TowerPlaced?.Invoke(tower);
             SelectTower(tower);

@@ -6,7 +6,8 @@ namespace HoldTheHill.Features.GameFlow
     /// <summary>
     /// Reads the run keys from the game's actions asset and hands them to the
     /// <see cref="LevelRun"/> beside it: NextWave sends a wave, ToggleSpeed switches 1x / 2x,
-    /// Pause opens or closes the pause menu, Upgrade buys the selected tower's next level.
+    /// Pause opens or closes the pause menu, Upgrade buys the selected tower's next level,
+    /// Burrow sends every tower underground or brings them all back up.
     /// Keys keep working while paused because the Input System does not follow
     /// <c>Time.timeScale</c>.
     /// </summary>
@@ -14,7 +15,7 @@ namespace HoldTheHill.Features.GameFlow
     [RequireComponent(typeof(LevelRun))]
     public class RunControls : MonoBehaviour
     {
-        [Tooltip("The game's actions asset. Uses its Gameplay map: NextWave, ToggleSpeed, Pause, Upgrade.")]
+        [Tooltip("The game's actions asset. Uses its Gameplay map: NextWave, ToggleSpeed, Pause, Upgrade, Burrow.")]
         [SerializeField] private InputActionAsset _actions;
 
         private LevelRun _run;
@@ -23,6 +24,7 @@ namespace HoldTheHill.Features.GameFlow
         private InputAction _toggleSpeed;
         private InputAction _pause;
         private InputAction _upgrade;
+        private InputAction _burrow;
 
         private void Awake()
         {
@@ -39,6 +41,7 @@ namespace HoldTheHill.Features.GameFlow
             _toggleSpeed = _gameplay.FindAction("ToggleSpeed", throwIfNotFound: true);
             _pause = _gameplay.FindAction("Pause", throwIfNotFound: true);
             _upgrade = _gameplay.FindAction("Upgrade", throwIfNotFound: true);
+            _burrow = _gameplay.FindAction("Burrow", throwIfNotFound: true);
         }
 
         private void OnEnable()
@@ -82,6 +85,11 @@ namespace HoldTheHill.Features.GameFlow
             if (_upgrade.WasPressedThisFrame())
             {
                 _run.UpgradeSelectedTower();
+            }
+
+            if (_burrow.WasPressedThisFrame())
+            {
+                _run.ToggleBurrowAll();
             }
         }
     }
