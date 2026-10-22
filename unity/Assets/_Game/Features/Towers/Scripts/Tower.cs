@@ -87,6 +87,14 @@ namespace HoldTheHill.Features.Towers
         /// <summary>The enemy being attacked this frame, or null.</summary>
         public BasicEnemy CurrentTarget { get; private set; }
 
+        /// <summary>
+        /// False for a melee or lobbed tower: it cannot reach a flying enemy (the wasp rule).
+        /// Follows from how the tower attacks, so no prefab needs a flag.
+        /// </summary>
+        public bool ReachesFlying => TargetPicker.CanReach(
+            enemyFlying: true, hasProjectile: _projectilePrefab != null,
+            lobbed: _projectilePrefab != null && _projectilePrefab.IsLobbed);
+
         private bool Attacks => _damage > 0f || _projectilePrefab != null;
 
         private void Awake()
@@ -141,12 +149,19 @@ namespace HoldTheHill.Features.Towers
 
             Vector3 here = transform.position;
             float rangeSqr = _range * _range;
+            bool reachesFlying = ReachesFlying;
             IReadOnlyList<BasicEnemy> enemies = EnemyRegistry.All;
 
             for (int i = 0; i < enemies.Count; i++)
             {
                 BasicEnemy enemy = enemies[i];
                 if (enemy == null || enemy.IsDead)
+                {
+                    continue;
+                }
+
+                // The wasp rule: a melee or lobbed tower does not even aim at a flyer.
+                if (!reachesFlying && enemy is IFlyingEnemy flyer && flyer.IsFlying)
                 {
                     continue;
                 }
