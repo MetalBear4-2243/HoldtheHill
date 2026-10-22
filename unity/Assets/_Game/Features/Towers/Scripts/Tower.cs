@@ -191,7 +191,8 @@ namespace HoldTheHill.Features.Towers
                 return;
             }
 
-            _cooldown = _fireInterval;
+            // The one place the Swarm Frenzy's tempo applies.
+            _cooldown = _fireInterval / TowerTempo.FireRateFactor;
             Attack(CurrentTarget);
         }
 
