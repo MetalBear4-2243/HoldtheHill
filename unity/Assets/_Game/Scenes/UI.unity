@@ -457,7 +457,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8776532642310502077, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
       propertyPath: availableTowers.Array.size
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 8776532642310502077, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
       propertyPath: 'availableTowers.Array.data[0]'
@@ -470,24 +470,27 @@ PrefabInstance:
     - target: {fileID: 8776532642310502077, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
       propertyPath: 'availableTowers.Array.data[2]'
       value: 
-      objectReference: {fileID: 11400000, guid: dcf97a14bf070e64fb9d1714123395f0, type: 2}
+      objectReference: {fileID: 11400000, guid: 6ed2cfab5c62a884fb47e39e274a2359, type: 2}
     - target: {fileID: 8776532642310502077, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
       propertyPath: 'availableTowers.Array.data[3]'
       value: 
-      objectReference: {fileID: 11400000, guid: 6ed2cfab5c62a884fb47e39e274a2359, type: 2}
+      objectReference: {fileID: 11400000, guid: b039e0d9044826745a74e40464e8e8c5, type: 2}
     - target: {fileID: 8776532642310502077, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
       propertyPath: 'availableTowers.Array.data[4]'
       value: 
-      objectReference: {fileID: 11400000, guid: b039e0d9044826745a74e40464e8e8c5, type: 2}
+      objectReference: {fileID: 11400000, guid: 8a09ea24cc014fa4490a12bcb2f01e2c, type: 2}
     - target: {fileID: 8776532642310502077, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
       propertyPath: 'availableTowers.Array.data[5]'
       value: 
-      objectReference: {fileID: 11400000, guid: 8a09ea24cc014fa4490a12bcb2f01e2c, type: 2}
+      objectReference: {fileID: 11400000, guid: dcf97a14bf070e64fb9d1714123395f0, type: 2}
     m_RemovedComponents:
     - {fileID: 6310276290275938803, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1314489951636225618, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4822061}
     - targetCorrespondingSourceObject: {fileID: 6314232914418053758, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
       insertIndex: -1
       addedObject: {fileID: 263457415}
@@ -497,6 +500,23 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6936351646917436812, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
   m_PrefabInstance: {fileID: 4822058}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &4822060 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1314489951636225618, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
+  m_PrefabInstance: {fileID: 4822058}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4822061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4822060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24a445a18fb74818a9e047c42d83c357, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.UI.ShopPlacerBinding
 --- !u!1 &43992124
 GameObject:
   m_ObjectHideFlags: 0

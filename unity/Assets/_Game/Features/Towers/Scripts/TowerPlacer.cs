@@ -159,9 +159,17 @@ namespace HoldTheHill.Features.Towers
             }
         }
 
-        /// <summary>Starts placing the tower sold by <paramref name="data"/>. The shop card calls this.</summary>
+        /// <summary>
+        /// Starts placing the tower sold by <paramref name="data"/>. The shop card calls this.
+        /// Does nothing while the run is paused or over, like the number keys.
+        /// </summary>
         public void Select(TowerData data)
         {
+            if (!AcceptsInput)
+            {
+                return;
+            }
+
             for (int i = 0; i < _offers.Count; i++)
             {
                 if (_offers[i].Data == data)
@@ -385,7 +393,13 @@ namespace HoldTheHill.Features.Towers
             tower.Removed += HandleTowerRemoved;
             _towers.Add(cell, tower);
             TowerPlaced?.Invoke(tower);
-            SelectTower(tower);
+
+            // The ghost stays in hand for the next build. Opening the card now would put Upgrade
+            // and Sell under the cursor, where the next build click would land on them.
+            if (_selected < 0)
+            {
+                SelectTower(tower);
+            }
         }
 
         private Vector2Int WorldToCell(Vector3 world)

@@ -189,27 +189,28 @@ namespace HoldTheHill.Features.UI
             Refresh();
         }
 
+        // Through the run, like U and B, so Enter on a focused button does nothing while paused or after the run.
         private void Upgrade()
         {
-            if (_placer != null)
+            if (Run != null)
             {
-                _placer.UpgradeSelectedTower();
+                Run.UpgradeSelectedTower();
             }
         }
 
         private void Sell()
         {
-            if (_placer != null)
+            if (Run != null)
             {
-                _placer.SellSelectedTower();
+                Run.SellSelectedTower();
             }
         }
 
         private void ToggleBurrow()
         {
-            if (_tower != null)
+            if (Run != null)
             {
-                _tower.Burrowed = !_tower.Burrowed;
+                Run.ToggleBurrowSelectedTower();
             }
         }
 

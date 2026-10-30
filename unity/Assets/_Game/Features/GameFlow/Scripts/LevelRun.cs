@@ -162,12 +162,30 @@ namespace HoldTheHill.Features.GameFlow
             }
         }
 
-        /// <summary>Buys the next level of the selected tower, if any. The U key comes here.</summary>
+        /// <summary>Buys the next level of the selected tower, if any. The U key and the card's Upgrade button come here.</summary>
         public void UpgradeSelectedTower()
         {
             if (Outcome == RunOutcome.Playing && !Clock.Paused && _placer != null)
             {
                 _placer.UpgradeSelectedTower();
+            }
+        }
+
+        /// <summary>Sells the selected tower, if any. The card's Sell button comes here.</summary>
+        public void SellSelectedTower()
+        {
+            if (Outcome == RunOutcome.Playing && !Clock.Paused && _placer != null)
+            {
+                _placer.SellSelectedTower();
+            }
+        }
+
+        /// <summary>Burrows the selected tower, or brings it back up. The card's Burrow button comes here.</summary>
+        public void ToggleBurrowSelectedTower()
+        {
+            if (Outcome == RunOutcome.Playing && !Clock.Paused && _placer != null && _placer.SelectedTower != null)
+            {
+                _placer.SelectedTower.Burrowed = !_placer.SelectedTower.Burrowed;
             }
         }
 

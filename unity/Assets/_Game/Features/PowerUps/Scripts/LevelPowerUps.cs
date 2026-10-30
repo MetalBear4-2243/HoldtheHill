@@ -130,7 +130,10 @@ namespace HoldTheHill.Features.PowerUps
                 return;
             }
 
-            if (_cancel.WasPressedThisFrame() && PickingGiftTarget)
+            // A tower taken in hand (a number key or a shop card) ends the gift pick, so one click
+            // never both gifts and builds.
+            bool towerInHand = _placer != null && _placer.Selected != null;
+            if (PickingGiftTarget && (_cancel.WasPressedThisFrame() || towerInHand))
             {
                 PickingGiftTarget = false;
                 Changed?.Invoke();
@@ -222,6 +225,11 @@ namespace HoldTheHill.Features.PowerUps
             if (_slot.Held == PowerUpKind.RoyalGift)
             {
                 PickingGiftTarget = !PickingGiftTarget;
+                if (PickingGiftTarget && _placer != null)
+                {
+                    // Put the ghost away: a click that misses a tower must not build and pay for one.
+                    _placer.Select(-1);
+                }
                 Changed?.Invoke();
                 return;
             }

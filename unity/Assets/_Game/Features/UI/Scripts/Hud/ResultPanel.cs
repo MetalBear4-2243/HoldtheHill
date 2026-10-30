@@ -1,6 +1,7 @@
 using HoldTheHill.Features.GameFlow;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace HoldTheHill.Features.UI
@@ -55,6 +56,12 @@ namespace HoldTheHill.Features.UI
         {
             _title.text = outcome == RunOutcome.Won ? UiStrings.Victory : UiStrings.Defeat;
             _panel.SetActive(true);
+
+            // Take the keyboard focus from whatever HUD button had it, so Enter means Restart, not Sell.
+            if (EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(_restart.gameObject);
+            }
         }
 
         private void Restart()

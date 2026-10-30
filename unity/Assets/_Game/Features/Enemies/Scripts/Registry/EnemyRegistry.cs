@@ -13,8 +13,23 @@ namespace HoldTheHill.Features.Enemies
     {
         private static readonly List<BasicEnemy> s_all = new List<BasicEnemy>();
 
-        /// <summary>Enemies currently alive and enabled, in registration order.</summary>
+        // The same enemies as s_all, for a cheap Contains: a shot in flight asks every frame.
+        private static readonly HashSet<BasicEnemy> s_registered = new HashSet<BasicEnemy>();
+
+        /// <summary>
+        /// Enemies currently alive and enabled and still on the path, in registration order. One that
+        /// has reached the Queen leaves at once, before its end-of-frame Destroy.
+        /// </summary>
         public static IReadOnlyList<BasicEnemy> All => s_all;
+
+        /// <summary>
+        /// True while <paramref name="enemy"/> is registered. False once it has died, reached the
+        /// Queen or been disabled, so anything holding a reference can let it go.
+        /// </summary>
+        public static bool Contains(BasicEnemy enemy)
+        {
+            return enemy != null && s_registered.Contains(enemy);
+        }
 
         /// <summary>
         /// A registered enemy was killed (not: reached the Queen). Raised by <see cref="RegisteredEnemy"/>
@@ -24,7 +39,7 @@ namespace HoldTheHill.Features.Enemies
 
         internal static void Add(BasicEnemy enemy)
         {
-            if (!s_all.Contains(enemy))
+            if (s_registered.Add(enemy))
             {
                 s_all.Add(enemy);
             }
@@ -32,7 +47,10 @@ namespace HoldTheHill.Features.Enemies
 
         internal static void Remove(BasicEnemy enemy)
         {
-            s_all.Remove(enemy);
+            if (s_registered.Remove(enemy))
+            {
+                s_all.Remove(enemy);
+            }
         }
 
         internal static void NotifyDied(BasicEnemy enemy)
@@ -45,6 +63,7 @@ namespace HoldTheHill.Features.Enemies
         private static void ResetStatics()
         {
             s_all.Clear();
+            s_registered.Clear();
             EnemyDied = null;
         }
     }
