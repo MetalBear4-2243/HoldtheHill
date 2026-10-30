@@ -13,15 +13,18 @@ namespace HoldTheHill.Features.Enemies
         /// Instantly defeats the Silverfish when clicked.
         /// Requires a Collider2D on the GameObject to detect mouse clicks.
         /// </summary>
-        private void OnMouseDown()
-        {
-            if (IsDead)
-            {
-                return;
-            }
+        /// 
+        /// commenting out this function since we are no longer using it
+        /// not deleting it just so we still have it around
+        // private void OnMouseDown()
+        // {
+        //     if (IsDead)
+        //     {
+        //         return;
+        //     }
 
-            // Instantly deplete all remaining health
-            TakeDamage(CurrentHealth);
-        }
+        //     // Instantly deplete all remaining health
+        //     TakeDamage(CurrentHealth);
+        // }
     }
 }

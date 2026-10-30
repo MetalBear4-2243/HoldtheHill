@@ -26,6 +26,27 @@ Copy this to the top of the log:
 - What you or the team should do next
 ```
 
+## 2026-10-24 — UI TowerList additions
+**Who:** Adam Montgomery with Google Gemini
+**Branch:** adamUIPrefabUpdate
+
+**Worked on**
+- Updating current UI scene with addition of TowerList and custom Queen health bar.
+- Coupled TowerList with TowerPlacer.
+- Updated TowerCardUI to accept call TowerPlacer method on click.
+
+
+**Decisions**
+- Made custom Queen health bar container and changed health color to green
+
+**Problems / blockers**
+- TowerList needs some UI improvements such as highlighted selection and ability to unselect.
+
+**Next**
+- Bug testing on TowerPlacer.
+- fix UI issues with TowerList.
+- Continue updating UI elements on the UI scene.
+```
 ## 2026-10-09 — Tower Shop Architecture Complete
 **Who:** Adam Montgomery, with AI assistance — see [AI use log](AI_DEVLOG.md)
 **Branch:** `Sandbox/Montgomery-Adam`

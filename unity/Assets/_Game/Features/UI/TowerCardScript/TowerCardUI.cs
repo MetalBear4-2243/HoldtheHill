@@ -1,36 +1,52 @@
 //Adam Montgomery
 //Gemini generated code
-//10.9.2026
+//10.22.2026
 
 using UnityEngine;
 using UnityEngine.UI;
+using HoldTheHill.Features.Towers;
 using TMPro;
 
 public class TowerCardUI : MonoBehaviour
 {
-    [Header("UI References")]
-    public TMP_Text nameText;
-    public TMP_Text costText;
-    public Image iconImage;
-    public Button cardButton; 
+    public TowerData towerData;
+    public TowerPlacer towerPlacer;
+    public Image iconDisplay;
+    public TextMeshProUGUI nameDisplay;
+    public TextMeshProUGUI costDisplay;
 
-    private TowerData myTowerData;
-
+    // 1. The shop script calls this exactly when it spawns the card
     public void SetupCard(TowerData data)
     {
-        myTowerData = data;
+        towerData = data;
         
-        nameText.text = myTowerData.towerName;
-        costText.text = myTowerData.honeydewCost.ToString();
-        iconImage.sprite = myTowerData.towerIcon;
-
-        cardButton.onClick.RemoveAllListeners();
-        cardButton.onClick.AddListener(OnCardClicked);
+        // 2. Overwrite the default UI with the real data
+        if (iconDisplay != null) iconDisplay.sprite = data.towerIcon;
+        if (nameDisplay != null) nameDisplay.text = data.towerName;
+        if (costDisplay != null) costDisplay.text = data.honeydewCost.ToString();
     }
 
-    private void OnCardClicked()
+    void Start()
     {
-        // Debug.Log($"Player clicked {myTowerData.towerName}. Ready to place {myTowerData.towerPrefab.name}!");
-        Debug.Log($"Player clicked {myTowerData.towerName}. Placement logic pending indev merge.");
+        // 2. Prefabs can't hold scene references, so we find the Placer dynamically
+        if (towerPlacer == null)
+        {
+            towerPlacer = FindFirstObjectByType<TowerPlacer>(); 
+        }
+
+        // 3. Set up the click detection
+        Button btn = GetComponent<Button>();
+        if (btn != null)
+        {
+            btn.onClick.AddListener(OnCardClicked);
+        }
+    }
+
+    public void OnCardClicked()
+    {
+        if (towerPlacer != null && towerData != null)
+        {
+            towerPlacer.Select(towerData);
+        }
     }
 }
