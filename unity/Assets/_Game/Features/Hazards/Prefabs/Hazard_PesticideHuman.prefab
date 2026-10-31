@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Hazards.PesticideHuman
   _warningSeconds: 2.5
-  _stunSeconds: 6
+  _stunSeconds: 4
   _cloud: {fileID: 4259046133213132298}
   _peakAlpha: 0.45
 --- !u!1 &8861957254034312640

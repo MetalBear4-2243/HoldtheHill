@@ -8,8 +8,8 @@ namespace HoldTheHill.Features.Towers
     /// <summary>
     /// A placed tower. Knows its grid cell, picks a target in range by its
     /// <see cref="TargetingPriority"/>, and attacks it on a cooldown: with a projectile when
-    /// it has one, otherwise with a direct melee hit. Numbers live on the prefab variants,
-    /// one set per level; <see cref="Upgrade"/> moves to the next set.
+    /// it has one, otherwise with a melee swing that hits every ground enemy in reach. Numbers
+    /// live on the prefab variants, one set per level; <see cref="Upgrade"/> moves to the next set.
     /// </summary>
     /// <remarks>
     /// Towers that do something else in range (slow, lay mines) carry an <see cref="ITowerAbility"/>
@@ -60,6 +60,7 @@ namespace HoldTheHill.Features.Towers
         private readonly List<BasicEnemy> _inRange = new List<BasicEnemy>();
         private readonly TowerCondition _condition = new TowerCondition();
         private SpriteRenderer _sprite;
+        private TowerStunRing _stunRing;
         private Color _baseColor = Color.white;
         private float _cooldown;
         private bool _hasAbility;
@@ -208,6 +209,12 @@ namespace HoldTheHill.Features.Towers
         {
             _condition.Stun(seconds);
             RefreshTint();
+
+            // Made on the first stun, so no tower prefab has to carry one.
+            if (_stunRing == null)
+            {
+                _stunRing = TowerStunRing.Attach(this, _sprite, _stunnedTint);
+            }
         }
 
         /// <summary>A hazard makes the tower miss for <paramref name="seconds"/>: it fires, to no effect.</summary>
@@ -313,7 +320,17 @@ namespace HoldTheHill.Features.Towers
 
             if (_projectilePrefab == null)
             {
-                target.TakeDamage(damage);
+                // A melee swing hits every ground enemy in reach, not just the target. AcquireTarget
+                // filled the list this frame and left flyers out (the wasp rule). A hit can kill and
+                // split a centipede; the list is a copy, so that is safe.
+                for (int i = 0; i < _inRange.Count; i++)
+                {
+                    BasicEnemy enemy = _inRange[i];
+                    if (enemy != null && !enemy.IsDead)
+                    {
+                        enemy.TakeDamage(damage);
+                    }
+                }
                 return;
             }
 

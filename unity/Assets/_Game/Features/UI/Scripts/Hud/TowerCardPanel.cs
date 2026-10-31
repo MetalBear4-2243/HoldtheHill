@@ -33,11 +33,22 @@ namespace HoldTheHill.Features.UI
         [Tooltip("One button per standing order, in enum order: First, Last, Closest.")]
         [SerializeField] private Button[] _orderButtons = new Button[3];
 
+        [Tooltip("Where the card sits, from the screen's top-left corner, while the selected tower is in the bottom half. Otherwise it keeps its bottom-left place from the scene.")]
+        [SerializeField] private Vector2 _topLeftOffset = new Vector2(24f, -88f);
+
         private static readonly string[] OrderNames = { UiStrings.OrderFirst, UiStrings.OrderLast, UiStrings.OrderClosest };
 
         private TowerPlacer _placer;
         private Honeydew _honeydew;
         private Tower _tower;
+        private RectTransform _card;
+        private Vector2 _bottomLeftOffset;
+
+        private void Awake()
+        {
+            _card = (RectTransform)_panel.transform;
+            _bottomLeftOffset = _card.anchoredPosition;
+        }
 
         protected override void OnEnable()
         {
@@ -131,7 +142,23 @@ namespace HoldTheHill.Features.UI
             _tower.Upgraded += HandleUpgraded;
             _tower.BurrowChanged += HandleBurrowChanged;
             _name.text = tower.ShopData != null ? tower.ShopData.towerName : UiStrings.UnknownTower;
+            PlaceCard(tower);
             Refresh();
+        }
+
+        // The card opens in the half of the screen away from the selected tower, so it never hides
+        // that tower or the ones beside it. Drawn last, so the help box or the shop list can't cover it.
+        private void PlaceCard(Tower tower)
+        {
+            Camera view = Camera.main;
+            bool towerLow = view != null && view.WorldToScreenPoint(tower.transform.position).y < Screen.height * 0.5f;
+
+            Vector2 corner = towerLow ? new Vector2(0f, 1f) : Vector2.zero;
+            _card.anchorMin = corner;
+            _card.anchorMax = corner;
+            _card.pivot = corner;
+            _card.anchoredPosition = towerLow ? _topLeftOffset : _bottomLeftOffset;
+            _card.SetAsLastSibling();
         }
 
         private void Refresh()

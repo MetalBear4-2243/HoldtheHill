@@ -71,6 +71,24 @@ namespace HoldTheHill.Tests
         }
 
         [Test]
+        public void StunLeftShare_RunsFromOneToZero_AndALongerStunStartsAgainFull()
+        {
+            var condition = new TowerCondition();
+            Assert.AreEqual(0f, condition.StunLeftShare, "never stunned: no ring");
+
+            condition.Stun(4f);
+            Assert.AreEqual(1f, condition.StunLeftShare);
+            condition.Tick(1f);
+            Assert.AreEqual(0.75f, condition.StunLeftShare, 1e-5f);
+            condition.Stun(2f);
+            Assert.AreEqual(0.75f, condition.StunLeftShare, 1e-5f, "a shorter stun changes nothing");
+            condition.Stun(6f);
+            Assert.AreEqual(1f, condition.StunLeftShare, "a longer stun is a new stun");
+            condition.Tick(6f);
+            Assert.AreEqual(0f, condition.StunLeftShare);
+        }
+
+        [Test]
         public void BurrowAll_BurrowsWhileAnyTowerIsUp_AndRaisesOnlyWhenAllAreDown()
         {
             Assert.IsTrue(TowerCondition.BurrowAllNext(burrowedCount: 0, towerCount: 4));
