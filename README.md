@@ -94,12 +94,14 @@ Levels are split into scenes that load together, so painting tiles and placing g
 |---|---|
 | `Scenes/Bootstrap` | `SceneLoader` and managers that live for the whole game |
 | `Scenes/UI` | HUD, menus, EventSystem |
-| `Levels/Hill01/Hill01_Terrain` | Tilemaps only |
-| `Levels/Hill01/Hill01_Gameplay` | Camera, light, spawners, hill, player start |
+| `Levels/L00_TutorialHill/L00_TutorialHill_Terrain` | Tilemaps only |
+| `Levels/L00_TutorialHill/L00_TutorialHill_Gameplay` | Camera, light, spawners, hill, player start |
 
-**Press Play in any of these scenes** and `SceneLoader` opens the rest automatically.
+**Press Play in any of these scenes** and `SceneLoader` opens the rest automatically. Meadow (`L01_Meadow`) is built the same way.
 
-**To add a level:** make `Scenes/Levels/Hill02/` with `Hill02_Terrain` and `Hill02_Gameplay`, add both to **File > Build Profiles > Scene List**, and load them from the level select.
+`Levels/Hill01` is the old first level. It is no longer in the build; the level builder copies it as a template, so keep the files.
+
+**To add a level:** make `Scenes/Levels/L02_<Name>/` with `L02_<Name>_Terrain` and `L02_<Name>_Gameplay`, add both to **File > Build Profiles > Scene List**, and list the level in `LevelCatalogue` so the level select shows it.
 
 ## Code
 

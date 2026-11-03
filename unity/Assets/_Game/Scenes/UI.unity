@@ -251,6 +251,10 @@ PrefabInstance:
       propertyPath: m_fontSizeBase
       value: 35
       objectReference: {fileID: 0}
+    - target: {fileID: 5625163934836188351, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
+      propertyPath: m_ScrollSensitivity
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 6195917682725558685, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
       propertyPath: m_SizeDelta.x
       value: 223.7738
@@ -1060,7 +1064,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1498,7 +1502,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 1, b: 0, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -3312,7 +3316,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 0}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -3376,7 +3380,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Controls  (F1 hides this)
 
-    1-6  pick a tower to build
+    1-6 or click a card  pick a tower
 
     Left click  build, or select a placed tower
 
@@ -3391,6 +3395,8 @@ MonoBehaviour:
     U  upgrade the selected tower
 
     B  burrow or raise all towers
+
+    Click a silverfish to squash it
 
     Click a drop to collect it, click the slot to use it'
   m_isRightToLeft: 0
@@ -3698,6 +3704,7 @@ MonoBehaviour:
   - {fileID: 481010618}
   - {fileID: 1581006455}
   - {fileID: 61407182}
+  _orderTitle: {fileID: 1768239787}
   _topLeftOffset: {x: 24, y: -88}
 --- !u!114 &1151973113
 MonoBehaviour:

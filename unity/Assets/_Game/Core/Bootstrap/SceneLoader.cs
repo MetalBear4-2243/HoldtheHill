@@ -155,7 +155,7 @@ namespace HoldTheHill.Core
                 yield return LoadIfMissing(sceneName);
             }
 
-            // Play pressed in one scene of a level (e.g. Hill01_Gameplay): open the rest of that level.
+            // Play pressed in one scene of a level (e.g. L00_TutorialHill_Gameplay): open the rest of that level.
             string openLevel = OpenLevelId;
             if (openLevel != null)
             {

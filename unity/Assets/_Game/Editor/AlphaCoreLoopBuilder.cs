@@ -135,7 +135,7 @@ namespace HoldTheHill.EditorTools
             WireGameplayScene(GameplayScenePath, Hill01WavesPath);
 
             AssetDatabase.SaveAssets();
-            Debug.Log("Alpha core loop built: open Hill01_Gameplay and press Play. Keys 1 to 6 pick a tower, left-click builds, right-click cancels.");
+            Debug.Log("Alpha core loop built in Hill01, the template the levels copy. To play, open L00_TutorialHill_Gameplay and press Play. Keys 1 to 6 pick a tower, left-click builds, right-click cancels.");
         }
 
         /// <summary>Makes the sprites, projectiles, mine, the six tower prefabs and their shop data; keeps what exists.</summary>
