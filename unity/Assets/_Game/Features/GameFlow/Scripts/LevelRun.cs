@@ -267,11 +267,16 @@ namespace HoldTheHill.Features.GameFlow
         {
             Time.timeScale = Clock.TimeScale;
 
-            // The Input System doesn't follow the time scale, so the placer is told: no building,
-            // picking or cancelling under the pause menu or the result panel.
+            // The Input System doesn't follow the time scale, so the placer and the power-ups are
+            // told: no building, picking, collecting or cancelling under the pause menu or the result panel.
             if (_placer != null)
             {
                 _placer.AcceptsInput = !Clock.Paused;
+            }
+
+            if (_powerUps != null)
+            {
+                _powerUps.AcceptsInput = !Clock.Paused;
             }
         }
 

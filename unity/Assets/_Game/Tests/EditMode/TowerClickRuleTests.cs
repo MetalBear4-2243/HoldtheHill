@@ -1,5 +1,6 @@
 using HoldTheHill.Features.Towers;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace HoldTheHill.Tests
 {
@@ -38,6 +39,25 @@ namespace HoldTheHill.Tests
             Assert.AreEqual(TowerClickRule.Outcome.Nothing,
                 TowerClickRule.Decide(armed: true, towerOnCell: false, blocked: false, affordable: false),
                 "not enough Honeydew");
+        }
+
+        [Test]
+        public void TheMapCells_HoldBothRoutes_AndNothingPastTheirEdges()
+        {
+            RectInt map = TowerPlacer.MapCells;
+
+            // The spawn and Queen ends of Tutorial Hill and Meadow, and the corners.
+            Assert.IsTrue(map.Contains(new Vector2Int(-10, 0)));
+            Assert.IsTrue(map.Contains(new Vector2Int(-10, 3)));
+            Assert.IsTrue(map.Contains(new Vector2Int(9, -3)));
+            Assert.IsTrue(map.Contains(new Vector2Int(-10, -5)));
+            Assert.IsTrue(map.Contains(new Vector2Int(9, 4)));
+
+            // One cell past each edge: beside the shop list, left of the spawn, under the HUD bands.
+            Assert.IsFalse(map.Contains(new Vector2Int(10, 0)));
+            Assert.IsFalse(map.Contains(new Vector2Int(-11, 0)));
+            Assert.IsFalse(map.Contains(new Vector2Int(0, 5)));
+            Assert.IsFalse(map.Contains(new Vector2Int(0, -6)));
         }
     }
 }

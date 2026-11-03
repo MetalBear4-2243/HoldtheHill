@@ -46,6 +46,9 @@ namespace HoldTheHill.Features.PowerUps
         /// <summary>Raised when a Royal Gift was aimed at a tower already at its last level, so the HUD can say so.</summary>
         public event Action GiftRefused;
 
+        /// <summary>Raised when a click lands on a drop while the slot is already full, so the HUD can say so.</summary>
+        public event Action SlotFull;
+
         /// <summary>The numbers and looks. The HUD reads icons from here.</summary>
         public PowerUpSettings Settings => _settings;
 
@@ -59,6 +62,12 @@ namespace HoldTheHill.Features.PowerUps
         public float FrenzySecondsLeft => _frenzyLeft;
 
         public bool FrenzyActive => _frenzyLeft > 0f;
+
+        /// <summary>
+        /// False while the run is paused or over: clicks and right-click then leave drops and the
+        /// gift pick alone. The level's run sets it, as it does for the placer.
+        /// </summary>
+        public bool AcceptsInput { get; set; } = true;
 
         private void Awake()
         {
@@ -125,7 +134,7 @@ namespace HoldTheHill.Features.PowerUps
         {
             TickFrenzy();
 
-            if (_gameplay == null || _camera == null)
+            if (_gameplay == null || _camera == null || !AcceptsInput)
             {
                 return;
             }
@@ -139,9 +148,10 @@ namespace HoldTheHill.Features.PowerUps
                 Changed?.Invoke();
             }
 
-            // A click on the HUD (the slot itself, the card) is not a click on the map.
+            // A click on the HUD (the slot itself, the card) is not a click on the map, and a click
+            // that squashed a silverfish must not also collect the drop it may have left.
             bool overUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
-            if (!_place.WasPressedThisFrame() || overUi)
+            if (!_place.WasPressedThisFrame() || overUi || SilverfishClickReader.ClickUsedThisFrame)
             {
                 return;
             }
@@ -176,13 +186,19 @@ namespace HoldTheHill.Features.PowerUps
 
         /// <summary>
         /// Collects the drop under <paramref name="world"/> into the slot. A full slot leaves the drop
-        /// where it is. True if something was collected.
+        /// where it is and raises <see cref="SlotFull"/>. True if something was collected.
         /// </summary>
         public bool CollectAt(Vector3 world)
         {
             PowerUpPickup pickup = PickupAt(world);
-            if (pickup == null || !_slot.TryStore(pickup.Kind))
+            if (pickup == null)
             {
+                return false;
+            }
+
+            if (!_slot.TryStore(pickup.Kind))
+            {
+                SlotFull?.Invoke();
                 return false;
             }
 

@@ -32,9 +32,15 @@ namespace HoldTheHill.Features.Towers
             public Tower Prefab;
         }
 
+        /// <summary>The map's cells, x -10..9 and y -5..4: the area LevelCameraFit frames. Nothing is built outside it.</summary>
+        public static readonly RectInt MapCells = new RectInt(-10, -5, 20, 10);
+
         [Header("Grid")]
         [Tooltip("Size of one grid cell in world units.")]
         [SerializeField] private float _cellSize = 1f;
+
+        [Tooltip("The cells towers can be built on, in grid cells. A click outside them builds nothing.")]
+        [SerializeField] private RectInt _buildArea = MapCells;
 
         [Header("Level")]
         [Tooltip("Towers can't be built on this path. Found automatically if left empty.")]
@@ -241,8 +247,9 @@ namespace HoldTheHill.Features.Towers
             int cost = _selectedTower.NextUpgradeCost;
             if (_wallet == null || _wallet.Honeydew.TrySpend(cost))
             {
-                _selectedTower.Upgrade();
+                // Counted first: Upgrade() tells the card, which reads the Sell refund from it.
                 _selectedTower.HoneydewSpent += cost;
+                _selectedTower.Upgrade();
             }
 
             return verdict;
@@ -333,9 +340,10 @@ namespace HoldTheHill.Features.Towers
                 Cancel();
             }
 
-            // A click on the HUD (the shop, a button, the card) is not a click on the map.
+            // A click on the HUD (the shop, a button, the card) is not a click on the map, and a click
+            // that squashed a silverfish must not also clear the selection or build.
             bool overUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
-            bool clicked = _place.WasPressedThisFrame() && !overUi;
+            bool clicked = _place.WasPressedThisFrame() && !overUi && !SilverfishClickReader.ClickUsedThisFrame;
             Vector3 mouseWorld = _camera.ScreenToWorldPoint(_point.ReadValue<Vector2>());
             Vector2Int cell = WorldToCell(mouseWorld);
             bool armed = _selected >= 0;
@@ -348,9 +356,12 @@ namespace HoldTheHill.Features.Towers
             {
                 Offer armedOffer = _offers[_selected];
                 cost = armedOffer.Data != null ? armedOffer.Data.honeydewCost : 0;
-                blocked = standing != null || IsOnPath(cell);
+                // Off the map (under the HUD bands or beside the shop list) there is no cell to build on.
+                bool onMap = _buildArea.Contains(cell);
+                blocked = !onMap || standing != null || IsOnPath(cell);
                 affordable = _wallet == null || _wallet.Honeydew.CanAfford(cost);
 
+                _preview.enabled = onMap;
                 _preview.transform.position = CellToWorld(cell);
                 _preview.color = blocked ? _blockedCellColor : affordable ? _freeCellColor : _unaffordableColor;
             }
