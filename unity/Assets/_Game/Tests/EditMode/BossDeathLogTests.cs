@@ -107,5 +107,38 @@ namespace HoldTheHill.Tests
             var taken = new List<DeathRecord>();
             Assert.AreEqual(1, log.TakeNear(0f, 0f, 1f, 5, now: 5f, into: taken));
         }
+
+        [Test]
+        public void RememberedDeaths_ReadOldestFirst()
+        {
+            BossDeathLog log = NewLog();
+            log.Record(2, 1f, 0f, 0, 0f);
+            log.Record(3, 2f, 0f, 0, 1f);
+
+            Assert.AreEqual(1f, log[0].X);
+            Assert.AreEqual(2f, log[1].X);
+        }
+
+        [Test]
+        public void Freshness_FadesFromOneToZeroOverTheMemory()
+        {
+            BossDeathLog log = NewLog(memory: 10f);
+            log.Record(2, 0f, 0f, 0, 4f);
+            DeathRecord death = log[0];
+
+            Assert.AreEqual(1f, log.Freshness(death, 4f), 0.0001f, "Fresh as it falls.");
+            Assert.AreEqual(0.5f, log.Freshness(death, 9f), 0.0001f);
+            Assert.AreEqual(0f, log.Freshness(death, 14f), 0.0001f, "Gone at the end of the memory.");
+            Assert.AreEqual(0f, log.Freshness(death, 30f), 0.0001f, "Never below zero.");
+        }
+
+        [Test]
+        public void Freshness_WithNoMemory_IsZero()
+        {
+            BossDeathLog log = NewLog(memory: 0f);
+            log.Record(2, 0f, 0f, 0, 0f);
+
+            Assert.AreEqual(0f, log.Freshness(log[0], 0f));
+        }
     }
 }

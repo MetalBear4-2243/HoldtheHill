@@ -51,6 +51,13 @@ namespace HoldTheHill.Features.UI
         public const string GiftAtMaxLevel = "Already max level";
         public const string FrenzyActiveFormat = "Frenzy {0} s";
 
+        // The Queen Mantis boss bar: her name, then what her shade does, in words as well as colour.
+        public const string MantisBarFormat = "{0} - {1}";
+        public const string QueenMantis = "Queen Mantis";
+        public const string MantisWhite = "White: heals";
+        public const string MantisBlack = "Black: raises the fallen";
+        public const string MantisPraying = "Praying: hit her now";
+
         // Home screen. Level titles come from Core's LevelCatalogue, beside their scene ids.
         public const string GameTitle = "Hold the Hill";
         public const string Play = "Play";
