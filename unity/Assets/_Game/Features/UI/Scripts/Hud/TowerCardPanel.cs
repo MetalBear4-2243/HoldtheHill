@@ -33,6 +33,9 @@ namespace HoldTheHill.Features.UI
         [Tooltip("One button per standing order, in enum order: First, Last, Closest.")]
         [SerializeField] private Button[] _orderButtons = new Button[3];
 
+        [Tooltip("The 'Target' heading over the order buttons; hidden with them for a tower that doesn't aim.")]
+        [SerializeField] private GameObject _orderTitle;
+
         [Tooltip("Where the card sits, from the screen's top-left corner, while the selected tower is in the bottom half. Otherwise it keeps its bottom-left place from the scene.")]
         [SerializeField] private Vector2 _topLeftOffset = new Vector2(24f, -88f);
 
@@ -188,8 +191,16 @@ namespace HoldTheHill.Features.UI
                 _sellLabel.text = string.Format(UiStrings.SellFormat, _placer.SellValue(_tower));
             }
 
+            // The Sap Ant's aura and the Carpenter Ant's mines pick no target, so an order would do nothing.
+            bool aims = _tower.UsesTargeting;
+            if (_orderTitle != null)
+            {
+                _orderTitle.SetActive(aims);
+            }
+
             for (int i = 0; i < _orderButtons.Length; i++)
             {
+                _orderButtons[i].gameObject.SetActive(aims);
                 bool current = (int)_tower.Priority == i;
                 TMP_Text label = _orderButtons[i].GetComponentInChildren<TMP_Text>();
                 if (label != null)

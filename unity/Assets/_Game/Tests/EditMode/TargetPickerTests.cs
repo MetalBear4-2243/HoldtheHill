@@ -61,6 +61,17 @@ namespace HoldTheHill.Tests
         }
 
         [Test]
+        public void AttacksOnItsOwn_OnlyWithoutAnAbility_AndWithSomethingToHitWith()
+        {
+            // The card shows the standing order only for these towers.
+            Assert.IsTrue(Tower.AttacksOnItsOwn(hasAbility: false, damage: 10f, hasProjectile: false), "melee");
+            Assert.IsTrue(Tower.AttacksOnItsOwn(hasAbility: false, damage: 0f, hasProjectile: true), "a shot carries the damage");
+            Assert.IsFalse(Tower.AttacksOnItsOwn(hasAbility: true, damage: 30f, hasProjectile: false), "the Carpenter Ant lays mines instead");
+            Assert.IsFalse(Tower.AttacksOnItsOwn(hasAbility: true, damage: 0f, hasProjectile: false), "the Sap Ant's aura");
+            Assert.IsFalse(Tower.AttacksOnItsOwn(hasAbility: false, damage: 0f, hasProjectile: false), "nothing to hit with");
+        }
+
+        [Test]
         public void PathProgress_IsDistanceWalked_FromWaypointIndexAndPosition()
         {
             // An L-shaped path: 4 units right, then 3 units up.

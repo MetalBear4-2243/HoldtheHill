@@ -150,8 +150,22 @@ namespace HoldTheHill.Features.Towers
             enemyFlying: true, hasProjectile: _projectilePrefab != null,
             lobbed: _projectilePrefab != null && _projectilePrefab.IsLobbed);
 
-        // A mine layer or a slow aura does the work; the tower only lends it its numbers.
-        private bool Attacks => !_hasAbility && (_damage > 0f || _projectilePrefab != null);
+        /// <summary>
+        /// True when the tower picks its own targets, so its standing order (First / Last / Closest)
+        /// matters. False for the Sap Ant's aura and the Carpenter Ant's mines. The card reads it.
+        /// </summary>
+        public bool UsesTargeting => Attacks;
+
+        private bool Attacks => AttacksOnItsOwn(_hasAbility, _damage, _projectilePrefab != null);
+
+        /// <summary>
+        /// The attack rule: a tower with an <see cref="ITowerAbility"/> (a mine layer or a slow aura) does
+        /// the work through it and only lends it its numbers; one with no damage and no projectile has nothing to hit with.
+        /// </summary>
+        public static bool AttacksOnItsOwn(bool hasAbility, float damage, bool hasProjectile)
+        {
+            return !hasAbility && (damage > 0f || hasProjectile);
+        }
 
         private void Awake()
         {

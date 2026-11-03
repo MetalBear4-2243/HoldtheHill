@@ -47,5 +47,18 @@ namespace HoldTheHill.Tests
             Assert.IsNull(missing.Id);
             Assert.IsFalse(LevelCatalogue.TryFind(null, out _));
         }
+
+        [Test]
+        public void TheControlsHelp_OpensOnlyOnTheTutorial()
+        {
+            // On Meadow the box would sit over the entry road.
+            Assert.IsTrue(LevelCatalogue.All[0].ShowsControlsHelp, "Tutorial Hill");
+            for (int i = 1; i < LevelCatalogue.All.Count; i++)
+            {
+                Assert.IsFalse(LevelCatalogue.All[i].ShowsControlsHelp, LevelCatalogue.All[i].Title);
+            }
+
+            Assert.IsFalse(default(LevelInfo).ShowsControlsHelp, "a level not on the list");
+        }
     }
 }
