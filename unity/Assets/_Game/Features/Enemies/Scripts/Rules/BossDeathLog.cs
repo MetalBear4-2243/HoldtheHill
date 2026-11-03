@@ -48,6 +48,24 @@ namespace HoldTheHill.Features.Enemies
         /// <summary>Deaths remembered right now, expired ones included until the next <see cref="TakeNear"/>.</summary>
         public int Count => _deaths.Count;
 
+        /// <summary>A remembered death, oldest first; for markers that show which bodies she can raise.</summary>
+        public DeathRecord this[int index] => _deaths[index];
+
+        /// <summary>
+        /// How fresh a death is at <paramref name="now"/>: 1 as it falls, 0 once it is older than the
+        /// memory and can no longer be raised. A marker fades with it.
+        /// </summary>
+        public float Freshness(DeathRecord death, float now)
+        {
+            if (MemorySeconds <= 0f)
+            {
+                return 0f;
+            }
+
+            float left = 1f - (now - death.Time) / MemorySeconds;
+            return left < 0f ? 0f : left > 1f ? 1f : left;
+        }
+
         /// <summary>Marks an enemy as a husk this boss raised, so its death will not count.</summary>
         public void MarkHusk(ulong enemyId)
         {

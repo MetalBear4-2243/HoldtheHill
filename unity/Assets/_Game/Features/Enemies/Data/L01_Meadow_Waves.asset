@@ -361,87 +361,87 @@ MonoBehaviour:
     - enemyPrefab: {fileID: 7105141689097810667, guid: f4385d581b1ef3f40952803f2be0c75a, type: 3}
       delayBeforeNext: 1.2
       spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 9083623440978163997, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
-      delayBeforeNext: 0.9
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 9083623440978163997, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
-      delayBeforeNext: 0.9
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 9083623440978163997, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
-      delayBeforeNext: 0.9
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 9083623440978163997, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
-      delayBeforeNext: 0.9
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 9083623440978163997, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
-      delayBeforeNext: 0.9
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 606357447812029990, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
-      delayBeforeNext: 0.5
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 606357447812029990, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
-      delayBeforeNext: 0.5
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 606357447812029990, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
-      delayBeforeNext: 0.5
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 606357447812029990, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
-      delayBeforeNext: 0.5
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 606357447812029990, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
-      delayBeforeNext: 0.5
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 606357447812029990, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
-      delayBeforeNext: 0.5
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 0.7
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 0.7
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 0.7
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 0.7
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 0.7
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 0.7
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.3
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.3
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.3
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.3
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.3
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.3
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.3
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.3
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.3
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 3
-      spawnPointOverride: {fileID: 0}
     - enemyPrefab: {fileID: 6483409811447509938, guid: 2e96c6a3f2b0a70479837b202fcab30e, type: 3}
-      delayBeforeNext: 0
+      delayBeforeNext: 2
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 9083623440978163997, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
+      delayBeforeNext: 0.9
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 9083623440978163997, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
+      delayBeforeNext: 0.9
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 9083623440978163997, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
+      delayBeforeNext: 0.9
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 9083623440978163997, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
+      delayBeforeNext: 0.9
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 9083623440978163997, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
+      delayBeforeNext: 0.9
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 606357447812029990, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
+      delayBeforeNext: 0.5
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 606357447812029990, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
+      delayBeforeNext: 0.5
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 606357447812029990, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
+      delayBeforeNext: 0.5
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 606357447812029990, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
+      delayBeforeNext: 0.5
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 606357447812029990, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
+      delayBeforeNext: 0.5
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 606357447812029990, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
+      delayBeforeNext: 0.5
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      delayBeforeNext: 0.7
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      delayBeforeNext: 0.7
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      delayBeforeNext: 0.7
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      delayBeforeNext: 0.7
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      delayBeforeNext: 0.7
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      delayBeforeNext: 0.7
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
+      delayBeforeNext: 0.3
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
+      delayBeforeNext: 0.3
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
+      delayBeforeNext: 0.3
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
+      delayBeforeNext: 0.3
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
+      delayBeforeNext: 0.3
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
+      delayBeforeNext: 0.3
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
+      delayBeforeNext: 0.3
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
+      delayBeforeNext: 0.3
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
+      delayBeforeNext: 0.3
+      spawnPointOverride: {fileID: 0}
+    - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
+      delayBeforeNext: 0.3
       spawnPointOverride: {fileID: 0}
