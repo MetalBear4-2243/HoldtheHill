@@ -30,7 +30,7 @@ namespace HoldTheHill.Features.Economy
         // Found once per enemy, the same way BasicEnemy finds its path.
         private void Start()
         {
-            _wallet = FindAnyObjectByType<HoneydewWallet>();
+            FindWallet();
         }
 
         private void OnEnable()
@@ -45,9 +45,20 @@ namespace HoldTheHill.Features.Economy
 
         private void Pay(BasicEnemy enemy)
         {
+            // A centipede half killed in the frame it split off dies before its Start runs:
+            // look the wallet up now, or that kill pays nothing.
+            FindWallet();
             if (_wallet != null)
             {
                 _wallet.Honeydew.Earn(_honeydew);
+            }
+        }
+
+        private void FindWallet()
+        {
+            if (_wallet == null)
+            {
+                _wallet = FindAnyObjectByType<HoneydewWallet>();
             }
         }
     }

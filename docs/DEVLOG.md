@@ -45,6 +45,31 @@ Copy this to the top of the log:
 
 **Next**
 - Adam checks the highlight colour on the real card art.
+## 2026-11-04 — Known bugs from the 10-20 review, before the Alpha
+**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
+**Branch:** `nilly/alpha-known-bugs`
+
+**Worked on**
+- Fire Ant lobs follow their target, so they land on moving Scarabs instead of where the Scarab was (G1-1).
+- Ant and Crazy Ant reach 1.5 / 1.6 / 1.7 (was 1.2 / 1.3 / 1.4), so one on a road corner's outer diagonal can hit the road (G1-3). A data test checks every melee tower.
+- A range ring shows around the ghost before you buy and around the selected tower (G2-1).
+- The Next Wave button greys out while a wave is still coming out, after the last wave, while paused and after the run ends. Space uses the same check, so it no longer logs spawner warnings (UI-7, GF-3).
+- Diatomaceous earth settles for 1.5 s, fading in, before it hurts or stuns anything. Until now it stunned towers on its first frame with no warning (HZ-3 warning half).
+- Towers fire at their stated rate: a shot keeps the part of a frame it was late by (TW-6). The Sap Ant and Carpenter Ant no longer search for targets every frame (TW-9).
+- A centipede half killed in the frame it split off now pays its bounty (known item 9).
+- Restart and Home unload a level's Gameplay scene before its Terrain, also after Play was pressed in a Gameplay scene (CO-1).
+
+**Decisions**
+- Jason's files are untouched: `BasicEnemy`, `CentipedeEnemy`, `Queen`, `SilverfishEnemy`, `EnemySpawner` and his tests. His items are below.
+- Dust warns but burrowing still doesn't protect from it; that half of HZ-3 is a design call.
+- The builders that make the Ant and Crazy Ant carry the new ranges, so a rerun keeps them.
+
+**Problems / blockers**
+- Needs Jason: centipede part damage (EN-3), the end-of-path split (known 10), the per-hit Queen log, the per-wave spawner logs, and his 7 failing EditMode tests.
+- No 1x / 2x button on the HUD yet (the key works); it needs a UI scene change in the Editor.
+
+**Next**
+- Play Tutorial Hill and Meadow on this branch, then in a Windows build, before the 11-06 Alpha.
 
 ## 2026-10-24 — UI TowerList additions
 **Who:** Adam Montgomery with Google Gemini
