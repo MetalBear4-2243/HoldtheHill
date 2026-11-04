@@ -110,11 +110,11 @@ namespace HoldTheHill.EditorTools
         internal static readonly TowerSpec[] Towers =
         {
             new TowerSpec("Tower_Ant", "Ant", "Ant", 75, new Color(0.55f, 0.35f, 0.15f), TowerKind.Melee,
-                1.2f, 8f, 0.8f, Up(45, 1.3f, 12f, 0.7f), Up(70, 1.4f, 18f, 0.6f)),
+                1.5f, 8f, 0.8f, Up(45, 1.6f, 12f, 0.7f), Up(70, 1.7f, 18f, 0.6f)),
             new TowerSpec("Tower_BulletAnt", "BulletAnt", "Bullet Ant", 100, new Color(0.2f, 0.2f, 0.25f), TowerKind.Shot,
                 3f, 12f, 1.2f, Up(60, 3.3f, 18f, 1.1f), Up(90, 3.6f, 26f, 1f)),
             new TowerSpec("Tower_CrazyAnt", "CrazyAnt", "Crazy Ant", 125, new Color(0.9f, 0.55f, 0.2f), TowerKind.Melee,
-                1.2f, 6f, 0.35f, Up(75, 1.3f, 9f, 0.3f), Up(110, 1.4f, 13f, 0.25f)),
+                1.5f, 6f, 0.35f, Up(75, 1.6f, 9f, 0.3f), Up(110, 1.7f, 13f, 0.25f)),
             new TowerSpec("Tower_FireAnt", "FireAnt", "Fire Ant", 200, new Color(0.85f, 0.2f, 0.1f), TowerKind.Lob,
                 2.8f, 14f, 1.6f, Up(120, 3f, 20f, 1.5f), Up(180, 3.3f, 30f, 1.4f)),
             new TowerSpec("Tower_SapAnt", "SapAnt", "Sap Ant", 225, new Color(0.3f, 0.7f, 0.3f), TowerKind.Slow,

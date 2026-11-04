@@ -66,6 +66,8 @@ namespace HoldTheHill.Features.Towers
         [SerializeField] private Color _blockedCellColor = new Color(1f, 0.3f, 0.3f, 0.35f);
         [SerializeField] private Color _unaffordableColor = new Color(1f, 0.8f, 0.2f, 0.35f);
         [SerializeField] private Color _selectionColor = new Color(0.4f, 0.9f, 1f, 0.45f);
+        [Tooltip("The ring that shows how far the ghost or the selected tower reaches.")]
+        [SerializeField] private Color _rangeColor = new Color(1f, 1f, 1f, 0.55f);
 
         private const int SelectKeys = 6;
 
@@ -76,6 +78,7 @@ namespace HoldTheHill.Features.Towers
         private Camera _camera;
         private SpriteRenderer _preview;
         private SpriteRenderer _selectionMark;
+        private RangeRing _rangeRing;
         private InputActionMap _gameplay;
         private InputAction _point;
         private InputAction _place;
@@ -118,6 +121,7 @@ namespace HoldTheHill.Features.Towers
             _preview = MakeMarker("Placement Preview", 100);
             _selectionMark = MakeMarker("Selection Mark", 99);
             _selectionMark.color = _selectionColor;
+            _rangeRing = RangeRing.Create("Range Ring", gameObject.scene, _preview, _rangeColor, 101);
 
             if (_actions != null)
             {
@@ -387,6 +391,29 @@ namespace HoldTheHill.Features.Towers
                         PlaceTower(_offers[_selected], cell);
                     }
                     break;
+            }
+        }
+
+        // After Update, and also while paused: the ring follows the ghost before a tower is bought,
+        // and the selected tower otherwise (its range grows with each upgrade).
+        private void LateUpdate()
+        {
+            if (_rangeRing == null)
+            {
+                return;
+            }
+
+            if (_selected >= 0 && _preview.enabled && _offers[_selected].Prefab != null)
+            {
+                _rangeRing.Show(_preview.transform.position, _offers[_selected].Prefab.Range);
+            }
+            else if (_selected < 0 && _selectedTower != null)
+            {
+                _rangeRing.Show(_selectedTower.transform.position, _selectedTower.Range);
+            }
+            else
+            {
+                _rangeRing.Hide();
             }
         }
 

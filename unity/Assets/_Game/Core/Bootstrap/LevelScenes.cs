@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace HoldTheHill.Core
 {
     /// <summary>
@@ -38,6 +40,45 @@ namespace HoldTheHill.Core
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// The order to unload <paramref name="loaded"/> scenes in (given in load order): every
+        /// level's Gameplay scene first, so a run never plays on for a few frames on a map that has
+        /// already gone; then the other scenes (Home, a sandbox scene); every Terrain scene last.
+        /// Within each group the last loaded goes first. The load order alone isn't enough: after
+        /// Play is pressed in a Gameplay scene, that scene was loaded before its Terrain.
+        /// </summary>
+        public static List<string> UnloadOrder(IReadOnlyList<string> loaded)
+        {
+            var gameplay = new List<string>();
+            var other = new List<string>();
+            var terrain = new List<string>();
+            if (loaded == null)
+            {
+                return gameplay;
+            }
+
+            for (int i = loaded.Count - 1; i >= 0; i--)
+            {
+                string scene = loaded[i];
+                if (!TryGetLevelId(scene, out _))
+                {
+                    other.Add(scene);
+                }
+                else if (scene.EndsWith(GameplaySuffix, System.StringComparison.Ordinal))
+                {
+                    gameplay.Add(scene);
+                }
+                else
+                {
+                    terrain.Add(scene);
+                }
+            }
+
+            gameplay.AddRange(other);
+            gameplay.AddRange(terrain);
+            return gameplay;
         }
 
         private static bool EndsWith(string sceneName, string suffix, out string head)

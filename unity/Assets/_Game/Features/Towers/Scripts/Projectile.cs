@@ -7,9 +7,10 @@ namespace HoldTheHill.Features.Towers
     /// <summary>
     /// One shot from a ranged tower. A straight shot flies at its target and deals the tower's
     /// damage on arrival; if the target dies or reaches the Queen first it carries on and expires.
-    /// A lobbed shot flies to where the target stood when it was fired, drawn along an arc, and
-    /// damages every enemy still in the <see cref="EnemyRegistry"/> within its splash radius where
-    /// it lands.
+    /// A lobbed shot is drawn along an arc and follows its target while the target lives, so it
+    /// lands on a moving enemy; if the target dies or leaves the map first, it lands where the
+    /// target was last seen. Where it lands it damages every enemy still in the
+    /// <see cref="EnemyRegistry"/> within its splash radius.
     /// </summary>
     [DisallowMultipleComponent]
     public class Projectile : MonoBehaviour
@@ -24,7 +25,7 @@ namespace HoldTheHill.Features.Towers
         [SerializeField, Min(0.1f)] private float _lifetime = 3f;
 
         [Header("Lobbed")]
-        [Tooltip("If on, the shot lands where the target was and splashes there instead of chasing it.")]
+        [Tooltip("If on, the shot arcs onto its target and splashes there instead of flying straight at it.")]
         [SerializeField] private bool _lobbed;
 
         [Tooltip("Lobbed only: how high the arc is drawn above the straight line, in world units.")]
@@ -41,6 +42,7 @@ namespace HoldTheHill.Features.Towers
         private float _age;
 
         // Lobbed flight: the shot's true position moves in a straight line; the arc is only drawn.
+        // The landing point follows the target, and the flight time is fixed at launch.
         private Vector3 _origin;
         private Vector3 _landing;
         private float _flightTime;
@@ -58,8 +60,7 @@ namespace HoldTheHill.Features.Towers
             _direction = Vector3.right;
             if (_target != null)
             {
-                _landing = _target.transform.position;
-                _landing.z = _origin.z;
+                _landing = LobLanding(_target.transform.position, _origin.z);
                 _direction = Direction(_landing);
                 _flightTime = Vector2.Distance(_origin, _landing) / _speed;
             }
@@ -108,6 +109,13 @@ namespace HoldTheHill.Features.Towers
 
         private void Lob()
         {
+            // Follow a living target, so the shot lands on it instead of on the spot it has left
+            // (a Scarab is gone from there by the time the shot comes down).
+            if (_target != null && !_target.IsDead && EnemyRegistry.Contains(_target))
+            {
+                _landing = LobLanding(_target.transform.position, _origin.z);
+            }
+
             float t = _flightTime > 0f ? Mathf.Clamp01(_age / _flightTime) : 1f;
             Vector3 along = Vector3.Lerp(_origin, _landing, t);
             transform.position = along + Vector3.up * (_arcHeight * Mathf.Sin(t * Mathf.PI));
@@ -150,6 +158,13 @@ namespace HoldTheHill.Features.Towers
             {
                 s_splashBuffer[i].TakeDamage(_damage);
             }
+        }
+
+        /// <summary>Where a lob comes down for a target at <paramref name="target"/>: on it, in the shot's own plane.</summary>
+        public static Vector3 LobLanding(Vector3 target, float z)
+        {
+            target.z = z;
+            return target;
         }
 
         private Vector3 Direction(Vector3 towards)
