@@ -201,20 +201,23 @@ namespace HoldTheHill.Features.Towers
             }
 
             _cooldown -= Time.deltaTime;
-            if (!_condition.CanAct)
+
+            // The Sap Ant and the Carpenter Ant work through their ability, so they never look for a
+            // target of their own; nor does a tower that is stunned or burrowed.
+            if (!_condition.CanAct || !Attacks)
             {
                 CurrentTarget = null;
                 return;
             }
 
             CurrentTarget = AcquireTarget();
-            if (CurrentTarget == null || _cooldown > 0f || !Attacks)
+            if (CurrentTarget == null || _cooldown > 0f)
             {
                 return;
             }
 
-            // The one place the Swarm Frenzy's tempo applies.
-            _cooldown = _fireInterval / TowerTempo.FireRateFactor;
+            // The tower attacks (Swarm Frenzy's tempo applies here; MineLayer applies it to mines).
+            _cooldown = TowerTempo.NextCooldown(_cooldown, _fireInterval, Time.deltaTime, TowerTempo.FireRateFactor);
             Attack(CurrentTarget);
         }
 

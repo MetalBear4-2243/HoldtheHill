@@ -103,12 +103,11 @@ namespace HoldTheHill.Core
         {
             _busy = true;
 
-            // Last loaded goes first: a level's Gameplay scene before its Terrain, so the run never
-            // plays on for a few frames on a map that has already gone.
-            List<string> loaded = LoadedSwappableScenes();
-            for (int i = loaded.Count - 1; i >= 0; i--)
+            // A level's Gameplay scene before its Terrain, so the run never plays on for a few frames
+            // on a map that has already gone; also when Play was pressed in the Gameplay scene.
+            foreach (string sceneName in LevelScenes.UnloadOrder(LoadedSwappableScenes()))
             {
-                yield return SceneManager.UnloadSceneAsync(loaded[i]);
+                yield return SceneManager.UnloadSceneAsync(sceneName);
             }
 
             if (levelId == null)
