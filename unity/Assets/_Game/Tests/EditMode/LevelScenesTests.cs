@@ -48,5 +48,34 @@ namespace HoldTheHill.Tests
         {
             Assert.IsFalse(LevelScenes.TryGetLevelId("L00_TutorialHill_terrain", out _));
         }
+
+        [Test]
+        public void UnloadOrder_GameplayBeforeTerrain_EvenWhenGameplayLoadedFirst()
+        {
+            // Play pressed in the Gameplay scene: it loads first, then Bootstrap's loader adds the Terrain.
+            var order = LevelScenes.UnloadOrder(new[] { "L01_Meadow_Gameplay", "L01_Meadow_Terrain" });
+            CollectionAssert.AreEqual(new[] { "L01_Meadow_Gameplay", "L01_Meadow_Terrain" }, order);
+        }
+
+        [Test]
+        public void UnloadOrder_ANormalLoad_StillUnloadsGameplayFirst()
+        {
+            var order = LevelScenes.UnloadOrder(new[] { "L00_TutorialHill_Terrain", "L00_TutorialHill_Gameplay" });
+            CollectionAssert.AreEqual(new[] { "L00_TutorialHill_Gameplay", "L00_TutorialHill_Terrain" }, order);
+        }
+
+        [Test]
+        public void UnloadOrder_OtherScenesSitBetween_LastLoadedFirst()
+        {
+            var order = LevelScenes.UnloadOrder(new[] { "Home", "L01_Meadow_Terrain", "SandboxTest", "L01_Meadow_Gameplay" });
+            CollectionAssert.AreEqual(new[] { "L01_Meadow_Gameplay", "SandboxTest", "Home", "L01_Meadow_Terrain" }, order);
+        }
+
+        [Test]
+        public void UnloadOrder_NothingLoaded_IsEmpty()
+        {
+            CollectionAssert.IsEmpty(LevelScenes.UnloadOrder(new string[0]));
+            CollectionAssert.IsEmpty(LevelScenes.UnloadOrder(null));
+        }
     }
 }

@@ -33,14 +33,13 @@ Copy this to the top of the log:
 **Worked on**
 - An enemy that reaches the Queen is out of the fight at once (`BasicEnemy.ReachedEnd`): a hit in the same frame no longer pays a bounty or splits a centipede into children that never move (known item 11, EN-1).
 - A centipede killed within a unit of the end of the path no longer drops a child on the Queen: the second half starts beside the first (known item 10). No child gets a waypoint past the end (TS-6).
-- Each centipede part does half its parent's damage to the Queen, rounded up, so all the parts together hit about as hard as the whole one (EN-3).
+- Centipede part damage (EN-3): Jason halved it himself in PR 49 while this was in progress; his rule (half, rounded down, at least 1, zero stays zero) and his tests are kept.
 - A split prefab without a `CentipedeEnemy` is refused with an error instead of leaving the parent walking at 0 HP (EN-10).
 - Both `TakeDamage` overloads raise `OnDamaged`, once per hit (TW-4, EN-5). A damage-over-time refreshed faster than it ticks still ticks, and a refresh no longer allocates (EN-8, TW-8).
 - The Queen no longer logs her health on every hit (GF-2). The spawner's wave and map messages are off unless "Log Progress" is ticked; warnings stay. Its living-enemy count now drops when enemies are destroyed.
 - His 7 failing EditMode tests pass: health set in SetUp, enemies removed with DestroyImmediate outside Play mode, the Queen test subscribes by hand (TS-1, TS-2, TS-3). 9 new tests.
 
 **Decisions**
-- Halving centipede damage was the review's suggestion; one line in `CentipedeEnemy.ChildDamage` to change if Jason wants full damage back.
 - The silverfish click needed nothing: Jason had already turned `OnMouseDown` off.
 
 **Problems / blockers**
@@ -48,6 +47,31 @@ Copy this to the top of the log:
 
 **Next**
 - Jason reviews the PR. Play a Meadow run with centipedes reaching the Queen.
+## 2026-11-04 — Known bugs from the 10-20 review, before the Alpha
+**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
+**Branch:** `nilly/alpha-known-bugs`
+
+**Worked on**
+- Fire Ant lobs follow their target, so they land on moving Scarabs instead of where the Scarab was (G1-1).
+- Ant and Crazy Ant reach 1.5 / 1.6 / 1.7 (was 1.2 / 1.3 / 1.4), so one on a road corner's outer diagonal can hit the road (G1-3). A data test checks every melee tower.
+- A range ring shows around the ghost before you buy and around the selected tower (G2-1).
+- The Next Wave button greys out while a wave is still coming out, after the last wave, while paused and after the run ends. Space uses the same check, so it no longer logs spawner warnings (UI-7, GF-3).
+- Diatomaceous earth settles for 1.5 s, fading in, before it hurts or stuns anything. Until now it stunned towers on its first frame with no warning (HZ-3 warning half).
+- Towers fire at their stated rate: a shot keeps the part of a frame it was late by (TW-6). The Sap Ant and Carpenter Ant no longer search for targets every frame (TW-9).
+- A centipede half killed in the frame it split off now pays its bounty (known item 9).
+- Restart and Home unload a level's Gameplay scene before its Terrain, also after Play was pressed in a Gameplay scene (CO-1).
+
+**Decisions**
+- Jason's files are untouched: `BasicEnemy`, `CentipedeEnemy`, `Queen`, `SilverfishEnemy`, `EnemySpawner` and his tests. His items are below.
+- Dust warns but burrowing still doesn't protect from it; that half of HZ-3 is a design call.
+- The builders that make the Ant and Crazy Ant carry the new ranges, so a rerun keeps them.
+
+**Problems / blockers**
+- Needs Jason: centipede part damage (EN-3), the end-of-path split (known 10), the per-hit Queen log, the per-wave spawner logs, and his 7 failing EditMode tests.
+- No 1x / 2x button on the HUD yet (the key works); it needs a UI scene change in the Editor.
+
+**Next**
+- Play Tutorial Hill and Meadow on this branch, then in a Windows build, before the 11-06 Alpha.
 
 ## 2026-10-24 — UI TowerList additions
 **Who:** Adam Montgomery with Google Gemini

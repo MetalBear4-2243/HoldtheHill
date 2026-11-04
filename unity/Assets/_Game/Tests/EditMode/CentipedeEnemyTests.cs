@@ -310,28 +310,7 @@ namespace HoldTheHill.Tests
             }
         }
 
-        [Test]
-        public void Split_GivesEachPartHalfTheDamageToTheQueen()
-        {
-            _centipede.SetMaxHealth(10.0, resetCurrentHealth: true);
-            _centipede.Damage = 20;
 
-            List<CentipedeEnemy> children = _centipede.Split();
-            _spawnedObjects.Add(children[0].gameObject);
-            _spawnedObjects.Add(children[1].gameObject);
-
-            Assert.That(children[0].Damage, Is.EqualTo(10));
-            Assert.That(children[1].Damage, Is.EqualTo(10));
-        }
-
-        [Test]
-        public void ChildDamage_RoundsUp_AndNeverDropsBelowOne()
-        {
-            Assert.That(CentipedeEnemy.ChildDamage(20), Is.EqualTo(10));
-            Assert.That(CentipedeEnemy.ChildDamage(5), Is.EqualTo(3));
-            Assert.That(CentipedeEnemy.ChildDamage(1), Is.EqualTo(1));
-            Assert.That(CentipedeEnemy.ChildDamage(0), Is.EqualTo(1));
-        }
 
         [Test]
         public void Split_WithASplitPrefabThatIsNoCentipede_ErrorsAndCopiesItselfInstead()
@@ -351,6 +330,70 @@ namespace HoldTheHill.Tests
             {
                 _spawnedObjects.Add(child.gameObject);
                 Assert.That(child, Is.Not.Null);
+            }
+        }
+
+        [Test]
+        public void Split_HalvesDamageInChildren()
+        {
+            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _centipede.Damage = 20;
+
+            List<CentipedeEnemy> children = _centipede.Split();
+
+            Assert.That(children.Count, Is.EqualTo(2));
+            foreach (var child in children)
+            {
+                _spawnedObjects.Add(child.gameObject);
+                Assert.That(child.Damage, Is.EqualTo(10));
+            }
+        }
+
+        [Test]
+        public void Split_WithDamageTen_HalvesDamageToFive()
+        {
+            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _centipede.Damage = 10;
+
+            List<CentipedeEnemy> children = _centipede.Split();
+
+            Assert.That(children.Count, Is.EqualTo(2));
+            foreach (var child in children)
+            {
+                _spawnedObjects.Add(child.gameObject);
+                Assert.That(child.Damage, Is.EqualTo(5));
+            }
+        }
+
+        [Test]
+        public void Split_WithDamageOne_MaintainsMinimumDamageOfOne()
+        {
+            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _centipede.Damage = 1;
+
+            List<CentipedeEnemy> children = _centipede.Split();
+
+            Assert.That(children.Count, Is.EqualTo(2));
+            foreach (var child in children)
+            {
+                _spawnedObjects.Add(child.gameObject);
+                Assert.That(child.Damage, Is.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void Split_WithDamageZero_PreservesZeroDamage()
+        {
+            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _centipede.Damage = 0;
+
+            List<CentipedeEnemy> children = _centipede.Split();
+
+            Assert.That(children.Count, Is.EqualTo(2));
+            foreach (var child in children)
+            {
+                _spawnedObjects.Add(child.gameObject);
+                Assert.That(child.Damage, Is.EqualTo(0));
             }
         }
     }

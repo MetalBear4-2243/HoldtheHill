@@ -11,7 +11,7 @@
 
 ## 1. Overview & Architecture
 
-`CentipedeEnemy` is a specialized subclass of `BasicEnemy`. The signature gameplay mechanic of the Centipede is its recursive splitting behavior: upon defeat, it divides into 2 smaller child enemies, each starting with half of the parent's maximum health pool.
+`CentipedeEnemy` is a specialized subclass of `BasicEnemy`. The signature gameplay mechanic of the Centipede is its recursive splitting behavior: upon defeat, it divides into 2 smaller child enemies, each starting with half of the parent's maximum health pool and half of its damage.
 
 These child enemies continue to traverse the assigned path from the parent's death point and waypoint progress. If defeated, each child will split again upon reaching 0 HP until they only have 1 HP remaining (at which point they die permanently). Additionally, designers can configure a `_splitsRemaining` counter to strictly cap how many times the enemy can split (-1 allows splitting recursively until the 1 HP condition is reached).
 
@@ -21,8 +21,8 @@ flowchart TD
     DeathCheck -->|Yes| CanSplitCheck{CanSplit?}
     CanSplitCheck -->|SplitsRemaining == 0 OR MaxHealth <= 1.0| Die[Die: OnDied Event & Destroy]
     CanSplitCheck -->|SplitsRemaining > 0 OR -1 AND MaxHealth > 1.0| Split[Spawn 2 Smaller CentipedeEnemies]
-    Split --> Child1[Child Centipede 1: MaxHealth / 2, SplitsRemaining - 1]
-    Split --> Child2[Child Centipede 2: MaxHealth / 2, SplitsRemaining - 1]
+    Split --> Child1[Child Centipede 1: MaxHealth / 2, Damage / 2, SplitsRemaining - 1]
+    Split --> Child2[Child Centipede 2: MaxHealth / 2, Damage / 2, SplitsRemaining - 1]
     Split --> Die
     Child1 --> Traverse1[Continue Path from Parent Waypoint]
     Child2 --> Traverse2[Continue Path from Parent Waypoint]
@@ -30,7 +30,7 @@ flowchart TD
 
 ### Key Architectural Pillars
 - **Inheritance & Reusability**: Inherits all baseline navigation, health management, sprite flipping, and destination handling from `BasicEnemy`.
-- **Recursive Splitting Mechanic**: Automatically halves `MaxHealth` for children, reduces visual scale (`_sizeMultiplier`), and spawns the first child at the parent's position and the second child 1 unit forward along the path.
+- **Recursive Splitting Mechanic**: Automatically halves `MaxHealth` and `Damage` for children, reduces visual scale (`_sizeMultiplier`), and spawns the first child at the parent's position and the second child 1 unit forward along the path.
 - **Strict Splitting Constraints**:
   - **1 HP Terminal Condition**: Splitting halts if the enemy has 1 HP or less, or if halving would produce less than 1 HP.
   - **Splits Remaining Counter**: Decrements with each split generation. When it reaches 0, no further splitting occurs. `-1` allows infinite splits until the 1 HP condition.
@@ -84,7 +84,7 @@ public static event Action<CentipedeEnemy, List<CentipedeEnemy>> OnAnyCentipedeS
 - **Returns**: The calculated world position.
 
 #### `public List<CentipedeEnemy> Split()`
-- **Description**: Instantiates 2 child enemies with `MaxHealth / 2.0`, decrements `SplitsRemaining` (unless `-1`), applies visual scaling, spawns the first child at the original position and the second child forward along the path, assigns path coordinates and waypoint progress, and invokes `OnSplit` events.
+- **Description**: Instantiates 2 child enemies with `MaxHealth / 2.0` and halved `Damage`, decrements `SplitsRemaining` (unless `-1`), applies visual scaling, spawns the first child at the original position and the second child forward along the path, assigns path coordinates and waypoint progress, and invokes `OnSplit` events.
 - **Returns**: List containing the 2 newly spawned child enemies.
 
 #### `protected override void Die()`

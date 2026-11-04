@@ -106,7 +106,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4deb3d16e7dbe49768b8986b26822e29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.Tower
-  _range: 1.2
+  _range: 1.5
   _damage: 6
   _fireInterval: 0.35
   _projectilePrefab: {fileID: 0}
@@ -114,11 +114,11 @@ MonoBehaviour:
   _priority: 0
   _upgrades:
   - Cost: 75
-    Range: 1.3
+    Range: 1.6
     Damage: 9
     FireInterval: 0.3
   - Cost: 110
-    Range: 1.4
+    Range: 1.7
     Damage: 13
     FireInterval: 0.25
   _scalePerLevel: 1.12

@@ -6,7 +6,7 @@ namespace HoldTheHill.Features.Enemies
 {
     /// <summary>
     /// Specialized subclass of <see cref="BasicEnemy"/> representing a Centipede enemy.
-    /// When defeated, it splits into 2 smaller enemies with half of the parent's maximum health.
+    /// When defeated, it splits into 2 smaller enemies with half of the parent's maximum health and damage.
     /// The newly spawned enemies continue to split upon reaching 0 HP until they only have 1 HP.
     /// Can also be constrained by a "splits remaining" counter (-1 for infinite splits until 1 HP).
     /// </summary>
@@ -207,15 +207,6 @@ namespace HoldTheHill.Features.Enemies
         }
 
         /// <summary>
-        /// Each part's damage to the Queen: half its parent's, rounded up, never below 1. The parts of
-        /// one centipede together hit the Queen about as hard as the whole centipede would have.
-        /// </summary>
-        public static int ChildDamage(int parentDamage)
-        {
-            return Mathf.Max(1, (parentDamage + 1) / 2);
-        }
-
-        /// <summary>
         /// Spawns 2 smaller centipede enemies with half maximum health, half damage to the Queen and
         /// decremented splits remaining. The first child is spawned at the original enemy's position,
         /// and the second child 1 unit forward along the path, unless that would put it at the end of
@@ -226,7 +217,7 @@ namespace HoldTheHill.Features.Enemies
         {
             double newMaxHealth = MaxHealth / 2.0;
             int childSplitsRemaining = (_splitsRemaining == -1) ? -1 : (_splitsRemaining - 1);
-            int childDamage = ChildDamage(Damage);
+            int childDamage = Damage <= 0 ? 0 : Mathf.Max(1, Damage / 2);
 
             List<CentipedeEnemy> spawnedChildren = new List<CentipedeEnemy>(2);
             GameObject template = SplitTemplate();
@@ -255,7 +246,7 @@ namespace HoldTheHill.Features.Enemies
                 GameObject childObj = Instantiate(template, spawnPos, transform.rotation, transform.parent);
                 CentipedeEnemy childCentipede = childObj.GetComponent<CentipedeEnemy>();
 
-                // Apply half max health, half damage and child splits remaining
+                // Apply half max health, half damage, and child splits remaining
                 childCentipede.SetMaxHealth(newMaxHealth, resetCurrentHealth: true);
                 childCentipede.SplitsRemaining = childSplitsRemaining;
                 childCentipede.Damage = childDamage;
