@@ -105,6 +105,7 @@ GameObject:
   - component: {fileID: 7570908297215969400}
   - component: {fileID: 1879310486640439383}
   - component: {fileID: 7445119045601590629}
+  - component: {fileID: 7900296838891906519}
   m_Layer: 0
   m_Name: Enemy_RhinoBeetle
   m_TagString: Untagged
@@ -192,6 +193,34 @@ MonoBehaviour:
   _artFacingDegrees: 0
   _turnDegreesPerSecond: 720
   _teleportDistance: 1
+--- !u!114 &7900296838891906519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7105141689097810667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66bd863c9425458f8c78eef98d4542f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.EnemyHurtAndDeath
+  _body: {fileID: 7013474645740589493}
+  _walk: {fileID: 3525022422014671697}
+  _hurtFrames:
+  - {fileID: -1887712236, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  - {fileID: 2138330763, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  _hurtFrameSeconds: 0.06
+  _deathFrames:
+  - {fileID: -1427417939, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  - {fileID: 1187566598, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  - {fileID: -1587234989, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  - {fileID: -560005302, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  - {fileID: 808285961, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  - {fileID: -2070287663, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  - {fileID: 1818576505, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  _deathFrameSeconds: 0.08
+  _deathFadeSeconds: 0.35
 --- !u!1 &7328185262829027814
 GameObject:
   m_ObjectHideFlags: 0

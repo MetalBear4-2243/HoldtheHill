@@ -86,6 +86,7 @@ namespace HoldTheHill.Features.Towers
             mine.Arm(_tower.Damage);
             mine.Exploded += HandleExploded;
             _mines.Add(mine);
+            _tower.ReportAbilityUsed();
         }
 
         private void HandleExploded(Mine mine)

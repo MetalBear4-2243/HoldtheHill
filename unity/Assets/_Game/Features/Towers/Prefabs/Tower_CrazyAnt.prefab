@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1872383578060003555}
   - component: {fileID: 1681274514025101029}
   - component: {fileID: 149991904082878181}
+  - component: {fileID: 6426785060347049558}
   m_Layer: 0
   m_Name: Tower_CrazyAnt
   m_TagString: Untagged
@@ -145,3 +146,26 @@ MonoBehaviour:
   - {fileID: 521234141, guid: db3d33decd84e284db235e7003c75798, type: 3}
   _frameSeconds: 0.16
   _randomStart: 1
+--- !u!114 &6426785060347049558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 165473272640961510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: face53635d71471a9cece6475eb9f8fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.TowerAttackAnimation
+  _renderer: {fileID: 1872383578060003555}
+  _idle: {fileID: 149991904082878181}
+  _frames:
+  - {fileID: -1220946495, guid: db3d33decd84e284db235e7003c75798, type: 3}
+  - {fileID: 982074488, guid: db3d33decd84e284db235e7003c75798, type: 3}
+  - {fileID: -1255745262, guid: db3d33decd84e284db235e7003c75798, type: 3}
+  - {fileID: -1127292547, guid: db3d33decd84e284db235e7003c75798, type: 3}
+  - {fileID: -1781150717, guid: db3d33decd84e284db235e7003c75798, type: 3}
+  - {fileID: -924487070, guid: db3d33decd84e284db235e7003c75798, type: 3}
+  _frameSeconds: 0.075
+  _hitFrame: 2

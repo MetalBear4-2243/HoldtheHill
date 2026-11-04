@@ -63,13 +63,21 @@ namespace HoldTheHill.Features.Towers
             float rangeSqr = _tower.Range * _tower.Range;
             IReadOnlyList<BasicEnemy> enemies = EnemyRegistry.All;
 
+            bool slowedAny = false;
             for (int i = 0; i < enemies.Count; i++)
             {
                 BasicEnemy enemy = enemies[i];
                 if (enemy != null && !enemy.IsDead && (enemy.transform.position - here).sqrMagnitude <= rangeSqr)
                 {
                     enemy.ApplyStatusEffect(effect);
+                    slowedAny = true;
                 }
+            }
+
+            // The Sap Ant casts while something is in its aura; the animation plays once per cast.
+            if (slowedAny)
+            {
+                _tower.ReportAbilityUsed();
             }
         }
     }

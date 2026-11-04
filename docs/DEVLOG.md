@@ -26,6 +26,39 @@ Copy this to the top of the log:
 - What you or the team should do next
 ```
 
+## 2026-11-04 — Enemy hurt and death animations
+**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
+**Branch:** `nilly/alpha-animations`
+
+**Worked on**
+- Each hit that takes health plays the enemy sheet's 2-frame Hurt row over its walk (`EnemyHurtAndDeath`). The walk keeps time underneath, so it carries on from where it was instead of jumping.
+- A death leaves the body behind for a moment: an `EnemyDeathEffect` plays the 7-frame Death row where the enemy died, facing the way it walked, then fades out. It sits in the level scene, so Restart and Home clear it.
+- An enemy that reaches the Queen leaves no body. Shield hits on the Rhino Beetle don't flinch it; only hits on its health do.
+- Seven enemies get it. The Rolly Polly's pill-bug sheet has no Hurt or Death rows, so it stays as it was; the Queen Mantis keeps her own art.
+- Build Sprites adds the rows to each enemy prefab. Rerunning it changes nothing.
+
+**Decisions**
+- The enemy is still removed the instant it dies, as before; the body left behind is only a picture, so bounties, the win check and the Queen Mantis's raises are unchanged.
+
+**Next**
+- Tower Upgrade rows; the Rhino's ShieldHit and ShieldBreak; the Rolly Polly's Roll while curled.
+
+## 2026-11-04 — Tower attack animations
+**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
+**Branch:** `nilly/alpha-animations`
+
+**Worked on**
+- Every tower plays its sheet's 6-frame Attack row over its idle loop (`TowerAttackAnimation`). Frames 0-1 wind up and frame 2 lands the blow, as the art is drawn.
+- A tower that is about to fire at a target starts winding up early, so the hit frame shows the moment the swing lands or the shot leaves. If an enemy walks into range of a tower that is already ready, it jumps straight to the hit frame.
+- The row is shortened to fit when a tower fires faster than it plays (Crazy Ant, upgrades, Swarm Frenzy). Stunned or burrowed towers go back to idle.
+- The Carpenter Ant plays it when it lays a mine, the Sap Ant while its aura is slowing someone.
+- `Tools > Hold the Hill > Alpha > Build Sprites` adds the attack row to each tower prefab. Rerunning it changes nothing.
+
+**Decisions**
+- The animation is only visual: damage and fire rate are unchanged, and the wind-up never delays a shot.
+
+**Next**
+- Tower Upgrade rows, then enemy Hurt and Death, from the same sheets.
 ## 2026-11-04 — Tower art on the shop cards
 **Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
 **Branch:** `nilly/tower-list-art`

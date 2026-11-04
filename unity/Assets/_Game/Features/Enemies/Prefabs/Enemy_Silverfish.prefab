@@ -129,6 +129,7 @@ GameObject:
   - component: {fileID: 8971728671540645579}
   - component: {fileID: 4421789823618292906}
   - component: {fileID: 8242778058887894981}
+  - component: {fileID: 7277538661383626606}
   m_Layer: 0
   m_Name: Enemy_Silverfish
   m_TagString: Untagged
@@ -247,3 +248,31 @@ MonoBehaviour:
   _artFacingDegrees: 0
   _turnDegreesPerSecond: 720
   _teleportDistance: 1
+--- !u!114 &7277538661383626606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4334611125077423612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66bd863c9425458f8c78eef98d4542f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.EnemyHurtAndDeath
+  _body: {fileID: 5136645692030269460}
+  _walk: {fileID: 1644264965611256552}
+  _hurtFrames:
+  - {fileID: 1671857933, guid: f4b3f46991f1f714cbe5c304165226a0, type: 3}
+  - {fileID: -527088875, guid: f4b3f46991f1f714cbe5c304165226a0, type: 3}
+  _hurtFrameSeconds: 0.06
+  _deathFrames:
+  - {fileID: 1236797029, guid: f4b3f46991f1f714cbe5c304165226a0, type: 3}
+  - {fileID: -374821333, guid: f4b3f46991f1f714cbe5c304165226a0, type: 3}
+  - {fileID: -2030478763, guid: f4b3f46991f1f714cbe5c304165226a0, type: 3}
+  - {fileID: 169820415, guid: f4b3f46991f1f714cbe5c304165226a0, type: 3}
+  - {fileID: -34708898, guid: f4b3f46991f1f714cbe5c304165226a0, type: 3}
+  - {fileID: 1292337598, guid: f4b3f46991f1f714cbe5c304165226a0, type: 3}
+  - {fileID: -456265652, guid: f4b3f46991f1f714cbe5c304165226a0, type: 3}
+  _deathFrameSeconds: 0.08
+  _deathFadeSeconds: 0.35

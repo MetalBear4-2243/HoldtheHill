@@ -128,6 +128,7 @@ GameObject:
   - component: {fileID: 4370679443227078794}
   - component: {fileID: 7739160465127538696}
   - component: {fileID: 5971560732726357393}
+  - component: {fileID: 5542931050383443630}
   m_Layer: 0
   m_Name: Enemy_Basic
   m_TagString: Untagged
@@ -210,3 +211,31 @@ MonoBehaviour:
   _artFacingDegrees: 0
   _turnDegreesPerSecond: 720
   _teleportDistance: 1
+--- !u!114 &5542931050383443630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6967988903673393095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66bd863c9425458f8c78eef98d4542f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.EnemyHurtAndDeath
+  _body: {fileID: 5424481429315448366}
+  _walk: {fileID: 8567175548221819682}
+  _hurtFrames:
+  - {fileID: 1702540908, guid: c357de54eff708145800db4a0fe27c06, type: 3}
+  - {fileID: 274775012, guid: c357de54eff708145800db4a0fe27c06, type: 3}
+  _hurtFrameSeconds: 0.06
+  _deathFrames:
+  - {fileID: -2062870329, guid: c357de54eff708145800db4a0fe27c06, type: 3}
+  - {fileID: 1996083482, guid: c357de54eff708145800db4a0fe27c06, type: 3}
+  - {fileID: -704208125, guid: c357de54eff708145800db4a0fe27c06, type: 3}
+  - {fileID: -1140857374, guid: c357de54eff708145800db4a0fe27c06, type: 3}
+  - {fileID: 1649998970, guid: c357de54eff708145800db4a0fe27c06, type: 3}
+  - {fileID: 801865620, guid: c357de54eff708145800db4a0fe27c06, type: 3}
+  - {fileID: -2089275873, guid: c357de54eff708145800db4a0fe27c06, type: 3}
+  _deathFrameSeconds: 0.08
+  _deathFadeSeconds: 0.35

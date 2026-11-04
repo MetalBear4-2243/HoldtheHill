@@ -117,7 +117,7 @@ namespace HoldTheHill.EditorTools
 
             AssetDatabase.SaveAssets();
             ReportAfterReload();
-            Debug.Log("Alpha sprites built: enemies loop their walk and face the road, towers loop their idle, shop cards show the tower.");
+            Debug.Log("Alpha sprites built: enemies loop their walk, face the road, flinch and die; towers loop their idle and play their attack; shop cards show the tower.");
         }
 
         private static string SheetPath(string folder, string sheet) => $"{folder}/{sheet}.png";
@@ -393,7 +393,7 @@ namespace HoldTheHill.EditorTools
                     return;
                 }
 
-                bool upgraded = isEnemy ? UpgradeEnemy(root, look, loop) : UpgradeTower(root, loop);
+                bool upgraded = isEnemy ? UpgradeEnemy(root, look, loop) : UpgradeTower(root, look, loop);
                 if (upgraded)
                 {
                     PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
@@ -464,7 +464,9 @@ namespace HoldTheHill.EditorTools
             body.localScale = Vector3.one * (PixelsPerUnit / loop.FrameWidth);
             body.localPosition = Vector3.zero;
 
-            SetFlipbook(EnsureComponent<SpriteFlipbook>(body.gameObject), renderer, loop);
+            SpriteFlipbook walk = EnsureComponent<SpriteFlipbook>(body.gameObject);
+            SetFlipbook(walk, renderer, loop);
+            SetHurtAndDeath(root, look, renderer, walk);
 
             var face = new SerializedObject(EnsureComponent<FaceTravel>(root));
             face.FindProperty("_body").objectReferenceValue = body;
@@ -480,9 +482,68 @@ namespace HoldTheHill.EditorTools
             return true;
         }
 
+        // The sheet's Hurt row plays over the walk on each hit, its Death row where the enemy dies
+        // (EnemyHurtAndDeath). A sheet without them (the pill bug) leaves the enemy as it was.
+        private const string HurtRow = "Hurt";
+        private const string DeathRow = "Death";
+
+        private static void SetHurtAndDeath(GameObject root, Look look, SpriteRenderer body, SpriteFlipbook walk)
+        {
+            string path = SheetPath(EnemySheetFolder, look.Sheet);
+            Loop hurt = SheetHasRow(path, HurtRow) ? LoadLoop(path, HurtRow) : default;
+            Loop death = SheetHasRow(path, DeathRow) ? LoadLoop(path, DeathRow) : default;
+            if (hurt.IsEmpty && death.IsEmpty)
+            {
+                return;
+            }
+
+            var so = new SerializedObject(EnsureComponent<EnemyHurtAndDeath>(root));
+            so.FindProperty("_body").objectReferenceValue = body;
+            so.FindProperty("_walk").objectReferenceValue = walk;
+            SetRow(so, "_hurtFrames", "_hurtFrameSeconds", hurt);
+            SetRow(so, "_deathFrames", "_deathFrameSeconds", death);
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void SetRow(SerializedObject so, string framesField, string secondsField, Loop row)
+        {
+            Sprite[] frames = row.IsEmpty ? Array.Empty<Sprite>() : row.Frames;
+            SerializedProperty list = so.FindProperty(framesField);
+            list.arraySize = frames.Length;
+            for (int i = 0; i < frames.Length; i++)
+            {
+                list.GetArrayElementAtIndex(i).objectReferenceValue = frames[i];
+            }
+
+            if (!row.IsEmpty)
+            {
+                so.FindProperty(secondsField).floatValue = row.FrameSeconds;
+            }
+        }
+
+        private static bool SheetHasRow(string pngPath, string row)
+        {
+            AsepriteSheet sheet = ReadSheet(pngPath);
+            if (sheet == null || sheet.frames == null)
+            {
+                return false;
+            }
+
+            foreach (AsepriteFrame frame in sheet.frames)
+            {
+                string[] parts = frame.filename.Split(' ');
+                if (parts.Length >= 2 && parts[1] == row)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         // A tower does not turn, so its own sprite plays the loop. Tower keeps the base colour it reads
         // in Awake for its stun and upgrade tints, so the placeholder colour goes back to white.
-        private static bool UpgradeTower(GameObject root, Loop loop)
+        private static bool UpgradeTower(GameObject root, Look look, Loop loop)
         {
             var renderer = root.GetComponent<SpriteRenderer>();
             if (renderer == null)
@@ -493,8 +554,38 @@ namespace HoldTheHill.EditorTools
 
             renderer.sprite = loop.Frames[0];
             renderer.color = Color.white;
-            SetFlipbook(EnsureComponent<SpriteFlipbook>(root), renderer, loop);
+            SpriteFlipbook idle = EnsureComponent<SpriteFlipbook>(root);
+            SetFlipbook(idle, renderer, loop);
+            SetAttack(root, look, renderer, idle);
             return true;
+        }
+
+        // The sheet's Attack row plays over the idle loop when the tower attacks (TowerAttackAnimation):
+        // frames 0-1 wind up, frame 2 lands the blow, as the Assets/Ants animations are drawn.
+        private const string AttackRow = "Attack";
+        private const int AttackHitFrame = 2;
+
+        private static void SetAttack(GameObject root, Look look, SpriteRenderer renderer, SpriteFlipbook idle)
+        {
+            Loop attack = LoadLoop(SheetPath(TowerSheetFolder, look.Sheet), AttackRow);
+            if (attack.IsEmpty)
+            {
+                Debug.LogError($"{look.Sheet} has no {AttackRow} row, so {look.Prefab} keeps only its idle.");
+                return;
+            }
+
+            var so = new SerializedObject(EnsureComponent<TowerAttackAnimation>(root));
+            so.FindProperty("_renderer").objectReferenceValue = renderer;
+            so.FindProperty("_idle").objectReferenceValue = idle;
+            so.FindProperty("_frameSeconds").floatValue = attack.FrameSeconds;
+            so.FindProperty("_hitFrame").intValue = Mathf.Min(AttackHitFrame, attack.Frames.Length - 1);
+            SerializedProperty frames = so.FindProperty("_frames");
+            frames.arraySize = attack.Frames.Length;
+            for (int i = 0; i < attack.Frames.Length; i++)
+            {
+                frames.GetArrayElementAtIndex(i).objectReferenceValue = attack.Frames[i];
+            }
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void SetFlipbook(SpriteFlipbook flipbook, SpriteRenderer renderer, Loop loop)

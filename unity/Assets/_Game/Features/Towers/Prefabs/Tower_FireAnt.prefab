@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2118703197528355219}
   - component: {fileID: 7333962735893383698}
   - component: {fileID: 849425033803441468}
+  - component: {fileID: 6602107749541955569}
   m_Layer: 0
   m_Name: Tower_FireAnt
   m_TagString: Untagged
@@ -145,3 +146,26 @@ MonoBehaviour:
   - {fileID: -1442933907, guid: 45c12271588f2cd468f9b20d9a0cef07, type: 3}
   _frameSeconds: 0.16
   _randomStart: 1
+--- !u!114 &6602107749541955569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4300963872598973903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: face53635d71471a9cece6475eb9f8fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.TowerAttackAnimation
+  _renderer: {fileID: 2118703197528355219}
+  _idle: {fileID: 849425033803441468}
+  _frames:
+  - {fileID: 1961116779, guid: 45c12271588f2cd468f9b20d9a0cef07, type: 3}
+  - {fileID: -570042393, guid: 45c12271588f2cd468f9b20d9a0cef07, type: 3}
+  - {fileID: 1919080238, guid: 45c12271588f2cd468f9b20d9a0cef07, type: 3}
+  - {fileID: 1558849310, guid: 45c12271588f2cd468f9b20d9a0cef07, type: 3}
+  - {fileID: -808720916, guid: 45c12271588f2cd468f9b20d9a0cef07, type: 3}
+  - {fileID: 1960822593, guid: 45c12271588f2cd468f9b20d9a0cef07, type: 3}
+  _frameSeconds: 0.08
+  _hitFrame: 2

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6340939830100537182}
   - component: {fileID: 8445289066091199059}
   - component: {fileID: 667929536406195481}
+  - component: {fileID: 3860377321831550501}
   m_Layer: 0
   m_Name: Tower_CarpenterAnt
   m_TagString: Untagged
@@ -162,3 +163,26 @@ MonoBehaviour:
   - {fileID: 1631868320, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
   _frameSeconds: 0.16
   _randomStart: 1
+--- !u!114 &3860377321831550501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3894133927894113233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: face53635d71471a9cece6475eb9f8fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.TowerAttackAnimation
+  _renderer: {fileID: 4213573751881267661}
+  _idle: {fileID: 667929536406195481}
+  _frames:
+  - {fileID: -950251990, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
+  - {fileID: -460705812, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
+  - {fileID: -1907650033, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
+  - {fileID: 1370951101, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
+  - {fileID: 1380037046, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
+  - {fileID: -540965028, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
+  _frameSeconds: 0.09
+  _hitFrame: 2
