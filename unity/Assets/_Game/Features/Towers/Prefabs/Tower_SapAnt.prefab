@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4493508298982625121}
   - component: {fileID: 4314983547922285816}
   - component: {fileID: 1061900607795424331}
+  - component: {fileID: 2308717287535249415}
   m_Layer: 0
   m_Name: Tower_SapAnt
   m_TagString: Untagged
@@ -83,8 +84,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: abad4366ac24a6843aa982b7ee96e25c, type: 3}
-  m_Color: {r: 0.3, g: 0.7, b: 0.3, a: 1}
+  m_Sprite: {fileID: 2142572427, guid: e3aaf7efcdea08d41bb2a8f93e76bc90, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -122,6 +123,9 @@ MonoBehaviour:
     Damage: 0
     FireInterval: 1
   _scalePerLevel: 1.12
+  _burrowedTint: {r: 0.5, g: 0.45, b: 0.4, a: 0.6}
+  _stunnedTint: {r: 0.55, g: 0.7, b: 1, a: 1}
+  _missingTint: {r: 1, g: 0.85, b: 0.45, a: 1}
 --- !u!114 &1061900607795424331
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,3 +140,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.SlowAura
   _slowMultiplier: 0.5
   _tickInterval: 0.25
+--- !u!114 &2308717287535249415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8073054547478975021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4bbc85fd0a0ddc4c8ca54197abbe59c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Animation.SpriteFlipbook
+  _renderer: {fileID: 4493508298982625121}
+  _frames:
+  - {fileID: 2142572427, guid: e3aaf7efcdea08d41bb2a8f93e76bc90, type: 3}
+  - {fileID: 1914955745, guid: e3aaf7efcdea08d41bb2a8f93e76bc90, type: 3}
+  - {fileID: 1283275755, guid: e3aaf7efcdea08d41bb2a8f93e76bc90, type: 3}
+  - {fileID: -998395224, guid: e3aaf7efcdea08d41bb2a8f93e76bc90, type: 3}
+  _frameSeconds: 0.16
+  _randomStart: 1

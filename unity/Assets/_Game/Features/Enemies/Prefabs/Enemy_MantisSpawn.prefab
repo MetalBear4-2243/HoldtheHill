@@ -72,6 +72,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5424481429315448366, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 1965472627, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 5634742258270139272, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5634742258270139272, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5634742258270139272, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
       propertyPath: m_Name
       value: Enemy_MantisSpawn
@@ -80,18 +96,34 @@ PrefabInstance:
       propertyPath: _honeydew
       value: 2
       objectReference: {fileID: 0}
-    - target: {fileID: 7942946102338713522, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      propertyPath: m_Color.b
-      value: 0.5
+    - target: {fileID: 8567175548221819682, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: _frameSeconds
+      value: 0.1
       objectReference: {fileID: 0}
-    - target: {fileID: 7942946102338713522, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      propertyPath: m_Color.g
-      value: 0.85
-      objectReference: {fileID: 0}
-    - target: {fileID: 7942946102338713522, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      propertyPath: m_Color.r
-      value: 0.7
-      objectReference: {fileID: 0}
+    - target: {fileID: 8567175548221819682, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_frames.Array.data[0]'
+      value: 
+      objectReference: {fileID: 1965472627, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 8567175548221819682, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_frames.Array.data[1]'
+      value: 
+      objectReference: {fileID: 1594855222, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 8567175548221819682, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_frames.Array.data[2]'
+      value: 
+      objectReference: {fileID: -1836797061, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 8567175548221819682, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_frames.Array.data[3]'
+      value: 
+      objectReference: {fileID: 402927477, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 8567175548221819682, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_frames.Array.data[4]'
+      value: 
+      objectReference: {fileID: 636611060, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 8567175548221819682, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_frames.Array.data[5]'
+      value: 
+      objectReference: {fileID: -990605841, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

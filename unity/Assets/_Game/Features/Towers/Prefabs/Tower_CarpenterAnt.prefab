@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4213573751881267661}
   - component: {fileID: 6340939830100537182}
   - component: {fileID: 8445289066091199059}
+  - component: {fileID: 667929536406195481}
   m_Layer: 0
   m_Name: Tower_CarpenterAnt
   m_TagString: Untagged
@@ -83,8 +84,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: abad4366ac24a6843aa982b7ee96e25c, type: 3}
-  m_Color: {r: 0.45, g: 0.3, b: 0.5, a: 1}
+  m_Sprite: {fileID: -1474875671, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -122,6 +123,9 @@ MonoBehaviour:
     Damage: 65
     FireInterval: 2
   _scalePerLevel: 1.12
+  _burrowedTint: {r: 0.5, g: 0.45, b: 0.4, a: 0.6}
+  _stunnedTint: {r: 0.55, g: 0.7, b: 1, a: 1}
+  _missingTint: {r: 1, g: 0.85, b: 0.45, a: 1}
 --- !u!114 &8445289066091199059
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -138,3 +142,23 @@ MonoBehaviour:
   _maxMines: 3
   _spotSpacing: 0.5
   _path: {fileID: 0}
+--- !u!114 &667929536406195481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3894133927894113233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4bbc85fd0a0ddc4c8ca54197abbe59c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Animation.SpriteFlipbook
+  _renderer: {fileID: 4213573751881267661}
+  _frames:
+  - {fileID: -1474875671, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
+  - {fileID: -1691623299, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
+  - {fileID: -844206037, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
+  - {fileID: 1631868320, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
+  _frameSeconds: 0.16
+  _randomStart: 1

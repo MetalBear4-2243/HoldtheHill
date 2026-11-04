@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3026445683941992430
+--- !u!1 &2743075834764761192
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,41 +8,39 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5170235225163937350}
-  - component: {fileID: 8931736120656175402}
-  - component: {fileID: 3374768163268902873}
-  - component: {fileID: 5103391622501576613}
-  - component: {fileID: 5336995317394550810}
+  - component: {fileID: 7449291433947577547}
+  - component: {fileID: 8688600909394740444}
+  - component: {fileID: 4722995850698434349}
   m_Layer: 0
-  m_Name: Enemy_RollyPolly
+  m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5170235225163937350
+--- !u!4 &7449291433947577547
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3026445683941992430}
+  m_GameObject: {fileID: 2743075834764761192}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 5170235225163937350}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &8931736120656175402
+--- !u!212 &8688600909394740444
 SpriteRenderer:
   serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3026445683941992430}
+  m_GameObject: {fileID: 2743075834764761192}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -84,17 +82,73 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 5
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 69fcb56da855fee42af32540473708ae, type: 3}
-  m_Color: {r: 0.45, g: 0.5, b: 0.6, a: 1}
+  m_Sprite: {fileID: -409648351, guid: 9bddc600d978a7648982b28c131dd9d1, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.5, y: 0.5}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &4722995850698434349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2743075834764761192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4bbc85fd0a0ddc4c8ca54197abbe59c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Animation.SpriteFlipbook
+  _renderer: {fileID: 8688600909394740444}
+  _frames:
+  - {fileID: -409648351, guid: 9bddc600d978a7648982b28c131dd9d1, type: 3}
+  - {fileID: -401444423, guid: 9bddc600d978a7648982b28c131dd9d1, type: 3}
+  - {fileID: 1772895174, guid: 9bddc600d978a7648982b28c131dd9d1, type: 3}
+  - {fileID: 984037636, guid: 9bddc600d978a7648982b28c131dd9d1, type: 3}
+  _frameSeconds: 0.11
+  _randomStart: 1
+--- !u!1 &3026445683941992430
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5170235225163937350}
+  - component: {fileID: 3374768163268902873}
+  - component: {fileID: 5103391622501576613}
+  - component: {fileID: 5336995317394550810}
+  - component: {fileID: 1912275126781867839}
+  m_Layer: 0
+  m_Name: Enemy_RollyPolly
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5170235225163937350
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3026445683941992430}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7449291433947577547}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3374768163268902873
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -112,7 +166,7 @@ MonoBehaviour:
   _moveSpeed: 1.3
   _waypointTolerance: 0.05
   _pathCoordinates: []
-  _flipSpriteFacing: 1
+  _flipSpriteFacing: 0
   _maxCurls: 3
   _rollDistance: 3
   _curledDamageShare: 0.4
@@ -144,3 +198,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Economy.Bounty
   _honeydew: 8
+--- !u!114 &1912275126781867839
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3026445683941992430}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 852332af3aa29f142b1bc2f3fcdcba93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Animation.FaceTravel
+  _body: {fileID: 7449291433947577547}
+  _artFacingDegrees: 0
+  _turnDegreesPerSecond: 720
+  _teleportDistance: 1

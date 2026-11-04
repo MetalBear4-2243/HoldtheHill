@@ -101,10 +101,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1915338611855637659}
-  - component: {fileID: 7374417255522958951}
   - component: {fileID: 1435930878618558212}
   - component: {fileID: 7570908297215969400}
   - component: {fileID: 1879310486640439383}
+  - component: {fileID: 7445119045601590629}
   m_Layer: 0
   m_Name: Enemy_RhinoBeetle
   m_TagString: Untagged
@@ -125,17 +125,114 @@ Transform:
   m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 8901919541380602473}
   - {fileID: 7514114938652337902}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &7374417255522958951
+--- !u!114 &1435930878618558212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7105141689097810667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21b7ec248614a074991f0eb13c3be66a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.RhinoBeetleEnemy
+  _maxHealth: 60
+  _damage: 15
+  _moveSpeed: 1.1
+  _waypointTolerance: 0.05
+  _pathCoordinates: []
+  _flipSpriteFacing: 0
+  _shieldCapacity: 40
+  _shieldRegrowDelay: 3
+  _shieldRegrowPerSecond: 25
+  _shieldVisual: {fileID: 2789301820359871446}
+--- !u!114 &7570908297215969400
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7105141689097810667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32163260760e481cb85ad2babca1a005, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.RegisteredEnemy
+--- !u!114 &1879310486640439383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7105141689097810667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f61290ef0f434dfaa24ca34f37be8f11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Economy.Bounty
+  _honeydew: 12
+--- !u!114 &7445119045601590629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7105141689097810667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 852332af3aa29f142b1bc2f3fcdcba93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Animation.FaceTravel
+  _body: {fileID: 8901919541380602473}
+  _artFacingDegrees: 0
+  _turnDegreesPerSecond: 720
+  _teleportDistance: 1
+--- !u!1 &7328185262829027814
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8901919541380602473}
+  - component: {fileID: 7013474645740589493}
+  - component: {fileID: 3525022422014671697}
+  m_Layer: 0
+  m_Name: Body
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8901919541380602473
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7328185262829027814}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1915338611855637659}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &7013474645740589493
 SpriteRenderer:
   serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7105141689097810667}
+  m_GameObject: {fileID: 7328185262829027814}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -177,8 +274,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 5
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 69fcb56da855fee42af32540473708ae, type: 3}
-  m_Color: {r: 0.4, g: 0.25, b: 0.15, a: 1}
+  m_Sprite: {fileID: -1326453476, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -188,50 +285,25 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
---- !u!114 &1435930878618558212
+--- !u!114 &3525022422014671697
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7105141689097810667}
+  m_GameObject: {fileID: 7328185262829027814}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 21b7ec248614a074991f0eb13c3be66a, type: 3}
+  m_Script: {fileID: 11500000, guid: a4bbc85fd0a0ddc4c8ca54197abbe59c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.RhinoBeetleEnemy
-  _maxHealth: 60
-  _damage: 15
-  _moveSpeed: 1.1
-  _waypointTolerance: 0.05
-  _pathCoordinates: []
-  _flipSpriteFacing: 1
-  _shieldCapacity: 40
-  _shieldRegrowDelay: 3
-  _shieldRegrowPerSecond: 25
-  _shieldVisual: {fileID: 2789301820359871446}
---- !u!114 &7570908297215969400
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7105141689097810667}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32163260760e481cb85ad2babca1a005, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.RegisteredEnemy
---- !u!114 &1879310486640439383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7105141689097810667}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f61290ef0f434dfaa24ca34f37be8f11, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Economy.Bounty
-  _honeydew: 12
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Animation.SpriteFlipbook
+  _renderer: {fileID: 7013474645740589493}
+  _frames:
+  - {fileID: -1326453476, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  - {fileID: 1018285284, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  - {fileID: 1556677091, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  - {fileID: -1626803882, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  - {fileID: 1050575292, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  - {fileID: 829264641, guid: a7d5183f271944b478dc171943a8a6e1, type: 3}
+  _frameSeconds: 0.1
+  _randomStart: 1
