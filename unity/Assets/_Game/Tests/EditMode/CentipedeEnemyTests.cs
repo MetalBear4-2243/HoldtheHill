@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 using HoldTheHill.Features.Enemies;
 
 namespace HoldTheHill.Tests
@@ -276,6 +278,62 @@ namespace HoldTheHill.Tests
         }
 
         [Test]
+        public void Split_NearTheEndOfThePath_KeepsTheSecondChildOffTheLastWaypoint()
+        {
+            _centipede.SetMaxHealth(10.0, resetCurrentHealth: true);
+            var pathPoints = new List<Vector3> { new Vector3(0f, 0f, 0f), new Vector3(10f, 0f, 0f) };
+            _centipede.SetPath(pathPoints, startingWaypointIndex: 1, teleportToStart: false);
+            _centipede.transform.position = new Vector3(9.5f, 0f, 0f);
+
+            List<CentipedeEnemy> children = _centipede.Split();
+            _spawnedObjects.Add(children[0].gameObject);
+            _spawnedObjects.Add(children[1].gameObject);
+
+            // Half a unit from the end: a child put a unit forward would sit on the Queen.
+            Assert.That(children[1].transform.position.x, Is.EqualTo(9.5f).Within(0.001f));
+            Assert.That(children[1].CurrentWaypointIndex, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Split_PastTheLastWaypoint_GivesNoChildAnIndexItCanNeverWalkTo()
+        {
+            _centipede.SetMaxHealth(10.0, resetCurrentHealth: true);
+            var pathPoints = new List<Vector3> { new Vector3(0f, 0f, 0f), new Vector3(10f, 0f, 0f) };
+            _centipede.SetPath(pathPoints, startingWaypointIndex: pathPoints.Count, teleportToStart: false);
+            _centipede.transform.position = new Vector3(10f, 0f, 0f);
+
+            List<CentipedeEnemy> children = _centipede.Split();
+            foreach (CentipedeEnemy child in children)
+            {
+                _spawnedObjects.Add(child.gameObject);
+                Assert.That(child.CurrentWaypointIndex, Is.LessThan(pathPoints.Count));
+            }
+        }
+
+
+
+        [Test]
+        public void Split_WithASplitPrefabThatIsNoCentipede_ErrorsAndCopiesItselfInstead()
+        {
+            var notACentipede = new GameObject("PlainEnemy");
+            notACentipede.AddComponent<BasicEnemy>();
+            _spawnedObjects.Add(notACentipede);
+
+            _centipede.SetMaxHealth(10.0, resetCurrentHealth: true);
+            _centipede.SplitPrefab = notACentipede;
+
+            LogAssert.Expect(LogType.Error, new Regex("has no CentipedeEnemy"));
+            List<CentipedeEnemy> children = _centipede.Split();
+
+            Assert.That(children.Count, Is.EqualTo(2));
+            foreach (CentipedeEnemy child in children)
+            {
+                _spawnedObjects.Add(child.gameObject);
+                Assert.That(child, Is.Not.Null);
+            }
+        }
+
+        [Test]
         public void Split_HalvesDamageInChildren()
         {
             _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
@@ -340,4 +398,3 @@ namespace HoldTheHill.Tests
         }
     }
 }
-

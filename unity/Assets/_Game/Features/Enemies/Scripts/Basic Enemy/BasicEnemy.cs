@@ -51,6 +51,10 @@ namespace HoldTheHill.Features.Enemies
 
         protected readonly Dictionary<string, ActiveStatusEffect> _activeStatusEffects = new Dictionary<string, ActiveStatusEffect>();
 
+        // The details of the hit being applied, while TakeDamage(DamageInfo) runs. TakeDamage(double)
+        // raises OnDamaged with these, or with plain details for a hit that came in as a number.
+        private DamageInfo? _pendingHit;
+
         // Events for decoupled listeners (UI, spawner tracking, audio, combat, tower credit)
         public event Action<BasicEnemy> OnDied;
         public event Action<BasicEnemy> OnDestinationReached;
@@ -95,6 +99,16 @@ namespace HoldTheHill.Features.Enemies
         /// <summary>True if health has been depleted and death sequence has started.</summary>
         public bool IsDead { get; protected set; }
 
+        /// <summary>
+        /// True once the enemy has reached the end of its path (the Queen). From then on it is out of
+        /// the fight: hits, heals, status effects and death do nothing, so a hit landing in the same
+        /// frame can neither pay a bounty nor split a centipede into children that never move.
+        /// </summary>
+        public bool ReachedEnd { get; protected set; }
+
+        /// <summary>False once the enemy is dead or has reached the end of its path.</summary>
+        public bool IsActive => !IsDead && !ReachedEnd;
+
         /// <summary>Transform of this enemy, satisfying IDamageable for aiming and distance queries.</summary>
         public Transform Transform => transform;
 
@@ -133,14 +147,14 @@ namespace HoldTheHill.Features.Enemies
 
         protected virtual void Update()
         {
-            if (IsDead)
+            if (!IsActive)
             {
                 return;
             }
 
             UpdateStatusEffects(Time.deltaTime);
 
-            if (IsDead)
+            if (!IsActive)
             {
                 return;
             }
@@ -185,7 +199,7 @@ namespace HoldTheHill.Features.Enemies
                             DamageType.Poison
                         ));
 
-                        if (IsDead)
+                        if (!IsActive)
                         {
                             break;
                         }
@@ -285,17 +299,22 @@ namespace HoldTheHill.Features.Enemies
         /// <param name="info">Details of the incoming hit from a tower, weapon, or hazard.</param>
         public virtual void TakeDamage(DamageInfo info)
         {
-            if (info.Amount <= 0f || IsDead)
+            if (info.Amount <= 0f || !IsActive)
             {
                 return;
             }
 
-            double previousHealth = _currentHealth;
-            TakeDamage((double)info.Amount);
-            float appliedDamage = (float)(previousHealth - _currentHealth);
-
-            OnDamaged?.Invoke(this, info, appliedDamage);
-            OnAnyDamaged?.Invoke(this, info, appliedDamage);
+            // Through the double overload, so subclasses that override it (the Rhino Beetle's shield,
+            // the Rolly Polly's curl) still see every hit; it raises the events with these details.
+            _pendingHit = info;
+            try
+            {
+                TakeDamage((double)info.Amount);
+            }
+            finally
+            {
+                _pendingHit = null;
+            }
         }
 
         /// <summary>
@@ -304,11 +323,15 @@ namespace HoldTheHill.Features.Enemies
         /// <param name="damageAmount">Amount of damage to inflict.</param>
         public virtual void TakeDamage(double damageAmount)
         {
-            if (damageAmount <= 0.0 || IsDead)
+            if (damageAmount <= 0.0 || !IsActive)
             {
                 return;
             }
 
+            DamageInfo hit = _pendingHit ?? new DamageInfo((float)damageAmount, null, transform.position);
+            _pendingHit = null;
+
+            double previousHealth = _currentHealth;
             _currentHealth = Math.Max(0.0, _currentHealth - damageAmount);
             OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
 
@@ -316,6 +339,12 @@ namespace HoldTheHill.Features.Enemies
             {
                 Die();
             }
+
+            // Raised for every hit, whichever overload it came through, so hit feedback and tower
+            // credit see the towers' plain-number hits too. Once, after a death it caused.
+            float appliedDamage = (float)(previousHealth - _currentHealth);
+            OnDamaged?.Invoke(this, hit, appliedDamage);
+            OnAnyDamaged?.Invoke(this, hit, appliedDamage);
         }
 
         /// <summary>
@@ -325,21 +354,32 @@ namespace HoldTheHill.Features.Enemies
         /// <param name="status">The status effect data to apply.</param>
         public virtual void ApplyStatusEffect(StatusEffectData status)
         {
-            if (!status.IsValid || IsDead)
+            if (!status.IsValid || !IsActive)
             {
                 return;
             }
 
             string effectKey = string.IsNullOrEmpty(status.EffectName) ? "Unnamed" : status.EffectName;
 
-            ActiveStatusEffect effect = new ActiveStatusEffect
+            // A refresh keeps the effect's tick clock, so a damage-over-time re-applied more often
+            // than it ticks (an aura refreshing every quarter second) still ticks. It also reuses the
+            // entry instead of allocating a new one on every refresh.
+            if (_activeStatusEffects.TryGetValue(effectKey, out ActiveStatusEffect effect))
             {
-                Data = status,
-                RemainingDuration = status.Duration,
-                TimeUntilNextTick = status.SafeTickInterval
-            };
+                effect.Data = status;
+                effect.RemainingDuration = status.Duration;
+                effect.TimeUntilNextTick = Mathf.Min(effect.TimeUntilNextTick, status.SafeTickInterval);
+            }
+            else
+            {
+                _activeStatusEffects[effectKey] = new ActiveStatusEffect
+                {
+                    Data = status,
+                    RemainingDuration = status.Duration,
+                    TimeUntilNextTick = status.SafeTickInterval
+                };
+            }
 
-            _activeStatusEffects[effectKey] = effect;
             RecalculateSpeedMultiplier();
         }
 
@@ -349,7 +389,7 @@ namespace HoldTheHill.Features.Enemies
         /// <param name="healAmount">Amount of health to restore.</param>
         public virtual void Heal(double healAmount)
         {
-            if (healAmount <= 0.0 || IsDead)
+            if (healAmount <= 0.0 || !IsActive)
             {
                 return;
             }
@@ -455,7 +495,7 @@ namespace HoldTheHill.Features.Enemies
         /// <param name="distance">Distance in world units to push backward.</param>
         public virtual void Knockback(float distance)
         {
-            if (distance <= 0f || IsDead || _pathCoordinates == null || _pathCoordinates.Count == 0)
+            if (distance <= 0f || !IsActive || _pathCoordinates == null || _pathCoordinates.Count == 0)
             {
                 return;
             }
@@ -488,9 +528,19 @@ namespace HoldTheHill.Features.Enemies
         /// </summary>
         protected virtual void OnReachedDestination()
         {
+            if (!IsActive)
+            {
+                return;
+            }
+
+            // Out of the fight before anyone hears about it, so nothing can hit it in between.
+            ReachedEnd = true;
+            _activeStatusEffects.Clear();
+            _speedMultiplier = 1f;
+
             OnDestinationReached?.Invoke(this);
             OnAnyDestinationReached?.Invoke(this);
-            Destroy(gameObject);
+            DestroySelf();
         }
 
         /// <summary>
@@ -506,7 +556,7 @@ namespace HoldTheHill.Features.Enemies
         /// </summary>
         protected virtual void Die()
         {
-            if (IsDead)
+            if (!IsActive)
             {
                 return;
             }
@@ -515,7 +565,23 @@ namespace HoldTheHill.Features.Enemies
             _activeStatusEffects.Clear();
             _speedMultiplier = 1f;
             OnDied?.Invoke(this);
-            Destroy(gameObject);
+            DestroySelf();
+        }
+
+        /// <summary>
+        /// Removes the enemy. Unity refuses <c>Destroy</c> outside Play mode, so EditMode tests that
+        /// kill an enemy, or bring one to the Queen, remove it at once instead.
+        /// </summary>
+        protected void DestroySelf()
+        {
+            if (Application.isPlaying)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                DestroyImmediate(gameObject);
+            }
         }
 
         private void OnDrawGizmosSelected()

@@ -16,6 +16,9 @@ namespace HoldTheHill.Tests
         {
             _enemyObject = new GameObject("TestEnemy");
             _enemy = _enemyObject.AddComponent<BasicEnemy>();
+
+            // EditMode never runs Awake, which is where health starts full.
+            _enemy.SetMaxHealth(_enemy.MaxHealth, resetCurrentHealth: true);
         }
 
         [TearDown]
@@ -193,6 +196,91 @@ namespace HoldTheHill.Tests
             _enemy.Knockback(2f);
 
             Assert.That(_enemy.transform.position.x, Is.EqualTo(3f).Within(0.001f));
+        }
+
+        [Test]
+        public void AnEnemyThatReachedTheQueen_CanNoLongerBeHurtHealedOrKilled()
+        {
+            bool died = false;
+            _enemy.OnDied += enemy => died = true;
+
+            _enemy.ReachDestination();
+
+            Assert.That(_enemy.ReachedEnd, Is.True);
+            Assert.That(_enemy.IsActive, Is.False);
+
+            // A hit landing in the same frame: no death, so no bounty and no centipede split.
+            _enemy.TakeDamage(_enemy.MaxHealth * 2.0);
+            _enemy.TakeDamage(new DamageInfo(1000f, null, Vector2.zero));
+            Assert.That(died, Is.False);
+            Assert.That(_enemy.IsDead, Is.False);
+        }
+
+        [Test]
+        public void ReachDestination_RaisesItsEventOnce()
+        {
+            int reached = 0;
+            _enemy.OnDestinationReached += enemy => reached++;
+
+            _enemy.ReachDestination();
+            _enemy.ReachDestination();
+
+            Assert.That(reached, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void OnDamaged_IsRaisedOnce_ForAHitByNumber_AndForAHitWithDetails()
+        {
+            int raised = 0;
+            float lastApplied = 0f;
+            GameObject lastSource = null;
+            _enemy.OnDamaged += (enemy, info, applied) =>
+            {
+                raised++;
+                lastApplied = applied;
+                lastSource = info.Source;
+            };
+
+            _enemy.TakeDamage(10.0);
+            Assert.That(raised, Is.EqualTo(1));
+            Assert.That(lastApplied, Is.EqualTo(10f).Within(0.001f));
+
+            var source = new GameObject("Source");
+            try
+            {
+                _enemy.TakeDamage(new DamageInfo(5f, source, Vector2.zero));
+                Assert.That(raised, Is.EqualTo(2), "A hit with details must not be counted twice.");
+                Assert.That(lastSource, Is.SameAs(source));
+            }
+            finally
+            {
+                Object.DestroyImmediate(source);
+            }
+        }
+
+        [Test]
+        public void ADamageOverTime_RefreshedFasterThanItTicks_StillTicks()
+        {
+            var poison = new StatusEffectData
+            {
+                EffectName = "Poison",
+                DamagePerTick = 5f,
+                TickInterval = 0.5f,
+                Duration = 2f,
+                SlowMultiplier = 1f
+            };
+
+            double start = _enemy.CurrentHealth;
+            _enemy.ApplyStatusEffect(poison);
+
+            // Re-applied every 0.25 s, like an aura, for one second: it should tick twice.
+            for (int i = 0; i < 4; i++)
+            {
+                _enemy.UpdateStatusEffects(0.25f);
+                _enemy.ApplyStatusEffect(poison);
+            }
+
+            Assert.That(start - _enemy.CurrentHealth, Is.EqualTo(10.0).Within(0.001));
         }
     }
 }
