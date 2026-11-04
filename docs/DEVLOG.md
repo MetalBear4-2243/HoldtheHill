@@ -26,6 +26,23 @@ Copy this to the top of the log:
 - What you or the team should do next
 ```
 
+## 2026-11-04 — Enemy hurt and death animations
+**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
+**Branch:** `nilly/alpha-animations`
+
+**Worked on**
+- Each hit that takes health plays the enemy sheet's 2-frame Hurt row over its walk (`EnemyHurtAndDeath`). The walk keeps time underneath, so it carries on from where it was instead of jumping.
+- A death leaves the body behind for a moment: an `EnemyDeathEffect` plays the 7-frame Death row where the enemy died, facing the way it walked, then fades out. It sits in the level scene, so Restart and Home clear it.
+- An enemy that reaches the Queen leaves no body. Shield hits on the Rhino Beetle don't flinch it; only hits on its health do.
+- Seven enemies get it. The Rolly Polly's pill-bug sheet has no Hurt or Death rows, so it stays as it was; the Queen Mantis keeps her own art.
+- Build Sprites adds the rows to each enemy prefab. Rerunning it changes nothing.
+
+**Decisions**
+- The enemy is still removed the instant it dies, as before; the body left behind is only a picture, so bounties, the win check and the Queen Mantis's raises are unchanged.
+
+**Next**
+- Tower Upgrade rows; the Rhino's ShieldHit and ShieldBreak; the Rolly Polly's Roll while curled.
+
 ## 2026-11-04 — Tower attack animations
 **Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
 **Branch:** `nilly/alpha-animations`

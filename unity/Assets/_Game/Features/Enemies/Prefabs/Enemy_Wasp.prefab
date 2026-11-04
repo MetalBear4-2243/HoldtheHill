@@ -129,6 +129,7 @@ GameObject:
   - component: {fileID: 5139298584461174411}
   - component: {fileID: 3766651792525656380}
   - component: {fileID: 4483134018295660188}
+  - component: {fileID: 8909638437939905870}
   m_Layer: 0
   m_Name: Enemy_Wasp
   m_TagString: Untagged
@@ -227,3 +228,31 @@ MonoBehaviour:
   _artFacingDegrees: 0
   _turnDegreesPerSecond: 720
   _teleportDistance: 1
+--- !u!114 &8909638437939905870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9083623440978163997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66bd863c9425458f8c78eef98d4542f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.EnemyHurtAndDeath
+  _body: {fileID: 7185587991280129999}
+  _walk: {fileID: 6244715382309034227}
+  _hurtFrames:
+  - {fileID: -621501619, guid: 2b6ff53f287098d49b5d24fe0b2d882e, type: 3}
+  - {fileID: -1912035582, guid: 2b6ff53f287098d49b5d24fe0b2d882e, type: 3}
+  _hurtFrameSeconds: 0.06
+  _deathFrames:
+  - {fileID: -1848150688, guid: 2b6ff53f287098d49b5d24fe0b2d882e, type: 3}
+  - {fileID: 633382202, guid: 2b6ff53f287098d49b5d24fe0b2d882e, type: 3}
+  - {fileID: -690482968, guid: 2b6ff53f287098d49b5d24fe0b2d882e, type: 3}
+  - {fileID: 1242097038, guid: 2b6ff53f287098d49b5d24fe0b2d882e, type: 3}
+  - {fileID: 619256322, guid: 2b6ff53f287098d49b5d24fe0b2d882e, type: 3}
+  - {fileID: -1468688653, guid: 2b6ff53f287098d49b5d24fe0b2d882e, type: 3}
+  - {fileID: -1383346088, guid: 2b6ff53f287098d49b5d24fe0b2d882e, type: 3}
+  _deathFrameSeconds: 0.08
+  _deathFadeSeconds: 0.35

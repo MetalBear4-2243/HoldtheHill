@@ -24,9 +24,34 @@ namespace HoldTheHill.Core.Animation
 
         private float _clock;
         private int _shown = -1;
+        private bool _held;
 
         /// <summary>How many frames the loop has.</summary>
         public int FrameCount => _frames != null ? _frames.Length : 0;
+
+        /// <summary>
+        /// While held, the loop keeps time but leaves the sprite alone, so a one-shot row (a hurt
+        /// flash) can show over it without the walk starting again from a new frame. Released, it
+        /// shows its current frame at once.
+        /// </summary>
+        public bool Held
+        {
+            get => _held;
+            set
+            {
+                if (_held == value)
+                {
+                    return;
+                }
+
+                _held = value;
+                if (!_held)
+                {
+                    _shown = -1;
+                    Show();
+                }
+            }
+        }
 
         private void Awake()
         {
@@ -53,7 +78,10 @@ namespace HoldTheHill.Core.Animation
 
             // Kept inside one loop, so a long run never loses float precision.
             _clock = (_clock + Time.deltaTime) % (count * _frameSeconds);
-            Show();
+            if (!_held)
+            {
+                Show();
+            }
         }
 
         private void Show()

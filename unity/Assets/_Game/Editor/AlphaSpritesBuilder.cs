@@ -115,7 +115,7 @@ namespace HoldTheHill.EditorTools
 
             AssetDatabase.SaveAssets();
             ReportAfterReload();
-            Debug.Log("Alpha sprites built: enemies loop their walk and face the road, towers loop their idle and play their attack.");
+            Debug.Log("Alpha sprites built: enemies loop their walk, face the road, flinch and die; towers loop their idle and play their attack.");
         }
 
         private static string SheetPath(string folder, string sheet) => $"{folder}/{sheet}.png";
@@ -433,7 +433,9 @@ namespace HoldTheHill.EditorTools
             body.localScale = Vector3.one * (PixelsPerUnit / loop.FrameWidth);
             body.localPosition = Vector3.zero;
 
-            SetFlipbook(EnsureComponent<SpriteFlipbook>(body.gameObject), renderer, loop);
+            SpriteFlipbook walk = EnsureComponent<SpriteFlipbook>(body.gameObject);
+            SetFlipbook(walk, renderer, loop);
+            SetHurtAndDeath(root, look, renderer, walk);
 
             var face = new SerializedObject(EnsureComponent<FaceTravel>(root));
             face.FindProperty("_body").objectReferenceValue = body;
@@ -447,6 +449,65 @@ namespace HoldTheHill.EditorTools
                 PrefabUtility.RemoveUnusedOverrides(new[] { root }, InteractionMode.AutomatedAction);
             }
             return true;
+        }
+
+        // The sheet's Hurt row plays over the walk on each hit, its Death row where the enemy dies
+        // (EnemyHurtAndDeath). A sheet without them (the pill bug) leaves the enemy as it was.
+        private const string HurtRow = "Hurt";
+        private const string DeathRow = "Death";
+
+        private static void SetHurtAndDeath(GameObject root, Look look, SpriteRenderer body, SpriteFlipbook walk)
+        {
+            string path = SheetPath(EnemySheetFolder, look.Sheet);
+            Loop hurt = SheetHasRow(path, HurtRow) ? LoadLoop(path, HurtRow) : default;
+            Loop death = SheetHasRow(path, DeathRow) ? LoadLoop(path, DeathRow) : default;
+            if (hurt.IsEmpty && death.IsEmpty)
+            {
+                return;
+            }
+
+            var so = new SerializedObject(EnsureComponent<EnemyHurtAndDeath>(root));
+            so.FindProperty("_body").objectReferenceValue = body;
+            so.FindProperty("_walk").objectReferenceValue = walk;
+            SetRow(so, "_hurtFrames", "_hurtFrameSeconds", hurt);
+            SetRow(so, "_deathFrames", "_deathFrameSeconds", death);
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void SetRow(SerializedObject so, string framesField, string secondsField, Loop row)
+        {
+            Sprite[] frames = row.IsEmpty ? Array.Empty<Sprite>() : row.Frames;
+            SerializedProperty list = so.FindProperty(framesField);
+            list.arraySize = frames.Length;
+            for (int i = 0; i < frames.Length; i++)
+            {
+                list.GetArrayElementAtIndex(i).objectReferenceValue = frames[i];
+            }
+
+            if (!row.IsEmpty)
+            {
+                so.FindProperty(secondsField).floatValue = row.FrameSeconds;
+            }
+        }
+
+        private static bool SheetHasRow(string pngPath, string row)
+        {
+            AsepriteSheet sheet = ReadSheet(pngPath);
+            if (sheet == null || sheet.frames == null)
+            {
+                return false;
+            }
+
+            foreach (AsepriteFrame frame in sheet.frames)
+            {
+                string[] parts = frame.filename.Split(' ');
+                if (parts.Length >= 2 && parts[1] == row)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // A tower does not turn, so its own sprite plays the loop. Tower keeps the base colour it reads

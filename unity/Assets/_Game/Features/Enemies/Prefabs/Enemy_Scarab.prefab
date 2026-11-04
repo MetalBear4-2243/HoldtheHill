@@ -76,6 +76,42 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: -463619095, guid: 3293b23e9e237e5489ce1bc6c00ed0f0, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_hurtFrames.Array.data[0]'
+      value: 
+      objectReference: {fileID: -1232080158, guid: 3293b23e9e237e5489ce1bc6c00ed0f0, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_hurtFrames.Array.data[1]'
+      value: 
+      objectReference: {fileID: -887045884, guid: 3293b23e9e237e5489ce1bc6c00ed0f0, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[0]'
+      value: 
+      objectReference: {fileID: 463102920, guid: 3293b23e9e237e5489ce1bc6c00ed0f0, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[1]'
+      value: 
+      objectReference: {fileID: 376354665, guid: 3293b23e9e237e5489ce1bc6c00ed0f0, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[2]'
+      value: 
+      objectReference: {fileID: 947678549, guid: 3293b23e9e237e5489ce1bc6c00ed0f0, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[3]'
+      value: 
+      objectReference: {fileID: 1687497427, guid: 3293b23e9e237e5489ce1bc6c00ed0f0, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[4]'
+      value: 
+      objectReference: {fileID: 1808281214, guid: 3293b23e9e237e5489ce1bc6c00ed0f0, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[5]'
+      value: 
+      objectReference: {fileID: -2043207830, guid: 3293b23e9e237e5489ce1bc6c00ed0f0, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[6]'
+      value: 
+      objectReference: {fileID: 1010044312, guid: 3293b23e9e237e5489ce1bc6c00ed0f0, type: 3}
     - target: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
       propertyPath: m_Name
       value: Enemy_Scarab

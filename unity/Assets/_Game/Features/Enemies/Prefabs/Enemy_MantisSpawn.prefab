@@ -76,6 +76,42 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 1965472627, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_hurtFrames.Array.data[0]'
+      value: 
+      objectReference: {fileID: 827618145, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_hurtFrames.Array.data[1]'
+      value: 
+      objectReference: {fileID: 210110216, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[0]'
+      value: 
+      objectReference: {fileID: -378539728, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[1]'
+      value: 
+      objectReference: {fileID: 103054329, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[2]'
+      value: 
+      objectReference: {fileID: -1369535545, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[3]'
+      value: 
+      objectReference: {fileID: 1283915623, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[4]'
+      value: 
+      objectReference: {fileID: 1166163772, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[5]'
+      value: 
+      objectReference: {fileID: -961917019, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
+    - target: {fileID: 5542931050383443630, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
+      propertyPath: '_deathFrames.Array.data[6]'
+      value: 
+      objectReference: {fileID: 777160245, guid: 1f456aa16e07b4b45b59a6a1efedbf5a, type: 3}
     - target: {fileID: 5634742258270139272, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
       propertyPath: m_LocalScale.x
       value: 1

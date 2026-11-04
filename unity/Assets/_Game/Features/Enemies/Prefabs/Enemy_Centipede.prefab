@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 3300021715412090444}
   - component: {fileID: 7871412728667706916}
   - component: {fileID: 4607000655058337388}
+  - component: {fileID: 5927265933580780706}
   m_Layer: 0
   m_Name: Enemy_Centipede
   m_TagString: Untagged
@@ -113,6 +114,34 @@ MonoBehaviour:
   _artFacingDegrees: 0
   _turnDegreesPerSecond: 720
   _teleportDistance: 1
+--- !u!114 &5927265933580780706
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4302541855062827728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66bd863c9425458f8c78eef98d4542f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.EnemyHurtAndDeath
+  _body: {fileID: 3060582130396330076}
+  _walk: {fileID: 1709665196289134524}
+  _hurtFrames:
+  - {fileID: -171476410, guid: 481470970916e534c99b28105ecf6c7f, type: 3}
+  - {fileID: 680151993, guid: 481470970916e534c99b28105ecf6c7f, type: 3}
+  _hurtFrameSeconds: 0.06
+  _deathFrames:
+  - {fileID: 1563393692, guid: 481470970916e534c99b28105ecf6c7f, type: 3}
+  - {fileID: 458211963, guid: 481470970916e534c99b28105ecf6c7f, type: 3}
+  - {fileID: 1649250097, guid: 481470970916e534c99b28105ecf6c7f, type: 3}
+  - {fileID: -1577217150, guid: 481470970916e534c99b28105ecf6c7f, type: 3}
+  - {fileID: -1046836317, guid: 481470970916e534c99b28105ecf6c7f, type: 3}
+  - {fileID: 1363542145, guid: 481470970916e534c99b28105ecf6c7f, type: 3}
+  - {fileID: 1843238344, guid: 481470970916e534c99b28105ecf6c7f, type: 3}
+  _deathFrameSeconds: 0.08
+  _deathFadeSeconds: 0.35
 --- !u!1 &4406328817692546951
 GameObject:
   m_ObjectHideFlags: 0
