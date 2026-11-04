@@ -15,6 +15,24 @@ public class TowerCardUI : MonoBehaviour
     public TextMeshProUGUI nameDisplay;
     public TextMeshProUGUI costDisplay;
 
+    [Header("Selection")]
+    [Tooltip("The card's background tint while its tower is picked (the ghost is out for it).")]
+    public Color selectedTint = new Color(1f, 0.82f, 0.3f, 1f);
+
+    private Image _background;
+    private Color _normalTint = Color.white;
+    private bool _showingSelected;
+
+    void Awake()
+    {
+        // The card's own background image, on the same object as this script.
+        _background = GetComponent<Image>();
+        if (_background != null)
+        {
+            _normalTint = _background.color;
+        }
+    }
+
     // 1. The shop script calls this exactly when it spawns the card
     public void SetupCard(TowerData data)
     {
@@ -31,7 +49,7 @@ public class TowerCardUI : MonoBehaviour
         // 2. Prefabs can't hold scene references, so we find the Placer dynamically
         if (towerPlacer == null)
         {
-            towerPlacer = FindFirstObjectByType<TowerPlacer>(); 
+            towerPlacer = FindAnyObjectByType<TowerPlacer>();
         }
 
         // 3. Set up the click detection
@@ -42,9 +60,43 @@ public class TowerCardUI : MonoBehaviour
         }
     }
 
+    // The card is highlighted while its tower is the one in hand: picked from this card, by its
+    // number key, or still in hand after a build. A placer read per card per frame, nothing more.
+    void Update()
+    {
+        bool selected = IsPicked();
+        if (selected == _showingSelected)
+        {
+            return;
+        }
+
+        _showingSelected = selected;
+        if (_background != null)
+        {
+            _background.color = selected ? selectedTint : _normalTint;
+        }
+    }
+
+    /// <summary>True while the placer holds this card's tower, ready to build.</summary>
+    public bool IsPicked()
+    {
+        return towerPlacer != null && towerData != null
+            && towerPlacer.Selected.HasValue && towerPlacer.Selected.Value.Data == towerData;
+    }
+
+    // Picks this card's tower; clicking the card again puts it away. Neither works while paused.
     public void OnCardClicked()
     {
-        if (towerPlacer != null && towerData != null)
+        if (towerPlacer == null || towerData == null || !towerPlacer.AcceptsInput)
+        {
+            return;
+        }
+
+        if (IsPicked())
+        {
+            towerPlacer.Select(-1);
+        }
+        else
         {
             towerPlacer.Select(towerData);
         }

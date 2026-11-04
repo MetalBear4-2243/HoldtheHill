@@ -94,12 +94,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerShopManager
   availableTowers:
-  - {fileID: 11400000, guid: 49124e34b78bb7b478a2c124090e8ca9, type: 2}
-  - {fileID: 11400000, guid: a3a276afdfecd824492bfbd9b17da016, type: 2}
-  - {fileID: 11400000, guid: ec6d28f9c1529c04ebda2fdacc270d35, type: 2}
-  - {fileID: 11400000, guid: 8504ca9d3e44fe74cb691b7a86bffc2d, type: 2}
-  - {fileID: 11400000, guid: dcf5b17dcb5f0794897348e3dbe4c5e7, type: 2}
-  - {fileID: 11400000, guid: 14cce67c52504864db0394e610f83de8, type: 2}
+  - {fileID: 11400000, guid: 1d161c5ee5411bf4e93ea2221cdf000d, type: 2}
+  - {fileID: 11400000, guid: 4a438d46cacba3e4087e8db3d9bf5bce, type: 2}
+  - {fileID: 11400000, guid: 6ed2cfab5c62a884fb47e39e274a2359, type: 2}
+  - {fileID: 11400000, guid: b039e0d9044826745a74e40464e8e8c5, type: 2}
+  - {fileID: 11400000, guid: 8a09ea24cc014fa4490a12bcb2f01e2c, type: 2}
+  - {fileID: 11400000, guid: dcf97a14bf070e64fb9d1714123395f0, type: 2}
   towerCardPrefab: {fileID: 7147593459635625576, guid: 7ef46c35c2ea0b142a6024d4fff5eb48, type: 3}
   shopContainer: {fileID: 1367690355575073055}
   shopScrollRect: {fileID: 5625163934836188351}

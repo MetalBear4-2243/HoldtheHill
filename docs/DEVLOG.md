@@ -26,6 +26,25 @@ Copy this to the top of the log:
 - What you or the team should do next
 ```
 
+## 2026-11-04 — Adam's tower list fixes
+**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md). Adam's files, edited with the team's go-ahead in the 11-04 meeting.
+**Branch:** `nilly/adam-ui-fixes`
+
+**Worked on**
+- The tower list's open blocker from 10-24: the card of the tower in hand is highlighted (gold tint), whether it was picked by card, number key or is still in hand after a build. Clicking that card again puts the tower away. Cards do nothing while paused.
+- `TowerList.prefab` lists the six real towers in number-key order instead of the six sandbox test towers (UI-2). The UI scene already did this as an override; now the prefab itself is right. A data test checks it.
+- `TowerData` moved beside the tower code, `Features/Towers/Scripts/TowerData.cs`, in the `HoldTheHill.Features.Towers` namespace (UI-10). Same GUID, same fields, so every asset keeps its values.
+- Create menu spelled "Hold the Hill" everywhere (PU-4). `TowerCardUI` uses `FindAnyObjectByType` (the old call is deprecated in 6000.6).
+
+**Decisions**
+- `TowerCardUI` and `TowerShopManager` keep their global namespace for now: the card's click is wired in the prefab by type name, and renaming it unplayed could break every card.
+- The balance box's live amount stays a scene override (HoneydewLabel); the prefab's text still says 150.
+
+**Problems / blockers**
+- Two EventSystems when playing a sandbox scene with the UI scene (CO-3) is still a team call.
+
+**Next**
+- Adam checks the highlight colour on the real card art.
 ## 2026-11-04 — Jason's enemy fixes from the 10-20 review
 **Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md). Jason's files, edited with the team's go-ahead in the 11-04 meeting.
 **Branch:** `nilly/jason-enemy-fixes`

@@ -3,6 +3,7 @@
 //10.9.2026
 
 using System.Collections.Generic;
+using HoldTheHill.Features.Towers;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -41,6 +42,9 @@ public class TowerShopManager : MonoBehaviour
 
         // Force the layout to rebuild so the scrollbar doesn't break
         Canvas.ForceUpdateCanvases();
-        shopScrollRect.verticalNormalizedPosition = 1f;
+        if (shopScrollRect != null)
+        {
+            shopScrollRect.verticalNormalizedPosition = 1f;
+        }
     }
 }
