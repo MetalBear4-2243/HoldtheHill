@@ -2,8 +2,8 @@
 
 **Target Unity Version**: Unity 6 (`6000.6.0f1`)  
 **Context**: 2D Tower Defense Game  
-**File Location**: `Assets/Scripts/EnemySpawner/EnemySpawner.cs`  
-**Companion File**: `Assets/Scripts/EnemySpawner/MapWaveDataSO.cs`
+**File Location**: `Hold the Hill/unity/Assets/_Game/Features/Enemies/Scripts/EnemySpawner/EnemySpawner.cs`  
+**Companion File**: `Hold the Hill/unity/Assets/_Game/Features/Enemies/Scripts/EnemySpawner/MapWaveDataSO.cs`
 
 ---
 
@@ -15,8 +15,8 @@
 - **Map-Specific Wave Data**: Dynamically swaps enemy compositions and wave profiles depending on the active map.
 - **Sequential Coroutine Spawning**: Spawns enemies one at a time with configurable per-enemy delays without blocking the main thread or dropping framerates.
 - **Wave Delineation & Pausing**: Automatically pauses upon completing all spawns in a wave and waits indefinitely in `WaitingForNextWave` state until explicitly prompted.
-- **Loose Coupling via UnityEvents**: Fires events for UI updates (wave counters, victory banners), sound effects, and enemy targeting without hardcoding references.
-- **Living Enemy Tracking**: Tracks instantiated enemies and provides optional gating to ensure all enemies are defeated before the next wave can start.
+- **Loose Coupling via Events**: Fires events for UI updates (wave counters, victory banners), sound effects, and enemy targeting without hardcoding references.
+- **Living Enemy Tracking**: Maintains an integer (`livingEnemyCount`) tracking alive enemies. Increments when this spawner or an enemy spawns enemies, and decrements via decoupled events when enemies die or reach the destination.
 
 ---
 
@@ -65,7 +65,12 @@ stateDiagram-v2
 | Field | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `autoStartFirstWave` | `bool` | `false` | If `true`, begins Wave 1 immediately when the scene starts. If `false`, waits for `StartNextWave()`. |
-| `requireEnemiesClearedBeforeNextWave` | `bool` | `false` | If `true`, prevents `StartNextWave()` from running until all living enemies have been defeated. |
+| `requireEnemiesClearedBeforeNextWave` | `bool` | `false` | If `true`, prevents `StartNextWave()` from running until all living enemies have been defeated (`LivingEnemyCount == 0`). |
+
+### Runtime State
+| Field | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `livingEnemyCount` | `int` | `0` | Serialized integer counter tracking alive enemies currently on the map. |
 
 ### Unity Events
 | Event | Signature | When Triggered | Common Use Cases |
@@ -86,7 +91,7 @@ stateDiagram-v2
 - **`int CurrentWaveIndex`**: Zero-based index of the current wave (`0` for Wave 1).
 - **`int CurrentWaveNumber`**: 1-based wave number (`currentWaveIndex + 1`) for UI display.
 - **`int TotalWaves`**: Total number of waves configured for the active map.
-- **`int LivingEnemyCount`**: Current count of living spawned enemies.
+- **`int LivingEnemyCount`**: Current integer count of alive enemies on the map.
 - **`bool IsSpawning`**: Returns `true` if a wave is currently actively spawning.
 
 ### Public Methods
@@ -100,27 +105,59 @@ public void StartNextWave()
 - **Safety Checks**:
   - Rejects execution if already `Spawning`.
   - Rejects execution if already `Completed`.
-  - Rejects execution if `requireEnemiesClearedBeforeNextWave` is enabled and enemies remain alive.
+  - Rejects execution if `requireEnemiesClearedBeforeNextWave` is enabled and `livingEnemyCount > 0`.
   - Terminates any lingering coroutines before starting `SpawnWaveRoutine`.
-- **Inspector Context Menu**: Can be tested directly during Play Mode by right-clicking the component header in the Inspector.
+
+#### `GameObject SpawnEnemy(EnemySpawnEntry entry)`
+```csharp
+public GameObject SpawnEnemy(EnemySpawnEntry entry)
+```
+- **Description**: Instantiates an enemy GameObject according to the entry parameters, tracks it, increments `LivingEnemyCount`, and fires `onEnemySpawned`.
+
+#### `GameObject SpawnEnemy(GameObject enemyPrefab, Transform spawnPointOverride = null)`
+```csharp
+public GameObject SpawnEnemy(GameObject enemyPrefab, Transform spawnPointOverride = null)
+```
+- **Description**: Overload to instantiate an enemy prefab directly, incrementing `LivingEnemyCount`.
+
+#### `void TrackEnemy(GameObject enemy)`
+```csharp
+public void TrackEnemy(GameObject enemy)
+```
+- **Description**: Manually tracks an externally created enemy, incrementing `LivingEnemyCount`.
 
 #### `void SetActiveMap(string mapId)`
 ```csharp
 public void SetActiveMap(string mapId)
 ```
-- **Description**: Stops any ongoing spawns, resets wave progress to 0, clears tracked enemies, and loads the wave configuration matching `mapId`. Fires `onMapChanged`.
+- **Description**: Stops any ongoing spawns, resets wave progress to 0, resets `livingEnemyCount` to 0, clears tracked enemies, and loads the wave configuration matching `mapId`. Fires `onMapChanged`.
 
 #### `void NotifyEnemyDefeated(GameObject enemy)`
 ```csharp
 public void NotifyEnemyDefeated(GameObject enemy)
 ```
-- **Description**: Call this from an enemy's health or death script to decrement `LivingEnemyCount`. (Also cleans up destroyed references automatically).
+- **Description**: Decrements `LivingEnemyCount` and removes the enemy from internal tracking.
 
 #### `void StopSpawning()`
 ```csharp
 public void StopSpawning()
 ```
 - **Description**: Immediately terminates the active spawn coroutine and resets state to `Idle`.
+
+#### Event Listeners (`SubscribeToEvents` / `UnsubscribeFromEvents`)
+```csharp
+public void SubscribeToEvents()
+public void UnsubscribeFromEvents()
+public void HandleEnemyDied(BasicEnemy enemy)
+public void HandleEnemyDestinationReached(BasicEnemy enemy)
+public void HandleCentipedeSplit(CentipedeEnemy parent, List<CentipedeEnemy> children)
+public void HandleEnemiesSpawned(int count)
+```
+- Subscribes in `OnEnable` and unsubscribes in `OnDisable` to decoupled static events:
+  - `BasicEnemy.OnAnyDied`: Decrements `LivingEnemyCount`.
+  - `BasicEnemy.OnAnyDestinationReached`: Decrements `LivingEnemyCount`.
+  - `CentipedeEnemy.OnAnyCentipedeSplit`: Increments `LivingEnemyCount` by the child count.
+  - `BasicEnemy.OnAnyEnemiesSpawned`: Increments `LivingEnemyCount` by the spawned count.
 
 ---
 
@@ -143,6 +180,7 @@ sequenceDiagram
     
     loop For Each Enemy in Wave.enemies
         Coroutine->>Unity: Instantiate(enemyPrefab, spawnPosition, rotation)
+        Note over Spawner: livingEnemyCount++
         Coroutine->>Listeners: onEnemySpawned(spawnedEnemy)
         Coroutine->>Unity: yield return new WaitForSeconds(delayBeforeNext)
         Note over Coroutine,Unity: Pauses without blocking game loop

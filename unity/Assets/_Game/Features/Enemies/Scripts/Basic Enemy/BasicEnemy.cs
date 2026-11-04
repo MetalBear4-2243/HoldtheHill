@@ -57,6 +57,13 @@ namespace HoldTheHill.Features.Enemies
 
         // Events for decoupled listeners (UI, spawner tracking, audio, combat, tower credit)
         public event Action<BasicEnemy> OnDied;
+        public static event Action<BasicEnemy> OnAnyDied;
+        public static event Action<BasicEnemy> OnEnemyDied
+        {
+            add => OnAnyDied += value;
+            remove => OnAnyDied -= value;
+        }
+        public static event Action<int> OnAnyEnemiesSpawned;
         public event Action<BasicEnemy> OnDestinationReached;
         public static event Action<BasicEnemy> OnAnyDestinationReached;
         public event Action<double, double> OnHealthChanged;
@@ -123,6 +130,8 @@ namespace HoldTheHill.Features.Enemies
         {
             OnAnyDestinationReached = null;
             OnAnyDamaged = null;
+            OnAnyDied = null;
+            OnAnyEnemiesSpawned = null;
         }
 
         protected virtual void Awake()
@@ -565,6 +574,7 @@ namespace HoldTheHill.Features.Enemies
             _activeStatusEffects.Clear();
             _speedMultiplier = 1f;
             OnDied?.Invoke(this);
+            OnAnyDied?.Invoke(this);
             DestroySelf();
         }
 
@@ -581,6 +591,17 @@ namespace HoldTheHill.Features.Enemies
             else
             {
                 DestroyImmediate(gameObject);
+            }
+        }
+
+        /// <summary>
+        /// Fires an event indicating that enemies were spawned by an existing enemy (e.g., splitting or summoning).
+        /// </summary>
+        public static void NotifyEnemiesSpawned(int count)
+        {
+            if (count > 0)
+            {
+                OnAnyEnemiesSpawned?.Invoke(count);
             }
         }
 
