@@ -59,6 +59,20 @@ Copy this to the top of the log:
 
 **Next**
 - Tower Upgrade rows, then enemy Hurt and Death, from the same sheets.
+## 2026-11-04 — Tower art on the shop cards
+**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
+**Branch:** `nilly/tower-list-art`
+
+**Worked on**
+- Each card in Adam's tower list shows its tower's own art (the first idle frame, the same picture as the tower on the map) instead of the placeholder square.
+- The card's icon keeps the art's square shape instead of stretching it to the slot.
+- `Tools > Hold the Hill > Alpha > Build Sprites` now sets the card icons too, so a rerun keeps them. A data test checks each icon matches its tower.
+
+**Decisions**
+- The icon is the idle frame from the tower's sprite sheet, not separate icon art; a drawn icon can replace it later in each tower's data asset.
+
+**Next**
+- Adam checks how the 32 px art reads at card size.
 
 ## 2026-11-04 — Adam's tower list fixes
 **Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md). Adam's files, edited with the team's go-ahead in the 11-04 meeting.

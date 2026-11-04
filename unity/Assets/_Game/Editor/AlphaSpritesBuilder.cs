@@ -34,6 +34,7 @@ namespace HoldTheHill.EditorTools
         private const string TowerPrefabFolder = "Assets/_Game/Features/Towers/Prefabs";
         private const string EnemySheetFolder = "Assets/_Game/Features/Enemies/Art/Sheets";
         private const string TowerSheetFolder = "Assets/_Game/Features/Towers/Art/Sheets";
+        private const string TowerDataFolder = "Assets/_Game/Features/Towers/Data";
         private const string BodyName = "Body";
 
         // As the placeholders: a 32 px frame is one world unit, one grid cell (TowerPlacer._cellSize is 1).
@@ -111,11 +112,12 @@ namespace HoldTheHill.EditorTools
             foreach (Look look in Towers)
             {
                 UpgradePrefab(TowerPrefabFolder, TowerSheetFolder, look, isEnemy: false);
+                SetShopIcon(look);
             }
 
             AssetDatabase.SaveAssets();
             ReportAfterReload();
-            Debug.Log("Alpha sprites built: enemies loop their walk, face the road, flinch and die; towers loop their idle and play their attack.");
+            Debug.Log("Alpha sprites built: enemies loop their walk, face the road, flinch and die; towers loop their idle and play their attack; shop cards show the tower.");
         }
 
         private static string SheetPath(string folder, string sheet) => $"{folder}/{sheet}.png";
@@ -339,6 +341,35 @@ namespace HoldTheHill.EditorTools
                 Debug.LogError($"{path} has no \"{tag}\" frames.");
             }
             return new Loop(frames.ToArray(), seconds, width);
+        }
+
+        // ---- Shop icons -----------------------------------------------------------------------
+
+        // The tower's shop card (Adam's TowerList) shows its first idle frame: the same picture as the
+        // tower standing on the map. Tower_Ant's data is Features/Towers/Data/Ant.asset, and so on.
+        private static void SetShopIcon(Look look)
+        {
+            const string PrefabPrefix = "Tower_";
+            string dataName = look.Prefab.StartsWith(PrefabPrefix, StringComparison.Ordinal)
+                ? look.Prefab.Substring(PrefabPrefix.Length)
+                : look.Prefab;
+            string dataPath = $"{TowerDataFolder}/{dataName}.asset";
+
+            var data = AssetDatabase.LoadAssetAtPath<TowerData>(dataPath);
+            if (data == null)
+            {
+                Debug.LogError($"{dataPath} is missing, so {look.Prefab}'s shop card keeps its old icon.");
+                return;
+            }
+
+            Loop loop = LoadLoop(SheetPath(TowerSheetFolder, look.Sheet), look.Loop);
+            if (loop.IsEmpty || data.towerIcon == loop.Frames[0])
+            {
+                return;
+            }
+
+            data.towerIcon = loop.Frames[0];
+            EditorUtility.SetDirty(data);
         }
 
         // ---- Prefabs --------------------------------------------------------------------------
