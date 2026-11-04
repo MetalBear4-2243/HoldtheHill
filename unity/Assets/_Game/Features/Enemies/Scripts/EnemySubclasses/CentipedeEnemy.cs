@@ -16,7 +16,7 @@ namespace HoldTheHill.Features.Enemies
         [Tooltip("Number of remaining splits allowed. Decrements with each split. Set to -1 for unlimited splits until 1 HP.")]
         [SerializeField] private int _splitsRemaining = -1;
 
-        [Tooltip("Optional prefab to instantiate for child segments. If null, this GameObject is used as the template.")]
+        [Tooltip("Optional prefab to instantiate for child segments; it must carry a CentipedeEnemy. If null, this GameObject is used as the template.")]
         [SerializeField] private GameObject _splitPrefab = null;
 
         [Tooltip("Visual scale multiplier applied to child enemies when splitting.")]
@@ -103,7 +103,7 @@ namespace HoldTheHill.Features.Enemies
         /// </summary>
         protected override void Die()
         {
-            if (IsDead)
+            if (!IsActive)
             {
                 return;
             }
@@ -183,25 +183,66 @@ namespace HoldTheHill.Features.Enemies
         }
 
         /// <summary>
-        /// Spawns 2 smaller centipede enemies with half maximum health and decremented splits remaining.
-        /// The first child is spawned at the original enemy's position, and the second child is spawned
-        /// 1 unit forward along the path.
+        /// Distance left to walk along the path, from where the centipede stands to the last waypoint.
+        /// Zero with no path or once the last waypoint is passed.
+        /// </summary>
+        public float RemainingPathDistance()
+        {
+            if (_pathCoordinates == null || _currentWaypointIndex >= _pathCoordinates.Count)
+            {
+                return 0f;
+            }
+
+            float total = 0f;
+            Vector3 from = transform.position;
+            for (int i = _currentWaypointIndex; i < _pathCoordinates.Count; i++)
+            {
+                Vector3 to = _pathCoordinates[i];
+                to.z = from.z;
+                total += Vector3.Distance(from, to);
+                from = to;
+            }
+
+            return total;
+        }
+
+        /// <summary>
+        /// Each part's damage to the Queen: half its parent's, rounded up, never below 1. The parts of
+        /// one centipede together hit the Queen about as hard as the whole centipede would have.
+        /// </summary>
+        public static int ChildDamage(int parentDamage)
+        {
+            return Mathf.Max(1, (parentDamage + 1) / 2);
+        }
+
+        /// <summary>
+        /// Spawns 2 smaller centipede enemies with half maximum health, half damage to the Queen and
+        /// decremented splits remaining. The first child is spawned at the original enemy's position,
+        /// and the second child 1 unit forward along the path, unless that would put it at the end of
+        /// the path, where it would reach the Queen at once: then it starts beside the first.
         /// </summary>
         /// <returns>List of the newly instantiated child centipede enemies.</returns>
         public List<CentipedeEnemy> Split()
         {
             double newMaxHealth = MaxHealth / 2.0;
             int childSplitsRemaining = (_splitsRemaining == -1) ? -1 : (_splitsRemaining - 1);
+            int childDamage = ChildDamage(Damage);
 
             List<CentipedeEnemy> spawnedChildren = new List<CentipedeEnemy>(2);
-            GameObject template = _splitPrefab != null ? _splitPrefab : gameObject;
+            GameObject template = SplitTemplate();
 
             // First child is spawned at the original enemy's position
             Vector3 child0Pos = transform.position;
-            int child0WaypointIndex = _currentWaypointIndex;
+            int child0WaypointIndex = ChildWaypointIndex(_currentWaypointIndex);
 
-            // Second child is spawned forward along the path
-            Vector3 child1Pos = CalculatePositionAlongPath(_splitForwardDistance, out int child1WaypointIndex);
+            // Second child is spawned forward along the path, if the path goes on that far
+            Vector3 child1Pos = child0Pos;
+            int child1WaypointIndex = child0WaypointIndex;
+            if (RemainingPathDistance() > _splitForwardDistance + _waypointTolerance)
+            {
+                child1Pos = CalculatePositionAlongPath(_splitForwardDistance, out child1WaypointIndex);
+                child1WaypointIndex = ChildWaypointIndex(child1WaypointIndex);
+            }
 
             Vector3[] spawnPositions = new Vector3[] { child0Pos, child1Pos };
             int[] waypointIndices = new int[] { child0WaypointIndex, child1WaypointIndex };
@@ -213,15 +254,11 @@ namespace HoldTheHill.Features.Enemies
 
                 GameObject childObj = Instantiate(template, spawnPos, transform.rotation, transform.parent);
                 CentipedeEnemy childCentipede = childObj.GetComponent<CentipedeEnemy>();
-                if (childCentipede == null)
-                {
-                    childCentipede = childObj.AddComponent<CentipedeEnemy>();
-                }
 
-                // Apply half max health and child splits remaining
+                // Apply half max health, half damage and child splits remaining
                 childCentipede.SetMaxHealth(newMaxHealth, resetCurrentHealth: true);
                 childCentipede.SplitsRemaining = childSplitsRemaining;
-                childCentipede.Damage = Damage;
+                childCentipede.Damage = childDamage;
                 childCentipede.MoveSpeed = MoveSpeed;
 
                 // Scale down visuals to represent a smaller enemy
@@ -240,6 +277,37 @@ namespace HoldTheHill.Features.Enemies
             OnAnyCentipedeSplit?.Invoke(this, spawnedChildren);
 
             return spawnedChildren;
+        }
+
+        // The split prefab must be a centipede: a plain BasicEnemy can't take a CentipedeEnemy as
+        // well (one enemy component per object), and the parent would walk on at 0 HP. Such a
+        // prefab is refused with an error, and the parent itself is copied instead.
+        private GameObject SplitTemplate()
+        {
+            if (_splitPrefab == null)
+            {
+                return gameObject;
+            }
+
+            if (_splitPrefab.GetComponent<CentipedeEnemy>() == null)
+            {
+                Debug.LogError($"{name}: the split prefab '{_splitPrefab.name}' has no CentipedeEnemy, so the centipede splits into copies of itself instead.", this);
+                return gameObject;
+            }
+
+            return _splitPrefab;
+        }
+
+        // A child must have a waypoint left to walk to: an index past the last waypoint would leave
+        // it standing still at the end of the path forever, and the run could never end.
+        private int ChildWaypointIndex(int index)
+        {
+            if (_pathCoordinates == null || _pathCoordinates.Count == 0)
+            {
+                return 0;
+            }
+
+            return Mathf.Clamp(index, 0, _pathCoordinates.Count - 1);
         }
     }
 }

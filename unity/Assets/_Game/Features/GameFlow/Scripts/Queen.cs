@@ -28,7 +28,7 @@ namespace HoldTheHill.Features.GameFlow
         [SerializeField] private UnityEvent<double, double> _onHealthChanged = new UnityEvent<double, double>();
 
         private double _currentHealth = 100.0;
-        //never be game over - jason
+        // Set once, when health first reaches zero, so Game Over fires only once.
         private bool _isGameOver;
 
         // C# Events for decoupled code listeners
@@ -100,7 +100,6 @@ namespace HoldTheHill.Features.GameFlow
             }
 
             _currentHealth -= damageAmount;
-            Debug.Log("Queen current health: " + _currentHealth);
             if (_currentHealth <= 0.0)
             {
                 _currentHealth = 0.0;

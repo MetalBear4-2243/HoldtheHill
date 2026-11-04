@@ -49,6 +49,10 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("If true, requires all living enemies of the current wave to be defeated before StartNextWave() can be triggered.")]
     [SerializeField] private bool requireEnemiesClearedBeforeNextWave = false;
 
+    [Header("Debug")]
+    [Tooltip("If true, logs each wave starting and finishing and map changes to the Console. Warnings are always logged.")]
+    [SerializeField] private bool logProgress = false;
+
     [Header("Events")]
     [Tooltip("Invoked whenever an enemy is instantiated.")]
     public UnityEvent<GameObject> onEnemySpawned;
@@ -78,7 +82,20 @@ public class EnemySpawner : MonoBehaviour
     public int CurrentWaveIndex { get { return currentWaveIndex; } }
     public int CurrentWaveNumber { get { return currentWaveIndex + 1; } }
     public int TotalWaves { get { return activeWaves != null ? activeWaves.Count : 0; } }
-    public int LivingEnemyCount { get { return activeLivingEnemies.Count; } }
+    /// <summary>
+    /// Enemies this spawner sent that are still on the map. Destroyed ones (killed, or arrived at
+    /// the Queen) are dropped as it is read, so it counts down as well as up. Enemies made by
+    /// something else (centipede halves, bosses' summons) are not counted; the run asks the
+    /// EnemyRegistry for those.
+    /// </summary>
+    public int LivingEnemyCount
+    {
+        get
+        {
+            PruneGoneEnemies();
+            return activeLivingEnemies.Count;
+        }
+    }
     public bool IsSpawning { get { return currentState == SpawnerState.Spawning; } }
 
     private void Awake()
@@ -123,7 +140,7 @@ public class EnemySpawner : MonoBehaviour
         activeLivingEnemies.Clear();
 
         onMapChanged?.Invoke(activeMapId);
-        Debug.Log($"[EnemySpawner] Active map changed to '{activeMapId}' with {activeWaves.Count} waves.");
+        LogProgress($"[EnemySpawner] Active map changed to '{activeMapId}' with {activeWaves.Count} waves.");
     }
 
     /// <summary>
@@ -188,7 +205,7 @@ public class EnemySpawner : MonoBehaviour
 
         if (currentState == SpawnerState.Completed)
         {
-            Debug.Log("[EnemySpawner] All waves for this map have already been completed.");
+            LogProgress("[EnemySpawner] All waves for this map have already been completed.");
             return;
         }
 
@@ -208,8 +225,7 @@ public class EnemySpawner : MonoBehaviour
         // Optional check if living enemies must be defeated first
         if (requireEnemiesClearedBeforeNextWave && activeLivingEnemies.Count > 0)
         {
-            // Filter out destroyed objects
-            activeLivingEnemies.RemoveAll(enemy => enemy == null);
+            PruneGoneEnemies();
             if (activeLivingEnemies.Count > 0)
             {
                 Debug.LogWarning($"[EnemySpawner] Cannot start next wave: {activeLivingEnemies.Count} enemies still alive.");
@@ -235,7 +251,7 @@ public class EnemySpawner : MonoBehaviour
         currentState = SpawnerState.Spawning;
         Wave wave = activeWaves[waveIdx];
 
-        Debug.Log($"[EnemySpawner] Starting {wave.waveName} ({waveIdx + 1}/{activeWaves.Count}) with {wave.enemies.Count} enemies.");
+        LogProgress($"[EnemySpawner] Starting {wave.waveName} ({waveIdx + 1}/{activeWaves.Count}) with {wave.enemies.Count} enemies.");
         onWaveStarted?.Invoke(waveIdx + 1, activeWaves.Count);
 
         for (int i = 0; i < wave.enemies.Count; i++)
@@ -262,13 +278,13 @@ public class EnemySpawner : MonoBehaviour
         int completedWaveNumber = waveIdx + 1;
         currentWaveIndex++;
 
-        Debug.Log($"[EnemySpawner] Finished spawning {wave.waveName}. Pausing spawner until next wave is prompted.");
+        LogProgress($"[EnemySpawner] Finished spawning {wave.waveName}. Pausing spawner until next wave is prompted.");
         onWaveCompleted?.Invoke(completedWaveNumber);
 
         if (currentWaveIndex >= activeWaves.Count)
         {
             currentState = SpawnerState.Completed;
-            Debug.Log("[EnemySpawner] All waves completed for active map!");
+            LogProgress("[EnemySpawner] All waves completed for active map!");
             onAllWavesCompleted?.Invoke();
         }
         else
@@ -293,6 +309,22 @@ public class EnemySpawner : MonoBehaviour
         activeLivingEnemies.Add(spawnedEnemy);
 
         onEnemySpawned?.Invoke(spawnedEnemy);
+    }
+
+    // Destroyed enemies read as null; a cached predicate, so pruning allocates nothing.
+    private static readonly System.Predicate<GameObject> IsGone = enemy => enemy == null;
+
+    private void PruneGoneEnemies()
+    {
+        activeLivingEnemies.RemoveAll(IsGone);
+    }
+
+    private void LogProgress(string message)
+    {
+        if (logProgress)
+        {
+            Debug.Log(message, this);
+        }
     }
 
     /// <summary>
