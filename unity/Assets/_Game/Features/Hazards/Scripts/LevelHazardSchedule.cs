@@ -9,7 +9,7 @@ namespace HoldTheHill.Features.Hazards
     /// wave starts. One asset per level, read by the level's <see cref="HazardScheduler"/>.
     /// No random director (the Alpha plan): the list is the whole schedule.
     /// </summary>
-    [CreateAssetMenu(fileName = "NewHazardSchedule", menuName = "Hold The Hill/Level Hazard Schedule")]
+    [CreateAssetMenu(fileName = "NewHazardSchedule", menuName = "Hold the Hill/Level Hazard Schedule")]
     public class LevelHazardSchedule : ScriptableObject
     {
         /// <summary>One scheduled hazard.</summary>
