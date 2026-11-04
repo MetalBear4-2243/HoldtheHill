@@ -274,6 +274,70 @@ namespace HoldTheHill.Tests
             Assert.That(advancedPos.y, Is.EqualTo(0.5f).Within(0.001f));
             Assert.That(targetWaypointIndex, Is.EqualTo(2));
         }
+
+        [Test]
+        public void Split_HalvesDamageInChildren()
+        {
+            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _centipede.Damage = 20;
+
+            List<CentipedeEnemy> children = _centipede.Split();
+
+            Assert.That(children.Count, Is.EqualTo(2));
+            foreach (var child in children)
+            {
+                _spawnedObjects.Add(child.gameObject);
+                Assert.That(child.Damage, Is.EqualTo(10));
+            }
+        }
+
+        [Test]
+        public void Split_WithDamageTen_HalvesDamageToFive()
+        {
+            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _centipede.Damage = 10;
+
+            List<CentipedeEnemy> children = _centipede.Split();
+
+            Assert.That(children.Count, Is.EqualTo(2));
+            foreach (var child in children)
+            {
+                _spawnedObjects.Add(child.gameObject);
+                Assert.That(child.Damage, Is.EqualTo(5));
+            }
+        }
+
+        [Test]
+        public void Split_WithDamageOne_MaintainsMinimumDamageOfOne()
+        {
+            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _centipede.Damage = 1;
+
+            List<CentipedeEnemy> children = _centipede.Split();
+
+            Assert.That(children.Count, Is.EqualTo(2));
+            foreach (var child in children)
+            {
+                _spawnedObjects.Add(child.gameObject);
+                Assert.That(child.Damage, Is.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void Split_WithDamageZero_PreservesZeroDamage()
+        {
+            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _centipede.Damage = 0;
+
+            List<CentipedeEnemy> children = _centipede.Split();
+
+            Assert.That(children.Count, Is.EqualTo(2));
+            foreach (var child in children)
+            {
+                _spawnedObjects.Add(child.gameObject);
+                Assert.That(child.Damage, Is.EqualTo(0));
+            }
+        }
     }
 }
 
