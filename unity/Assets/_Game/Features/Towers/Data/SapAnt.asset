@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: HoldTheHill.Runtime::TowerData
   towerName: Sap Ant
   honeydewCost: 225
-  towerIcon: {fileID: 21300000, guid: abad4366ac24a6843aa982b7ee96e25c, type: 3}
+  towerIcon: {fileID: 2142572427, guid: e3aaf7efcdea08d41bb2a8f93e76bc90, type: 3}

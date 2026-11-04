@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: HoldTheHill.Runtime::TowerData
   towerName: Carpenter Ant
   honeydewCost: 250
-  towerIcon: {fileID: 21300000, guid: abad4366ac24a6843aa982b7ee96e25c, type: 3}
+  towerIcon: {fileID: -1474875671, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
