@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using HoldTheHill.Core.Animation;
 using HoldTheHill.Features.Enemies;
+using HoldTheHill.Features.Towers;
 using UnityEditor;
 using UnityEditor.U2D.Sprites;
 using UnityEngine;
@@ -114,7 +115,7 @@ namespace HoldTheHill.EditorTools
 
             AssetDatabase.SaveAssets();
             ReportAfterReload();
-            Debug.Log("Alpha sprites built: enemies loop their walk and face the road, towers loop their idle.");
+            Debug.Log("Alpha sprites built: enemies loop their walk and face the road, towers loop their idle and play their attack.");
         }
 
         private static string SheetPath(string folder, string sheet) => $"{folder}/{sheet}.png";
@@ -361,7 +362,7 @@ namespace HoldTheHill.EditorTools
                     return;
                 }
 
-                bool upgraded = isEnemy ? UpgradeEnemy(root, look, loop) : UpgradeTower(root, loop);
+                bool upgraded = isEnemy ? UpgradeEnemy(root, look, loop) : UpgradeTower(root, look, loop);
                 if (upgraded)
                 {
                     PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
@@ -450,7 +451,7 @@ namespace HoldTheHill.EditorTools
 
         // A tower does not turn, so its own sprite plays the loop. Tower keeps the base colour it reads
         // in Awake for its stun and upgrade tints, so the placeholder colour goes back to white.
-        private static bool UpgradeTower(GameObject root, Loop loop)
+        private static bool UpgradeTower(GameObject root, Look look, Loop loop)
         {
             var renderer = root.GetComponent<SpriteRenderer>();
             if (renderer == null)
@@ -461,8 +462,38 @@ namespace HoldTheHill.EditorTools
 
             renderer.sprite = loop.Frames[0];
             renderer.color = Color.white;
-            SetFlipbook(EnsureComponent<SpriteFlipbook>(root), renderer, loop);
+            SpriteFlipbook idle = EnsureComponent<SpriteFlipbook>(root);
+            SetFlipbook(idle, renderer, loop);
+            SetAttack(root, look, renderer, idle);
             return true;
+        }
+
+        // The sheet's Attack row plays over the idle loop when the tower attacks (TowerAttackAnimation):
+        // frames 0-1 wind up, frame 2 lands the blow, as the Assets/Ants animations are drawn.
+        private const string AttackRow = "Attack";
+        private const int AttackHitFrame = 2;
+
+        private static void SetAttack(GameObject root, Look look, SpriteRenderer renderer, SpriteFlipbook idle)
+        {
+            Loop attack = LoadLoop(SheetPath(TowerSheetFolder, look.Sheet), AttackRow);
+            if (attack.IsEmpty)
+            {
+                Debug.LogError($"{look.Sheet} has no {AttackRow} row, so {look.Prefab} keeps only its idle.");
+                return;
+            }
+
+            var so = new SerializedObject(EnsureComponent<TowerAttackAnimation>(root));
+            so.FindProperty("_renderer").objectReferenceValue = renderer;
+            so.FindProperty("_idle").objectReferenceValue = idle;
+            so.FindProperty("_frameSeconds").floatValue = attack.FrameSeconds;
+            so.FindProperty("_hitFrame").intValue = Mathf.Min(AttackHitFrame, attack.Frames.Length - 1);
+            SerializedProperty frames = so.FindProperty("_frames");
+            frames.arraySize = attack.Frames.Length;
+            for (int i = 0; i < attack.Frames.Length; i++)
+            {
+                frames.GetArrayElementAtIndex(i).objectReferenceValue = attack.Frames[i];
+            }
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void SetFlipbook(SpriteFlipbook flipbook, SpriteRenderer renderer, Loop loop)

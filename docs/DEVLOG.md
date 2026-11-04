@@ -26,6 +26,23 @@ Copy this to the top of the log:
 - What you or the team should do next
 ```
 
+## 2026-11-04 — Tower attack animations
+**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
+**Branch:** `nilly/alpha-animations`
+
+**Worked on**
+- Every tower plays its sheet's 6-frame Attack row over its idle loop (`TowerAttackAnimation`). Frames 0-1 wind up and frame 2 lands the blow, as the art is drawn.
+- A tower that is about to fire at a target starts winding up early, so the hit frame shows the moment the swing lands or the shot leaves. If an enemy walks into range of a tower that is already ready, it jumps straight to the hit frame.
+- The row is shortened to fit when a tower fires faster than it plays (Crazy Ant, upgrades, Swarm Frenzy). Stunned or burrowed towers go back to idle.
+- The Carpenter Ant plays it when it lays a mine, the Sap Ant while its aura is slowing someone.
+- `Tools > Hold the Hill > Alpha > Build Sprites` adds the attack row to each tower prefab. Rerunning it changes nothing.
+
+**Decisions**
+- The animation is only visual: damage and fire rate are unchanged, and the wind-up never delays a shot.
+
+**Next**
+- Tower Upgrade rows, then enemy Hurt and Death, from the same sheets.
+
 ## 2026-11-04 — Adam's tower list fixes
 **Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md). Adam's files, edited with the team's go-ahead in the 11-04 meeting.
 **Branch:** `nilly/adam-ui-fixes`

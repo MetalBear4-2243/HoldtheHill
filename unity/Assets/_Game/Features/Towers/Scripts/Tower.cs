@@ -74,6 +74,18 @@ namespace HoldTheHill.Features.Towers
         /// <summary>Raised just before a hazard removes the tower, so the placer can free its cell.</summary>
         public event Action<Tower> Removed;
 
+        /// <summary>
+        /// Raised the moment the tower attacks: a melee swing lands or a shot leaves. The attack
+        /// animation lines its hit frame up with it.
+        /// </summary>
+        public event Action Attacked;
+
+        /// <summary>
+        /// Raised when a tower that works through an ability uses it: the Carpenter Ant lays a mine,
+        /// the Sap Ant's aura slows someone. The attack animation plays once for it.
+        /// </summary>
+        public event Action AbilityUsed;
+
         /// <summary>How far this tower can reach, in world units.</summary>
         public float Range => _range;
 
@@ -82,6 +94,9 @@ namespace HoldTheHill.Features.Towers
 
         /// <summary>Seconds between attacks.</summary>
         public float FireInterval => _fireInterval;
+
+        /// <summary>Seconds until the tower may attack again; zero when it is ready.</summary>
+        public float CooldownRemaining => Mathf.Max(0f, _cooldown);
 
         /// <summary>Which grid cell this tower occupies.</summary>
         public Vector2Int Cell { get; set; }
@@ -348,11 +363,20 @@ namespace HoldTheHill.Features.Towers
                         enemy.TakeDamage(damage);
                     }
                 }
+
+                Attacked?.Invoke();
                 return;
             }
 
             Projectile shot = Instantiate(_projectilePrefab, _muzzle.position, Quaternion.identity);
             shot.Launch(target, damage);
+            Attacked?.Invoke();
+        }
+
+        /// <summary>The tower's ability (mine layer, slow aura) tells the tower it acted, for the animation.</summary>
+        public void ReportAbilityUsed()
+        {
+            AbilityUsed?.Invoke();
         }
 
         // Draws the range circle, and the current target, in the Scene view when the tower is selected.
