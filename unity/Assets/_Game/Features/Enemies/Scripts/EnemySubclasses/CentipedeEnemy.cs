@@ -6,7 +6,7 @@ namespace HoldTheHill.Features.Enemies
 {
     /// <summary>
     /// Specialized subclass of <see cref="BasicEnemy"/> representing a Centipede enemy.
-    /// When defeated, it splits into 2 smaller enemies with half of the parent's maximum health.
+    /// When defeated, it splits into 2 smaller enemies with half of the parent's maximum health and damage.
     /// The newly spawned enemies continue to split upon reaching 0 HP until they only have 1 HP.
     /// Can also be constrained by a "splits remaining" counter (-1 for infinite splits until 1 HP).
     /// </summary>
@@ -183,7 +183,7 @@ namespace HoldTheHill.Features.Enemies
         }
 
         /// <summary>
-        /// Spawns 2 smaller centipede enemies with half maximum health and decremented splits remaining.
+        /// Spawns 2 smaller centipede enemies with half maximum health, half damage, and decremented splits remaining.
         /// The first child is spawned at the original enemy's position, and the second child is spawned
         /// 1 unit forward along the path.
         /// </summary>
@@ -192,6 +192,7 @@ namespace HoldTheHill.Features.Enemies
         {
             double newMaxHealth = MaxHealth / 2.0;
             int childSplitsRemaining = (_splitsRemaining == -1) ? -1 : (_splitsRemaining - 1);
+            int childDamage = Damage <= 0 ? 0 : Mathf.Max(1, Damage / 2);
 
             List<CentipedeEnemy> spawnedChildren = new List<CentipedeEnemy>(2);
             GameObject template = _splitPrefab != null ? _splitPrefab : gameObject;
@@ -218,10 +219,10 @@ namespace HoldTheHill.Features.Enemies
                     childCentipede = childObj.AddComponent<CentipedeEnemy>();
                 }
 
-                // Apply half max health and child splits remaining
+                // Apply half max health, half damage, and child splits remaining
                 childCentipede.SetMaxHealth(newMaxHealth, resetCurrentHealth: true);
                 childCentipede.SplitsRemaining = childSplitsRemaining;
-                childCentipede.Damage = Damage;
+                childCentipede.Damage = childDamage;
                 childCentipede.MoveSpeed = MoveSpeed;
 
                 // Scale down visuals to represent a smaller enemy
