@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: HoldTheHill.Runtime::TowerData
   towerName: Fire Ant
   honeydewCost: 200
-  towerIcon: {fileID: 21300000, guid: abad4366ac24a6843aa982b7ee96e25c, type: 3}
+  towerIcon: {fileID: -616928818, guid: 45c12271588f2cd468f9b20d9a0cef07, type: 3}

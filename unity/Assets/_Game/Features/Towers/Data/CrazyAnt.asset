@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: HoldTheHill.Runtime::TowerData
   towerName: Crazy Ant
   honeydewCost: 125
-  towerIcon: {fileID: 21300000, guid: abad4366ac24a6843aa982b7ee96e25c, type: 3}
+  towerIcon: {fileID: 1747458572, guid: db3d33decd84e284db235e7003c75798, type: 3}
