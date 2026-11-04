@@ -80,8 +80,18 @@ namespace HoldTheHill.Tests
             _enemy.Damage = 15;
             double initialHealth = _queen.CurrentHealth;
 
-            // Trigger enemy destination reached
-            _enemy.ReachDestination();
+            // EditMode never calls OnEnable, where the Queen subscribes, so subscribe as it does and
+            // always unsubscribe: a test Queen left on the static event would take hits all session.
+            BasicEnemy.OnAnyDestinationReached += _queen.HandleEnemyReachedDestination;
+            try
+            {
+                // Trigger enemy destination reached
+                _enemy.ReachDestination();
+            }
+            finally
+            {
+                BasicEnemy.OnAnyDestinationReached -= _queen.HandleEnemyReachedDestination;
+            }
 
             Assert.That(_queen.CurrentHealth, Is.EqualTo(initialHealth - 15.0));
         }

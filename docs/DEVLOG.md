@@ -45,6 +45,27 @@ Copy this to the top of the log:
 
 **Next**
 - Adam checks the highlight colour on the real card art.
+## 2026-11-04 — Jason's enemy fixes from the 10-20 review
+**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md). Jason's files, edited with the team's go-ahead in the 11-04 meeting.
+**Branch:** `nilly/jason-enemy-fixes`
+
+**Worked on**
+- An enemy that reaches the Queen is out of the fight at once (`BasicEnemy.ReachedEnd`): a hit in the same frame no longer pays a bounty or splits a centipede into children that never move (known item 11, EN-1).
+- A centipede killed within a unit of the end of the path no longer drops a child on the Queen: the second half starts beside the first (known item 10). No child gets a waypoint past the end (TS-6).
+- Centipede part damage (EN-3): Jason halved it himself in PR 49 while this was in progress; his rule (half, rounded down, at least 1, zero stays zero) and his tests are kept.
+- A split prefab without a `CentipedeEnemy` is refused with an error instead of leaving the parent walking at 0 HP (EN-10).
+- Both `TakeDamage` overloads raise `OnDamaged`, once per hit (TW-4, EN-5). A damage-over-time refreshed faster than it ticks still ticks, and a refresh no longer allocates (EN-8, TW-8).
+- The Queen no longer logs her health on every hit (GF-2). The spawner's wave and map messages are off unless "Log Progress" is ticked; warnings stay. Its living-enemy count now drops when enemies are destroyed.
+- His 7 failing EditMode tests pass: health set in SetUp, enemies removed with DestroyImmediate outside Play mode, the Queen test subscribes by hand (TS-1, TS-2, TS-3). 9 new tests.
+
+**Decisions**
+- The silverfish click needed nothing: Jason had already turned `OnMouseDown` off.
+
+**Problems / blockers**
+- Still open for Beta: a status effect made with SlowMultiplier left at 0 stops the enemy (CB-1); no `WaveCleared` event on the spawner.
+
+**Next**
+- Jason reviews the PR. Play a Meadow run with centipedes reaching the Queen.
 ## 2026-11-04 — Known bugs from the 10-20 review, before the Alpha
 **Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
 **Branch:** `nilly/alpha-known-bugs`
