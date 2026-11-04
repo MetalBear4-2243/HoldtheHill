@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using HoldTheHill.Features.Enemies;
 
 /// <summary>
 /// Controls enemy spawning for a 2D Tower Defense game.
@@ -76,26 +77,22 @@ public class EnemySpawner : MonoBehaviour
     private Coroutine spawnCoroutine;
     private readonly List<GameObject> activeLivingEnemies = new List<GameObject>();
 
+    [Tooltip("Number of living enemies currently tracked on the map.")]
+    [SerializeField] private int livingEnemyCount = 0;
+
     // Public Getters
     public SpawnerState CurrentState { get { return currentState; } }
     public string ActiveMapId { get { return activeMapId; } }
     public int CurrentWaveIndex { get { return currentWaveIndex; } }
     public int CurrentWaveNumber { get { return currentWaveIndex + 1; } }
     public int TotalWaves { get { return activeWaves != null ? activeWaves.Count : 0; } }
+
     /// <summary>
-    /// Enemies this spawner sent that are still on the map. Destroyed ones (killed, or arrived at
-    /// the Queen) are dropped as it is read, so it counts down as well as up. Enemies made by
-    /// something else (centipede halves, bosses' summons) are not counted; the run asks the
-    /// EnemyRegistry for those.
+    /// Current count of alive enemies on the map.
+    /// Increments when this spawner spawns an enemy or when enemies spawn other enemies (e.g. Centipede splitting),
+    /// and decrements when an enemy dies or reaches the destination.
     /// </summary>
-    public int LivingEnemyCount
-    {
-        get
-        {
-            PruneGoneEnemies();
-            return activeLivingEnemies.Count;
-        }
-    }
+    public int LivingEnemyCount { get { return livingEnemyCount; } }
     public bool IsSpawning { get { return currentState == SpawnerState.Spawning; } }
 
     private void Awake()
@@ -103,6 +100,100 @@ public class EnemySpawner : MonoBehaviour
         if (defaultSpawnPoint == null)
         {
             defaultSpawnPoint = transform;
+        }
+        livingEnemyCount = 0;
+        activeLivingEnemies.Clear();
+    }
+
+    private void OnEnable()
+    {
+        SubscribeToEvents();
+    }
+
+    private void OnDisable()
+    {
+        UnsubscribeFromEvents();
+    }
+
+    /// <summary>
+    /// Subscribes to enemy lifecycle events to track live enemy count.
+    /// Safe to call multiple times.
+    /// </summary>
+    public void SubscribeToEvents()
+    {
+        UnsubscribeFromEvents();
+
+        BasicEnemy.OnAnyDied += HandleEnemyDied;
+        BasicEnemy.OnAnyDestinationReached += HandleEnemyDestinationReached;
+        CentipedeEnemy.OnAnyCentipedeSplit += HandleCentipedeSplit;
+        BasicEnemy.OnAnyEnemiesSpawned += HandleEnemiesSpawned;
+    }
+
+    /// <summary>
+    /// Unsubscribes from enemy lifecycle events.
+    /// </summary>
+    public void UnsubscribeFromEvents()
+    {
+        BasicEnemy.OnAnyDied -= HandleEnemyDied;
+        BasicEnemy.OnAnyDestinationReached -= HandleEnemyDestinationReached;
+        CentipedeEnemy.OnAnyCentipedeSplit -= HandleCentipedeSplit;
+        BasicEnemy.OnAnyEnemiesSpawned -= HandleEnemiesSpawned;
+    }
+
+    /// <summary>
+    /// Event handler invoked when any enemy dies.
+    /// Decrements the live enemy counter.
+    /// </summary>
+    public void HandleEnemyDied(BasicEnemy enemy)
+    {
+        livingEnemyCount = Mathf.Max(0, livingEnemyCount - 1);
+        if (enemy != null)
+        {
+            activeLivingEnemies.Remove(enemy.gameObject);
+        }
+    }
+
+    /// <summary>
+    /// Event handler invoked when an enemy completes its path to the destination.
+    /// Decrements the live enemy counter.
+    /// </summary>
+    public void HandleEnemyDestinationReached(BasicEnemy enemy)
+    {
+        livingEnemyCount = Mathf.Max(0, livingEnemyCount - 1);
+        if (enemy != null)
+        {
+            activeLivingEnemies.Remove(enemy.gameObject);
+        }
+    }
+
+    /// <summary>
+    /// Event handler invoked when a centipede enemy splits into child segments.
+    /// Increments the live enemy counter by the number of spawned children.
+    /// </summary>
+    public void HandleCentipedeSplit(CentipedeEnemy parent, List<CentipedeEnemy> children)
+    {
+        if (children != null && children.Count > 0)
+        {
+            livingEnemyCount += children.Count;
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (children[i] != null)
+                {
+                    activeLivingEnemies.Add(children[i].gameObject);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Event handler invoked when an enemy spawns additional enemies into the scene.
+    /// Increments the live enemy counter.
+    /// </summary>
+    public void HandleEnemiesSpawned(int count)
+    {
+        if (count > 0)
+        {
+            livingEnemyCount += count;
         }
     }
 
@@ -138,6 +229,7 @@ public class EnemySpawner : MonoBehaviour
         currentWaveIndex = 0;
         currentState = SpawnerState.Idle;
         activeLivingEnemies.Clear();
+        livingEnemyCount = 0;
 
         onMapChanged?.Invoke(activeMapId);
         LogProgress($"[EnemySpawner] Active map changed to '{activeMapId}' with {activeWaves.Count} waves.");
@@ -223,14 +315,10 @@ public class EnemySpawner : MonoBehaviour
         }
 
         // Optional check if living enemies must be defeated first
-        if (requireEnemiesClearedBeforeNextWave && activeLivingEnemies.Count > 0)
+        if (requireEnemiesClearedBeforeNextWave && livingEnemyCount > 0)
         {
-            PruneGoneEnemies();
-            if (activeLivingEnemies.Count > 0)
-            {
-                Debug.LogWarning($"[EnemySpawner] Cannot start next wave: {activeLivingEnemies.Count} enemies still alive.");
-                return;
-            }
+            Debug.LogWarning($"[EnemySpawner] Cannot start next wave: {livingEnemyCount} enemies still alive.");
+            return;
         }
 
         if (spawnCoroutine != null)
@@ -297,18 +385,55 @@ public class EnemySpawner : MonoBehaviour
     }
 
     /// <summary>
-    /// Instantiates an enemy GameObject and tracks it.
+    /// Instantiates an enemy GameObject, tracks it, and increments the living enemy count.
     /// </summary>
-    private void SpawnEnemy(EnemySpawnEntry entry)
+    public GameObject SpawnEnemy(EnemySpawnEntry entry)
     {
+        if (entry == null || entry.enemyPrefab == null)
+        {
+            return null;
+        }
+
         Transform spawnPoint = entry.spawnPointOverride != null ? entry.spawnPointOverride : defaultSpawnPoint;
         Vector3 spawnPosition = spawnPoint != null ? spawnPoint.position : Vector3.zero;
         Quaternion spawnRotation = spawnPoint != null ? spawnPoint.rotation : Quaternion.identity;
 
         GameObject spawnedEnemy = Instantiate(entry.enemyPrefab, spawnPosition, spawnRotation, enemyContainer);
         activeLivingEnemies.Add(spawnedEnemy);
+        livingEnemyCount++;
 
         onEnemySpawned?.Invoke(spawnedEnemy);
+        return spawnedEnemy;
+    }
+
+    /// <summary>
+    /// Instantiates an enemy prefab directly at an optional spawn transform.
+    /// Increments the living enemy counter.
+    /// </summary>
+    public GameObject SpawnEnemy(GameObject enemyPrefab, Transform spawnPointOverride = null)
+    {
+        if (enemyPrefab == null)
+        {
+            return null;
+        }
+
+        return SpawnEnemy(new EnemySpawnEntry
+        {
+            enemyPrefab = enemyPrefab,
+            spawnPointOverride = spawnPointOverride
+        });
+    }
+
+    /// <summary>
+    /// Manually tracks an externally instantiated enemy, incrementing the living enemy count.
+    /// </summary>
+    public void TrackEnemy(GameObject enemy)
+    {
+        if (enemy != null && !activeLivingEnemies.Contains(enemy))
+        {
+            activeLivingEnemies.Add(enemy);
+            livingEnemyCount++;
+        }
     }
 
     // Destroyed enemies read as null; a cached predicate, so pruning allocates nothing.
@@ -329,12 +454,14 @@ public class EnemySpawner : MonoBehaviour
 
     /// <summary>
     /// Allows external enemy logic (or health components) to notify the spawner when an enemy dies.
+    /// Decrements the living enemy counter.
     /// </summary>
     public void NotifyEnemyDefeated(GameObject enemy)
     {
         if (activeLivingEnemies.Contains(enemy))
         {
             activeLivingEnemies.Remove(enemy);
+            livingEnemyCount = Mathf.Max(0, livingEnemyCount - 1);
         }
     }
 

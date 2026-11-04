@@ -29,6 +29,12 @@ namespace HoldTheHill.Features.Enemies
         public event Action<CentipedeEnemy, List<CentipedeEnemy>> OnSplit;
         public static event Action<CentipedeEnemy, List<CentipedeEnemy>> OnAnyCentipedeSplit;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticEvents()
+        {
+            OnAnyCentipedeSplit = null;
+        }
+
         /// <summary>
         /// Gets or sets the number of splits remaining.
         /// -1 enables splitting until the 1 HP condition is reached.
