@@ -9,15 +9,16 @@ namespace HoldTheHill.EditorTools
 {
     /// <summary>
     /// Alpha step 6, the bosses. Makes the Centipede prefab (Jason's <see cref="CentipedeEnemy"/>
-    /// with a <see cref="CentipedeSpeedUp"/> beside it) and the Queen Mantis prefab
-    /// (<see cref="QueenMantisBoss"/> raising Mantis Spawn husks), both with a boss-sized
-    /// <see cref="Bounty"/>, and puts one of each at the end of the last wave of its level:
-    /// the Centipede closes Tutorial Hill, the Queen Mantis closes Meadow.
+    /// with a <see cref="CentipedeSpeedUp"/> beside it) and, through <see cref="QueenMantisBuilder"/>,
+    /// the Queen Mantis prefab, both with a boss-sized <see cref="Bounty"/>, and puts one of each at
+    /// the end of the last wave of its level: the Centipede closes Tutorial Hill, the Queen Mantis
+    /// closes Meadow (Build Queen Mantis then moves her up that wave).
     /// </summary>
     /// <remarks>
-    /// Safe to run again: a prefab that exists is kept (Inspector tuning survives), and a boss is
-    /// appended to a last wave only while that wave has none. Runs after Build Enemies, which makes
-    /// the Mantis Spawn prefab the Queen raises. No scene is opened.
+    /// Safe to run again: the Centipede prefab is kept once it exists (Inspector tuning survives),
+    /// the Queen Mantis prefab is upgraded in place, and a boss is appended to a last wave only
+    /// while that wave has no enemy of the boss's kind. Runs after Build Enemies, which makes the
+    /// Mantis Spawn prefab the Queen Mantis summons and raises. No scene is opened.
     /// </remarks>
     internal static class AlphaBossesBuilder
     {
@@ -25,7 +26,6 @@ namespace HoldTheHill.EditorTools
         private const string WaveDataFolder = "Assets/_Game/Features/Enemies/Data";
         private const string CentipedePath = EnemyPrefabFolder + "/Enemy_Centipede.prefab";
         private const string QueenMantisPath = EnemyPrefabFolder + "/Enemy_QueenMantis.prefab";
-        private const string MantisSpawnPath = EnemyPrefabFolder + "/Enemy_MantisSpawn.prefab";
 
         /// <summary>Seconds between the last ordinary enemy of a boss wave and the boss itself.</summary>
         private const float GapBeforeBoss = 3f;
@@ -42,14 +42,8 @@ namespace HoldTheHill.EditorTools
             Sprite circle = AlphaCoreLoopBuilder.EnsureSprite("Circle", circle: true);
             AlphaCoreLoopBuilder.EnsureFolder(EnemyPrefabFolder);
 
-            var husk = AssetDatabase.LoadAssetAtPath<GameObject>(MantisSpawnPath);
-            if (husk == null)
-            {
-                Debug.LogWarning($"{MantisSpawnPath} does not exist yet; run Build Enemies first. The Queen Mantis will raise nothing until it is set.");
-            }
-
             EnsureCentipedePrefab(circle);
-            EnsureQueenMantisPrefab(circle, husk);
+            QueenMantisBuilder.EnsurePrefab();
             AssetDatabase.SaveAssets();
 
             for (int i = 0; i < Levels.Length; i++)
@@ -103,32 +97,6 @@ namespace HoldTheHill.EditorTools
             return prefab;
         }
 
-        private static GameObject EnsureQueenMantisPrefab(Sprite circle, GameObject husk)
-        {
-            GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(QueenMantisPath);
-            if (existing != null)
-            {
-                return existing;
-            }
-
-            GameObject go = NewBossObject("Enemy_QueenMantis", circle, new Color(0.25f, 0.6f, 0.2f), 1.1f);
-            var queen = go.AddComponent<QueenMantisBoss>();
-            var so = new SerializedObject(queen);
-            so.FindProperty("_maxHealth").doubleValue = 300.0;
-            so.FindProperty("_damage").intValue = 40;
-            so.FindProperty("_moveSpeed").floatValue = 0.8f;
-            so.FindProperty("_huskPrefab").objectReferenceValue = husk != null ? husk.GetComponent<BasicEnemy>() : null;
-            so.ApplyModifiedPropertiesWithoutUndo();
-
-            go.AddComponent<RegisteredEnemy>();
-            SetBounty(go.AddComponent<Bounty>(), 80);
-
-            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, QueenMantisPath);
-            Object.DestroyImmediate(go);
-            Debug.Log("Made Enemy_QueenMantis (QueenMantisBoss; heals in white, raises Mantis Spawn husks in black).");
-            return prefab;
-        }
-
         private static GameObject NewBossObject(string name, Sprite sprite, Color color, float scale)
         {
             var go = new GameObject(name);
@@ -150,7 +118,8 @@ namespace HoldTheHill.EditorTools
 
         /// <summary>
         /// Puts one boss at the end of the level's last wave, a beat after the last ordinary enemy,
-        /// unless that wave already has one.
+        /// unless that wave already has an enemy of the boss's kind (matched by its enemy component,
+        /// not prefab identity, so a variant or a moved entry counts).
         /// </summary>
         private static void AppendBossToLastWave(string wavesPath, GameObject boss)
         {
@@ -168,11 +137,14 @@ namespace HoldTheHill.EditorTools
             }
 
             Wave last = waves.waves[waves.waves.Count - 1];
+            System.Type kind = boss.GetComponent<BasicEnemy>() != null ? boss.GetComponent<BasicEnemy>().GetType() : null;
             for (int i = 0; i < last.enemies.Count; i++)
             {
-                if (last.enemies[i].enemyPrefab == boss)
+                GameObject prefab = last.enemies[i].enemyPrefab;
+                BasicEnemy enemy = prefab != null ? prefab.GetComponent<BasicEnemy>() : null;
+                if (prefab == boss || (kind != null && enemy != null && enemy.GetType() == kind))
                 {
-                    Debug.Log($"{waves.name}: {last.waveName} already ends with {boss.name}; kept as it is.");
+                    Debug.Log($"{waves.name}: {last.waveName} already has a {kind?.Name ?? boss.name}; kept as it is.");
                     return;
                 }
             }
@@ -213,8 +185,10 @@ namespace HoldTheHill.EditorTools
             else
             {
                 var enemy = queen.GetComponent<QueenMantisBoss>();
-                string husk = enemy != null ? AlphaRunFrameBuilder.Name(new SerializedObject(enemy), "_huskPrefab") : "NO QueenMantisBoss";
-                Debug.Log($"Enemy_QueenMantis: {Parts(queen)}; husk prefab {husk}"
+                string spawn = enemy == null ? "NO QueenMantisBoss"
+                    : enemy.Data == null ? "NO data asset"
+                    : enemy.Data.SpawnPrefab != null ? enemy.Data.SpawnPrefab.name : "none";
+                Debug.Log($"Enemy_QueenMantis: {Parts(queen)}; summons and raises {spawn}"
                     + (enemy != null ? $"; health {enemy.MaxHealth}, speed {enemy.MoveSpeed}" : ""));
             }
 

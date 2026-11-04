@@ -6,7 +6,9 @@ namespace HoldTheHill.Features.Hazards
 {
     /// <summary>
     /// The human with the pesticide. A cloud thickens over the map for a warning spell, then
-    /// every tower that is not burrowed is stunned for a while. Burrow first and the colony is safe.
+    /// every tower that is not burrowed is stunned for a while. Burrow first and the colony is safe:
+    /// the burrowed towers come back up by themselves as the cloud lands, so staying under too long
+    /// cannot cost the run.
     /// </summary>
     [DisallowMultipleComponent]
     public class PesticideHuman : MonoBehaviour
@@ -15,7 +17,7 @@ namespace HoldTheHill.Features.Hazards
         [SerializeField, Min(0f)] private float _warningSeconds = 2.5f;
 
         [Tooltip("Seconds every unburrowed tower is stunned when the cloud lands.")]
-        [SerializeField, Min(0.1f)] private float _stunSeconds = 6f;
+        [SerializeField, Min(0.1f)] private float _stunSeconds = 4f;
 
         [Tooltip("The cloud sprite. Fades in over the warning and out over the stun.")]
         [SerializeField] private SpriteRenderer _cloud;
@@ -59,7 +61,17 @@ namespace HoldTheHill.Features.Hazards
             for (int i = 0; i < towers.Count; i++)
             {
                 Tower tower = towers[i];
-                if (tower != null && !tower.Burrowed)
+                if (tower == null)
+                {
+                    continue;
+                }
+
+                // The spray only lands once, so a burrowed tower is already past the danger.
+                if (tower.Burrowed)
+                {
+                    tower.Burrowed = false;
+                }
+                else
                 {
                     tower.Stun(_stunSeconds);
                 }

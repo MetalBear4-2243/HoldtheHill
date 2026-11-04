@@ -22,7 +22,8 @@ namespace HoldTheHill.Features.UI
         public const string OrderFirst = "First";
         public const string OrderLast = "Last";
         public const string OrderClosest = "Closest";
-        public const string CurrentOrderMark = "▸ ";
+        // Plain ASCII: the HUD font (LiberationSans) has no arrow glyphs.
+        public const string CurrentOrderMark = "> ";
         public const string Burrow = "Burrow";
         public const string Unburrow = "Come up";
         public const string UnknownTower = "Tower";
@@ -32,7 +33,7 @@ namespace HoldTheHill.Features.UI
         public const string ControlsTitle = "Controls  (F1 hides this)";
         public static readonly string[] ControlsLines =
         {
-            "1-6  pick a tower to build",
+            "1-6 or click a card  pick a tower",
             "Left click  build, or select a placed tower",
             "Right click  cancel",
             "Space  next wave",
@@ -40,8 +41,12 @@ namespace HoldTheHill.Features.UI
             "Esc  pause",
             "U  upgrade the selected tower",
             "B  burrow or raise all towers",
+            "Click a silverfish to squash it",
             "Click a drop to collect it, click the slot to use it",
         };
+
+        /// <summary>The whole help box: the title over one line per control. After <see cref="ControlsLines"/>, which it reads.</summary>
+        public static readonly string ControlsText = ControlsTitle + "\n" + string.Join("\n", ControlsLines);
 
         // The power-up slot.
         public const string PowerUpEmpty = "No power-up";
@@ -49,7 +54,15 @@ namespace HoldTheHill.Features.UI
         public const string RoyalGift = "Royal Gift";
         public const string PickTowerForGift = "Pick a tower";
         public const string GiftAtMaxLevel = "Already max level";
+        public const string SlotFull = "Slot full";
         public const string FrenzyActiveFormat = "Frenzy {0} s";
+
+        // The Queen Mantis boss bar: her name, then what her shade does, in words as well as colour.
+        public const string MantisBarFormat = "{0} - {1}";
+        public const string QueenMantis = "Queen Mantis";
+        public const string MantisWhite = "White: heals";
+        public const string MantisBlack = "Black: raises the fallen";
+        public const string MantisPraying = "Praying: hit her now";
 
         // Home screen. Level titles come from Core's LevelCatalogue, beside their scene ids.
         public const string GameTitle = "Hold the Hill";

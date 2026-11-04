@@ -8,13 +8,13 @@ namespace HoldTheHill.Features.Towers
     /// <summary>
     /// A placed tower. Knows its grid cell, picks a target in range by its
     /// <see cref="TargetingPriority"/>, and attacks it on a cooldown: with a projectile when
-    /// it has one, otherwise with a direct melee hit. Numbers live on the prefab variants,
-    /// one set per level; <see cref="Upgrade"/> moves to the next set.
+    /// it has one, otherwise with a melee swing that hits every ground enemy in reach. Numbers
+    /// live on the prefab variants, one set per level; <see cref="Upgrade"/> moves to the next set.
     /// </summary>
     /// <remarks>
-    /// Towers that do something else in range (slow, lay mines) carry a second component that
-    /// reads <see cref="Range"/> and <see cref="Damage"/>; a tower with no damage and no
-    /// projectile does not attack on its own.
+    /// Towers that do something else in range (slow, lay mines) carry an <see cref="ITowerAbility"/>
+    /// component that reads <see cref="Range"/> and <see cref="Damage"/>; such a tower, or one with
+    /// no damage and no projectile, does not attack on its own.
     /// </remarks>
     public class Tower : MonoBehaviour
     {
@@ -60,8 +60,10 @@ namespace HoldTheHill.Features.Towers
         private readonly List<BasicEnemy> _inRange = new List<BasicEnemy>();
         private readonly TowerCondition _condition = new TowerCondition();
         private SpriteRenderer _sprite;
+        private TowerStunRing _stunRing;
         private Color _baseColor = Color.white;
         private float _cooldown;
+        private bool _hasAbility;
 
         /// <summary>Raised after an upgrade, with the new level. The card and visuals listen.</summary>
         public event Action<int> Upgraded;
@@ -148,7 +150,22 @@ namespace HoldTheHill.Features.Towers
             enemyFlying: true, hasProjectile: _projectilePrefab != null,
             lobbed: _projectilePrefab != null && _projectilePrefab.IsLobbed);
 
-        private bool Attacks => _damage > 0f || _projectilePrefab != null;
+        /// <summary>
+        /// True when the tower picks its own targets, so its standing order (First / Last / Closest)
+        /// matters. False for the Sap Ant's aura and the Carpenter Ant's mines. The card reads it.
+        /// </summary>
+        public bool UsesTargeting => Attacks;
+
+        private bool Attacks => AttacksOnItsOwn(_hasAbility, _damage, _projectilePrefab != null);
+
+        /// <summary>
+        /// The attack rule: a tower with an <see cref="ITowerAbility"/> (a mine layer or a slow aura) does
+        /// the work through it and only lends it its numbers; one with no damage and no projectile has nothing to hit with.
+        /// </summary>
+        public static bool AttacksOnItsOwn(bool hasAbility, float damage, bool hasProjectile)
+        {
+            return !hasAbility && (damage > 0f || hasProjectile);
+        }
 
         private void Awake()
         {
@@ -156,6 +173,8 @@ namespace HoldTheHill.Features.Towers
             {
                 _muzzle = transform;
             }
+
+            _hasAbility = GetComponent<ITowerAbility>() != null;
 
             _sprite = GetComponentInChildren<SpriteRenderer>();
             if (_sprite != null)
@@ -204,6 +223,12 @@ namespace HoldTheHill.Features.Towers
         {
             _condition.Stun(seconds);
             RefreshTint();
+
+            // Made on the first stun, so no tower prefab has to carry one.
+            if (_stunRing == null)
+            {
+                _stunRing = TowerStunRing.Attach(this, _sprite, _stunnedTint);
+            }
         }
 
         /// <summary>A hazard makes the tower miss for <paramref name="seconds"/>: it fires, to no effect.</summary>
@@ -309,7 +334,17 @@ namespace HoldTheHill.Features.Towers
 
             if (_projectilePrefab == null)
             {
-                target.TakeDamage(damage);
+                // A melee swing hits every ground enemy in reach, not just the target. AcquireTarget
+                // filled the list this frame and left flyers out (the wasp rule). A hit can kill and
+                // split a centipede; the list is a copy, so that is safe.
+                for (int i = 0; i < _inRange.Count; i++)
+                {
+                    BasicEnemy enemy = _inRange[i];
+                    if (enemy != null && !enemy.IsDead)
+                    {
+                        enemy.TakeDamage(damage);
+                    }
+                }
                 return;
             }
 

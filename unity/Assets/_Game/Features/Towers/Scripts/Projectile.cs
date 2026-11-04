@@ -6,9 +6,10 @@ namespace HoldTheHill.Features.Towers
 {
     /// <summary>
     /// One shot from a ranged tower. A straight shot flies at its target and deals the tower's
-    /// damage on arrival; if the target dies first it carries on and expires. A lobbed shot flies
-    /// to where the target stood when it was fired, drawn along an arc, and damages everything
-    /// within its splash radius where it lands.
+    /// damage on arrival; if the target dies or reaches the Queen first it carries on and expires.
+    /// A lobbed shot flies to where the target stood when it was fired, drawn along an arc, and
+    /// damages every enemy still in the <see cref="EnemyRegistry"/> within its splash radius where
+    /// it lands.
     /// </summary>
     [DisallowMultipleComponent]
     public class Projectile : MonoBehaviour
@@ -81,7 +82,13 @@ namespace HoldTheHill.Features.Towers
 
             float step = _speed * Time.deltaTime;
 
-            // A destroyed target compares equal to null, so the shot just keeps its last heading.
+            // A target that died or reached the Queen has left the registry: drop it, and the shot
+            // keeps its last heading and expires. A hit on the frame it arrived would pay a bounty.
+            if (_target != null && !EnemyRegistry.Contains(_target))
+            {
+                _target = null;
+            }
+
             if (_target != null && !_target.IsDead)
             {
                 Vector3 targetPosition = _target.transform.position;

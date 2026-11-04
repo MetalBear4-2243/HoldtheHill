@@ -1,3 +1,4 @@
+using HoldTheHill.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -6,8 +7,10 @@ namespace HoldTheHill.Features.UI
 {
     /// <summary>
     /// A developer help box on the HUD listing the keys and clicks, from <see cref="UiStrings"/>.
-    /// Shown by default; the ToggleHelp action (F1) hides and shows it. Lives under the HUD object,
-    /// so it goes away with the HUD between levels.
+    /// Opens with the tutorial level only (<see cref="LevelInfo.ShowsControlsHelp"/>), since on later
+    /// maps it covers the road; the ToggleHelp action (F1) hides and shows it, and once the player has
+    /// used F1 the box stays as they left it. Lives under the HUD object, so it goes away with the HUD
+    /// between levels and is set again when the next run's HUD comes on.
     /// </summary>
     [DisallowMultipleComponent]
     public class ControlsOverlay : MonoBehaviour
@@ -22,6 +25,7 @@ namespace HoldTheHill.Features.UI
         [SerializeField] private InputActionAsset _actions;
 
         private InputAction _toggle;
+        private bool _playerChose;
 
         private void Awake()
         {
@@ -40,13 +44,28 @@ namespace HoldTheHill.Features.UI
         {
             if (_text != null)
             {
-                _text.text = UiStrings.ControlsTitle + "\n" + string.Join("\n", UiStrings.ControlsLines);
+                _text.text = UiStrings.ControlsText;
+            }
+
+            // The HUD comes on with each run; until the player has pressed F1, the level decides.
+            if (!_playerChose && _panel != null)
+            {
+                _panel.SetActive(OpenLevelShowsHelp());
             }
 
             if (_toggle != null)
             {
                 _toggle.Enable();
             }
+        }
+
+        private static bool OpenLevelShowsHelp()
+        {
+            SceneLoader loader = SceneLoader.Current;
+            string levelId = loader != null ? loader.OpenLevelId : null;
+
+            // A level opened straight from its scene, or one not on the list, keeps the box open.
+            return levelId == null || !LevelCatalogue.TryFind(levelId, out LevelInfo level) || level.ShowsControlsHelp;
         }
 
         private void OnDisable()
@@ -62,6 +81,7 @@ namespace HoldTheHill.Features.UI
             if (_toggle != null && _toggle.WasPressedThisFrame() && _panel != null)
             {
                 _panel.SetActive(!_panel.activeSelf);
+                _playerChose = true;
             }
         }
     }

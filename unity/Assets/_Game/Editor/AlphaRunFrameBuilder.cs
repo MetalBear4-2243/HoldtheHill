@@ -67,7 +67,7 @@ namespace HoldTheHill.EditorTools
             AssetDatabase.SaveAssets();
 
             ReportAfterReload();
-            Debug.Log("Alpha run frame built: open Hill01_Gameplay and press Play. Space sends a wave, T toggles 2x, Esc pauses.");
+            Debug.Log("Alpha run frame built in Hill01, the template the levels copy. To play, open L00_TutorialHill_Gameplay and press Play. Space sends a wave, T toggles 2x, Esc pauses.");
         }
 
         /// <summary>Entry point for a batch run: <c>-executeMethod HoldTheHill.EditorTools.AlphaRunFrameBuilder.BuildFromCommandLine</c>.</summary>

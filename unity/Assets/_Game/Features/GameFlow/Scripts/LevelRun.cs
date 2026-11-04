@@ -126,10 +126,10 @@ namespace HoldTheHill.Features.GameFlow
             }
         }
 
-        /// <summary>Sends the next wave. Does nothing once the run is over.</summary>
+        /// <summary>Sends the next wave. Does nothing while paused or once the run is over.</summary>
         public void StartNextWave()
         {
-            if (Outcome == RunOutcome.Playing && _spawner != null)
+            if (Outcome == RunOutcome.Playing && !Clock.Paused && _spawner != null)
             {
                 _spawner.StartNextWave();
             }
@@ -162,12 +162,30 @@ namespace HoldTheHill.Features.GameFlow
             }
         }
 
-        /// <summary>Buys the next level of the selected tower, if any. The U key comes here.</summary>
+        /// <summary>Buys the next level of the selected tower, if any. The U key and the card's Upgrade button come here.</summary>
         public void UpgradeSelectedTower()
         {
             if (Outcome == RunOutcome.Playing && !Clock.Paused && _placer != null)
             {
                 _placer.UpgradeSelectedTower();
+            }
+        }
+
+        /// <summary>Sells the selected tower, if any. The card's Sell button comes here.</summary>
+        public void SellSelectedTower()
+        {
+            if (Outcome == RunOutcome.Playing && !Clock.Paused && _placer != null)
+            {
+                _placer.SellSelectedTower();
+            }
+        }
+
+        /// <summary>Burrows the selected tower, or brings it back up. The card's Burrow button comes here.</summary>
+        public void ToggleBurrowSelectedTower()
+        {
+            if (Outcome == RunOutcome.Playing && !Clock.Paused && _placer != null && _placer.SelectedTower != null)
+            {
+                _placer.SelectedTower.Burrowed = !_placer.SelectedTower.Burrowed;
             }
         }
 
@@ -248,6 +266,18 @@ namespace HoldTheHill.Features.GameFlow
         private void ApplyTimeScale()
         {
             Time.timeScale = Clock.TimeScale;
+
+            // The Input System doesn't follow the time scale, so the placer and the power-ups are
+            // told: no building, picking, collecting or cancelling under the pause menu or the result panel.
+            if (_placer != null)
+            {
+                _placer.AcceptsInput = !Clock.Paused;
+            }
+
+            if (_powerUps != null)
+            {
+                _powerUps.AcceptsInput = !Clock.Paused;
+            }
         }
 
         // Domain reload is on, but clearing keeps Play mode safe if that ever changes.

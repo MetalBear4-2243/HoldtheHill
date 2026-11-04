@@ -49,8 +49,9 @@ namespace HoldTheHill.EditorTools
             public WaveSpec[] Waves;
         }
 
-        // Grid cells, cell size 1. The camera is orthographic size 5 at the origin, so x in [-9, 9] and
-        // y in [-5, 5] are on screen at 16:9; routes enter and leave off the left and right edges.
+        // Grid cells, cell size 1; the map is cells x -10..9 and y -5..4 (TowerPlacer.MapCells), world
+        // x and y in [-10, 10] and [-5, 5]. LevelCameraFit sizes the camera to show all of it, the Queen
+        // at x 9.5 included, with room above and below for the HUD and on the right for the shop list.
         private static readonly Dictionary<string, LevelSpec> Specs = new Dictionary<string, LevelSpec>
         {
             ["L00_TutorialHill"] = new LevelSpec
@@ -216,6 +217,7 @@ namespace HoldTheHill.EditorTools
             {
                 camera.clearFlags = CameraClearFlags.SolidColor;
                 camera.backgroundColor = spec.CameraBackground;
+                AlphaPlaytestToolsBuilder.EnsureCameraFit(camera);
             }
 
             EditorSceneManager.MarkSceneDirty(scene);

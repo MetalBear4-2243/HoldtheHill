@@ -1,5 +1,6 @@
 using HoldTheHill.Features.GameFlow;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace HoldTheHill.Features.UI
@@ -51,7 +52,14 @@ namespace HoldTheHill.Features.UI
         private void Refresh()
         {
             bool paused = Run != null && Run.Clock.Paused && Run.Outcome == RunOutcome.Playing;
+            bool opening = paused && !_panel.activeSelf;
             _panel.SetActive(paused);
+
+            // Take the keyboard focus from whatever HUD button had it, so Enter means Resume, not Upgrade.
+            if (opening && EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(_resume.gameObject);
+            }
         }
 
         private void HandleFinished(RunOutcome outcome)

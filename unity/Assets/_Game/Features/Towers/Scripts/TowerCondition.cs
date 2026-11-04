@@ -16,6 +16,9 @@ namespace HoldTheHill.Features.Towers
         /// <summary>Seconds of stun left. A stunned tower does nothing.</summary>
         public float StunnedFor { get; private set; }
 
+        /// <summary>How long the current stun was when it began, so its time left can be drawn as a share.</summary>
+        public float StunLength { get; private set; }
+
         /// <summary>Seconds of missing left. A missing tower fires, but its shots and hits do nothing.</summary>
         public float MissingFor { get; private set; }
 
@@ -32,8 +35,15 @@ namespace HoldTheHill.Features.Towers
         /// <summary>Stuns for <paramref name="seconds"/>. A shorter stun never cuts a longer one short.</summary>
         public void Stun(float seconds)
         {
-            StunnedFor = Math.Max(StunnedFor, seconds);
+            if (seconds > StunnedFor)
+            {
+                StunnedFor = seconds;
+                StunLength = seconds;
+            }
         }
+
+        /// <summary>The share of the current stun still to run, from 1 when it lands to 0 when it is over.</summary>
+        public float StunLeftShare => StunLength > 0f ? StunnedFor / StunLength : 0f;
 
         /// <summary>Makes the tower miss for <paramref name="seconds"/>. Never shortens a longer spell.</summary>
         public void Miss(float seconds)
