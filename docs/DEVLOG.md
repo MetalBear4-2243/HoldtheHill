@@ -26,6 +26,23 @@ Copy this to the top of the log:
 - What you or the team should do next
 ```
 
+## 2026-11-04 — Shot and mine art
+**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
+**Branch:** `nilly/alpha-projectile-art`
+
+**Worked on**
+- The Bullet Ant's shot is the Spitter's acid glob and the Fire Ant's lob is the Bombardier's shell, each looping its Fly row and turned to face where it flies (the lob tips over along its arc).
+- The Carpenter Ant's mine blinks its Armed row while it waits.
+- A bullet hit leaves a small acid splash, a lob a blast where it lands, a mine its explosion. Each plays once and removes itself (`SpriteOneShot`).
+- `Tools > Hold the Hill > Alpha > Build Sprites` adds all of it. Rerunning it changes nothing. A data test checks each prefab.
+
+**Decisions**
+- Picks are Nilly's: each tower's own shot from the same art set, the old mine, the Acid, Blast and Explode rows.
+- Shots, mine and effects are drawn at the towers' pixel size (scale 0.8), so they come out about as big as the circles they replace. The blasts are smaller than the damage area; scale them up in the `Fx_` prefabs if that reads wrong.
+
+**Next**
+- Still placeholders: the wasp's stinger, the Rhino Beetle's shield circle, the Queen.
+
 ## 2026-11-04 — Enemy hurt and death animations
 **Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
 **Branch:** `nilly/alpha-animations`

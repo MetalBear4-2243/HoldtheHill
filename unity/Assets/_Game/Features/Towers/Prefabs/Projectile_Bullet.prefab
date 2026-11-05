@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 8693054781168019592}
   - component: {fileID: 5010976850460415802}
   - component: {fileID: 745359060003485302}
+  - component: {fileID: 6834296340782205202}
+  - component: {fileID: 2472805096798912768}
   m_Layer: 0
   m_Name: Projectile_Bullet
   m_TagString: Untagged
@@ -28,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -82,8 +84,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 20
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 69fcb56da855fee42af32540473708ae, type: 3}
-  m_Color: {r: 1, g: 0.9, b: 0.3, a: 1}
+  m_Sprite: {fileID: 268568401, guid: baecdb2217544ca4dad6f77b05ca44aa, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -108,3 +110,43 @@ MonoBehaviour:
   _speed: 10
   _hitRadius: 0.2
   _lifetime: 3
+  _lobbed: 0
+  _arcHeight: 1.5
+  _splashRadius: 1
+  _hitEffect: {fileID: 4038922836402998990, guid: fdf27b58a1c1e8d49b0fae109b8bea17, type: 3}
+--- !u!114 &6834296340782205202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1345024644739851045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4bbc85fd0a0ddc4c8ca54197abbe59c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Animation.SpriteFlipbook
+  _renderer: {fileID: 5010976850460415802}
+  _frames:
+  - {fileID: 268568401, guid: baecdb2217544ca4dad6f77b05ca44aa, type: 3}
+  - {fileID: 1805506527, guid: baecdb2217544ca4dad6f77b05ca44aa, type: 3}
+  - {fileID: 975997614, guid: baecdb2217544ca4dad6f77b05ca44aa, type: 3}
+  - {fileID: 377398598, guid: baecdb2217544ca4dad6f77b05ca44aa, type: 3}
+  _frameSeconds: 0.06
+  _randomStart: 1
+--- !u!114 &2472805096798912768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1345024644739851045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 852332af3aa29f142b1bc2f3fcdcba93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Animation.FaceTravel
+  _body: {fileID: 8693054781168019592}
+  _artFacingDegrees: 0
+  _turnDegreesPerSecond: 3600
+  _teleportDistance: 1

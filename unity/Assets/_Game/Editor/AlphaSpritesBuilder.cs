@@ -17,6 +17,8 @@ namespace HoldTheHill.EditorTools
     /// towers, each playing one looping row through a <see cref="SpriteFlipbook"/> (no Animator).
     /// Enemies loop Walk on a child "Body" that a <see cref="FaceTravel"/> turns to face the way they
     /// walk; towers loop Idle on their own sprite. The Queen Mantis keeps her own art and is not touched.
+    /// Shots and the Carpenter's mine loop their row on their own sprite (shots turn to face their
+    /// flight), and each leaves a one-shot effect (<see cref="SpriteOneShot"/>) where it hits.
     /// </summary>
     /// <remarks>
     /// Safe to run again: a sheet already sliced and set up is kept as it is, and the prefabs are
@@ -26,7 +28,9 @@ namespace HoldTheHill.EditorTools
     /// <c>B:\Archive\hold-the-hill-drive-offload-2026-10-07.zip</c>), copied into the features' <c>Art/Sheets</c>.
     /// Each sheet is cut by its JSON, one sprite per frame, named as in Aseprite ("EnemyRunner Walk 0").
     /// Tower picks are Nilly's (2026-11-03): the six Alpha towers wear old-roster sheets.
-    /// To take the art off again: delete the two Art/Sheets folders and revert the prefabs.
+    /// Shot picks are Nilly's (2026-11-04): each tower's own shot from the same roster (Spitter glob,
+    /// Bombardier shell), the old mine, and the Acid, Blast and mine Explode rows for the hits.
+    /// To take the art off again: delete the two Art/Sheets folders and the Fx_ prefabs, and revert the prefabs.
     /// </remarks>
     internal static class AlphaSpritesBuilder
     {
@@ -82,7 +86,51 @@ namespace HoldTheHill.EditorTools
             new Look("Tower_CarpenterAnt", "TowerMineLayer", "Idle"),
         };
 
-        [MenuItem("Tools/Hold the Hill/Alpha/Build Sprites (enemy and tower sheets, looping)")]
+        // A shot (or a mine) and the effect it leaves where it hits. Every sheet faces right.
+        private readonly struct ShotLook
+        {
+            public readonly string Prefab;
+            public readonly string Sheet;
+            public readonly string Loop;
+            public readonly bool FacesFlight;
+            public readonly string EffectField;
+            public readonly string Effect;
+            public readonly string EffectSheet;
+            public readonly string EffectRow;
+
+            public ShotLook(string prefab, string sheet, string loop, bool facesFlight,
+                string effectField, string effect, string effectSheet, string effectRow)
+            {
+                Prefab = prefab;
+                Sheet = sheet;
+                Loop = loop;
+                FacesFlight = facesFlight;
+                EffectField = effectField;
+                Effect = effect;
+                EffectSheet = effectSheet;
+                EffectRow = effectRow;
+            }
+        }
+
+        private static readonly ShotLook[] Shots =
+        {
+            new ShotLook("Projectile_Bullet", "ProjLinear", "Fly", facesFlight: true, "_hitEffect", "Fx_BulletHit", "FxImpact", "Acid"),
+            new ShotLook("Projectile_Lob", "ProjMortar", "Fly", facesFlight: true, "_hitEffect", "Fx_LobBlast", "FxBlast", "Blast"),
+            new ShotLook("Mine_Carpenter", "FxMine", "Armed", facesFlight: false, "_explosionEffect", "Fx_MineBlast", "FxMine", "Explode"),
+        };
+
+        // Shots, the mine and their effects draw at the towers' pixel size: a sheet pixel is 1/40 unit,
+        // as on a tower (root 0.8) and the Basic enemy (0.6 x 32/24). The glob, shell and mine then come
+        // out about as big as the circles they replace. Set on the first upgrade only; then it is the Inspector's.
+        private const float ShotScale = 0.8f;
+
+        // A shot points along its flight at once (a short lob turns half round in a quarter second).
+        private const float ShotTurnDegreesPerSecond = 3600f;
+
+        // Over the shots (20) and the enemies, so a splash shows on the enemy it hit.
+        private const int EffectSortingOrder = 21;
+
+        [MenuItem("Tools/Hold the Hill/Alpha/Build Sprites (enemy, tower and shot sheets, looping)")]
         private static void Build()
         {
             BuildAll();
@@ -104,6 +152,21 @@ namespace HoldTheHill.EditorTools
             {
                 ImportSheet(SheetPath(TowerSheetFolder, look.Sheet));
             }
+            var shotSheets = new List<string>();
+            foreach (ShotLook shot in Shots)
+            {
+                foreach (string sheet in new[] { shot.Sheet, shot.EffectSheet })
+                {
+                    if (!shotSheets.Contains(sheet))
+                    {
+                        shotSheets.Add(sheet);
+                    }
+                }
+            }
+            foreach (string sheet in shotSheets)
+            {
+                ImportSheet(SheetPath(TowerSheetFolder, sheet));
+            }
 
             foreach (Look look in Enemies)
             {
@@ -115,9 +178,19 @@ namespace HoldTheHill.EditorTools
                 SetShopIcon(look);
             }
 
+            // Effects first: a shot points at its effect's prefab.
+            foreach (ShotLook shot in Shots)
+            {
+                EnsureEffect(shot);
+            }
+            foreach (ShotLook shot in Shots)
+            {
+                UpgradeShot(shot);
+            }
+
             AssetDatabase.SaveAssets();
             ReportAfterReload();
-            Debug.Log("Alpha sprites built: enemies loop their walk, face the road, flinch and die; towers loop their idle and play their attack; shop cards show the tower.");
+            Debug.Log("Alpha sprites built: enemies loop their walk, face the road, flinch and die; towers loop their idle and play their attack; shop cards show the tower; shots fly with their art and leave a splash.");
         }
 
         private static string SheetPath(string folder, string sheet) => $"{folder}/{sheet}.png";
@@ -602,6 +675,136 @@ namespace HoldTheHill.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        // ---- Shots and hit effects ------------------------------------------------------------
+
+        // A tiny prefab per effect: a SpriteRenderer and a SpriteOneShot playing the row once.
+        // Made the first time; after that only the frames are refreshed, so scale and order stay as tuned.
+        private static void EnsureEffect(ShotLook look)
+        {
+            string path = PrefabPath(TowerPrefabFolder, look.Effect);
+            bool isNew = AssetDatabase.LoadAssetAtPath<GameObject>(path) == null;
+            GameObject root = isNew ? new GameObject(look.Effect) : PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                Loop row = LoadLoop(SheetPath(TowerSheetFolder, look.EffectSheet), look.EffectRow);
+                if (row.IsEmpty)
+                {
+                    return;
+                }
+
+                var renderer = EnsureComponent<SpriteRenderer>(root);
+                if (isNew)
+                {
+                    root.transform.localScale = Vector3.one * ShotScale;
+                    // The shot's own material and layer, so the splash is lit as the shot is.
+                    var shot = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath(TowerPrefabFolder, look.Prefab));
+                    var shotRenderer = shot != null ? shot.GetComponent<SpriteRenderer>() : null;
+                    if (shotRenderer != null)
+                    {
+                        renderer.sharedMaterial = shotRenderer.sharedMaterial;
+                        renderer.sortingLayerID = shotRenderer.sortingLayerID;
+                    }
+                    renderer.sortingOrder = EffectSortingOrder;
+                }
+
+                renderer.sprite = row.Frames[0];
+                renderer.color = Color.white;
+
+                var so = new SerializedObject(EnsureComponent<SpriteOneShot>(root));
+                so.FindProperty("_renderer").objectReferenceValue = renderer;
+                so.FindProperty("_frameSeconds").floatValue = row.FrameSeconds;
+                SerializedProperty frames = so.FindProperty("_frames");
+                frames.arraySize = row.Frames.Length;
+                for (int i = 0; i < row.Frames.Length; i++)
+                {
+                    frames.GetArrayElementAtIndex(i).objectReferenceValue = row.Frames[i];
+                }
+                so.ApplyModifiedPropertiesWithoutUndo();
+
+                PrefabUtility.SaveAsPrefabAsset(root, path);
+            }
+            finally
+            {
+                if (isNew)
+                {
+                    Object.DestroyImmediate(root);
+                }
+                else
+                {
+                    PrefabUtility.UnloadPrefabContents(root);
+                }
+            }
+        }
+
+        // The shot keeps its root sprite and plays the loop there; a shot turns its whole self to its
+        // flight (it has no children or colliders to keep still). The placeholder colour goes to white.
+        private static void UpgradeShot(ShotLook look)
+        {
+            string prefabPath = PrefabPath(TowerPrefabFolder, look.Prefab);
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath) == null)
+            {
+                Debug.LogError($"{prefabPath} is missing; run the Alpha core loop builder that makes it first.");
+                return;
+            }
+
+            GameObject root = PrefabUtility.LoadPrefabContents(prefabPath);
+            try
+            {
+                // Loaded after the prefab, in case opening it let loose assets go (as OpenScene does).
+                string sheetPath = SheetPath(TowerSheetFolder, look.Sheet);
+                Loop loop = LoadLoop(sheetPath, look.Loop);
+                var effect = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath(TowerPrefabFolder, look.Effect));
+                var renderer = root.GetComponent<SpriteRenderer>();
+                if (loop.IsEmpty || renderer == null)
+                {
+                    Debug.LogError($"{look.Prefab}: no {look.Loop} frames or no SpriteRenderer on its root; left as it is.");
+                    return;
+                }
+
+                // Still the placeholder circle: take the towers' pixel size once.
+                if (AssetDatabase.GetAssetPath(renderer.sprite) != sheetPath)
+                {
+                    root.transform.localScale = Vector3.one * ShotScale;
+                }
+
+                renderer.sprite = loop.Frames[0];
+                renderer.color = Color.white;
+                SetFlipbook(EnsureComponent<SpriteFlipbook>(root), renderer, loop);
+
+                if (look.FacesFlight)
+                {
+                    var face = new SerializedObject(EnsureComponent<FaceTravel>(root));
+                    face.FindProperty("_body").objectReferenceValue = root.transform;
+                    face.FindProperty("_artFacingDegrees").floatValue = 0f;
+                    face.FindProperty("_turnDegreesPerSecond").floatValue = ShotTurnDegreesPerSecond;
+                    face.ApplyModifiedPropertiesWithoutUndo();
+                }
+
+                MonoBehaviour owner = root.GetComponent<Projectile>();
+                if (owner == null)
+                {
+                    owner = root.GetComponent<Mine>();
+                }
+                SerializedObject ownerSo = owner != null ? new SerializedObject(owner) : null;
+                SerializedProperty effectField = ownerSo?.FindProperty(look.EffectField);
+                if (effectField == null || effect == null)
+                {
+                    Debug.LogError($"{look.Prefab}: no {look.EffectField} field or no {look.Effect} prefab; it flies without a hit effect.");
+                }
+                else
+                {
+                    effectField.objectReferenceValue = effect;
+                    ownerSo.ApplyModifiedPropertiesWithoutUndo();
+                }
+
+                PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+        }
+
         private static T EnsureComponent<T>(GameObject go) where T : Component
         {
             T component = go.GetComponent<T>();
@@ -652,6 +855,49 @@ namespace HoldTheHill.EditorTools
                 AppendFlipbook(text, prefab.GetComponent<SpriteFlipbook>());
                 text.Append($"; root scale {prefab.transform.localScale.x}");
                 Debug.Log(text.ToString());
+            }
+
+            foreach (ShotLook look in Shots)
+            {
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath(TowerPrefabFolder, look.Prefab));
+                var effect = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath(TowerPrefabFolder, look.Effect));
+                if (prefab == null || effect == null)
+                {
+                    Debug.LogError($"{look.Prefab} or {look.Effect} is missing after the build.");
+                    continue;
+                }
+
+                var renderer = prefab.GetComponent<SpriteRenderer>();
+                var text = new StringBuilder($"{look.Prefab}: ");
+                text.Append(renderer != null ? $"sprite {NameOf(renderer.sprite)}, colour {renderer.color}, order {renderer.sortingOrder}" : "NO SPRITE");
+                AppendFlipbook(text, prefab.GetComponent<SpriteFlipbook>());
+                var face = prefab.GetComponent<FaceTravel>();
+                text.Append(face != null ? $"; faces flight, turns {NameOf(new SerializedObject(face).FindProperty("_body").objectReferenceValue)}" : "; does not turn");
+                MonoBehaviour owner = prefab.GetComponent<Projectile>();
+                if (owner == null)
+                {
+                    owner = prefab.GetComponent<Mine>();
+                }
+                SerializedProperty field = owner != null ? new SerializedObject(owner).FindProperty(look.EffectField) : null;
+                text.Append($"; {look.EffectField} {(field != null ? NameOf(field.objectReferenceValue) : "MISSING")}");
+                text.Append($"; root scale {prefab.transform.localScale.x}");
+                Debug.Log(text.ToString());
+
+                var effectRenderer = effect.GetComponent<SpriteRenderer>();
+                var oneShot = effect.GetComponent<SpriteOneShot>();
+                var effectText = new StringBuilder($"{look.Effect}: ");
+                effectText.Append(effectRenderer != null ? $"sprite {NameOf(effectRenderer.sprite)}, order {effectRenderer.sortingOrder}" : "NO SPRITE");
+                if (oneShot != null)
+                {
+                    var so = new SerializedObject(oneShot);
+                    effectText.Append($"; plays {so.FindProperty("_frames").arraySize} frames once at {so.FindProperty("_frameSeconds").floatValue:0.###} s");
+                }
+                else
+                {
+                    effectText.Append("; NO ONE-SHOT");
+                }
+                effectText.Append($"; scale {effect.transform.localScale.x}");
+                Debug.Log(effectText.ToString());
             }
         }
 

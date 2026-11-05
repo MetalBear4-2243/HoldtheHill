@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using HoldTheHill.Features.Enemies;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace HoldTheHill.Features.Towers
 {
@@ -33,6 +34,10 @@ namespace HoldTheHill.Features.Towers
 
         [Tooltip("Lobbed only: every enemy within this distance of the landing point takes the damage.")]
         [SerializeField, Min(0f)] private float _splashRadius = 1f;
+
+        [Header("Look")]
+        [Tooltip("Optional: an effect (a splash, a blast) left where the shot hits or lands. It removes itself.")]
+        [SerializeField] private GameObject _hitEffect;
 
         private static readonly List<BasicEnemy> s_splashBuffer = new List<BasicEnemy>();
 
@@ -97,6 +102,7 @@ namespace HoldTheHill.Features.Towers
                 if (distance <= _hitRadius + step)
                 {
                     _target.TakeDamage(_damage);
+                    LeaveHitEffect(transform.position);
                     Destroy(gameObject);
                     return;
                 }
@@ -126,7 +132,20 @@ namespace HoldTheHill.Features.Towers
             }
 
             Splash(_landing);
+            LeaveHitEffect(_landing);
             Destroy(gameObject);
+        }
+
+        // Not a child of the shot, which goes now; kept in the shot's scene, so it goes with the level.
+        private void LeaveHitEffect(Vector3 at)
+        {
+            if (_hitEffect == null)
+            {
+                return;
+            }
+
+            GameObject effect = Instantiate(_hitEffect, at, Quaternion.identity);
+            SceneManager.MoveGameObjectToScene(effect, gameObject.scene);
         }
 
         // Damages every living enemy on the ground near the point; a splash on the ground misses
