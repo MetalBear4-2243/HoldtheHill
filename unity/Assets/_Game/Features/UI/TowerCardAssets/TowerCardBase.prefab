@@ -656,6 +656,7 @@ MonoBehaviour:
   iconDisplay: {fileID: 3809876761361134753}
   nameDisplay: {fileID: 768110394854520548}
   costDisplay: {fileID: 5725381831817320773}
+  selectedTint: {r: 1, g: 0.82, b: 0.3, a: 1}
 --- !u!1 &8681879251867374930
 GameObject:
   m_ObjectHideFlags: 0
@@ -979,7 +980,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7920573334259855015, guid: 6c0ba4a2b82f6304b8225afb6b969584, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -4.1829
+      value: -4.182907
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
