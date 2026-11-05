@@ -48,7 +48,7 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private bool autoStartFirstWave = false;
 
     [Tooltip("If true, requires all living enemies of the current wave to be defeated before StartNextWave() can be triggered.")]
-    [SerializeField] private bool requireEnemiesClearedBeforeNextWave = false;
+    [SerializeField] private bool requireEnemiesClearedBeforeNextWave = true;
 
     [Header("Debug")]
     [Tooltip("If true, logs each wave starting and finishing and map changes to the Console. Warnings are always logged.")]
