@@ -6,6 +6,9 @@ A single-player 2D hybrid tower defense by **Turbulent Towers Studio**: control 
 
 - **[Devlog](docs/DEVLOG.md)** — what we worked on, what we decided, and why. Add an entry when you finish a task.
 - **[AI use log](docs/AI_DEVLOG.md)** — short disclosure of AI-assisted work (our instructor asks for it). Add one row whenever AI helps.
+- **[Project map](docs/PROJECT_MAP.md)** — where tasks, documents, builds and code live, and which Notion tasks have code on `Indev`.
+- **[Conventions](docs/CONVENTIONS.md)** — naming and layout where this README leaves it open.
+- **[Technical documents](Documentation/)** — one page per system (enemies, spawner, wave data, and the fork's pages for reference).
 
 ## Setup (do this once)
 
@@ -40,19 +43,21 @@ unity/Assets/
     Core/                 shared systems every feature can use
       Audio/  Bootstrap/  Events/  GameFeel/  Pooling/  Save/  Utilities/
     Features/             one folder per game system
-      Player/             player character, camera
+      Player/             empty: the player character was cut from the design
       GameFlow/           hill health, build phase <-> wave phase, win/lose
       Enemies/            enemy types, waves, difficulty scaling, pathfinding
       Towers/             towers and buildings, grid placement
-      Combat/             targeting, damage, status effects, power-ups
-      Economy/            currency, harvestables, loot drops
-      Progression/        upgrade tree, stats, achievements
+      Combat/             targeting, damage, status effects
+      Economy/            Honeydew, kill bounties
+      Hazards/            the four hazards and tower burrowing
+      PowerUps/           drops from kills, the HUD slot, the two power-ups
+      Progression/        empty for the Alpha
       Levels/             level data, level select, tutorial
       UI/                 HUD, menus, settings
-      DebugTools/         cheat console and test helpers (development builds only)
+      DebugTools/         empty for the Alpha
     Shared/               assets used by 2+ features
       Art/Tilesets/  Audio/Music/  VFX/  Fonts/  Materials/
-    Scenes/               Bootstrap, UI, and Levels/<LevelName>/
+    Scenes/               Bootstrap, Home, UI, and Levels/<LevelName>/
     Editor/               custom Unity editor tools
     Tests/                EditMode/ and PlayMode/ automated tests
   _Sandbox/<github-username>/   your personal test area - only edit your own
@@ -122,7 +127,7 @@ Our scripts compile into these assemblies (the `.asmdef` files), which keeps rec
 1. **Pull `Indev` before starting anything.** `Indev` is our integration branch - it's where everyone's work comes together and gets tested.
 2. **Make a branch for each task**, named `yourname/what-it-does`, e.g. `adam/enemy-spawner`. Branch it off `Indev`.
 3. **Keep branches small and short** - merge within a day or two.
-4. **Open a pull request into `Indev`.** Don't push straight to `Indev` or `main` - both are shared.
+4. **Open a pull request into `Indev`** and link the Notion task in its description. Don't push straight to `Indev` or `main` - both are shared.
 5. **Say in Discord before editing a shared scene or prefab**, and push it as soon as you're done.
 
 > `main` is our stable branch. It is deliberately behind `Indev` right now - we'll bring it up to date in one pass once the documentation and folder structure are settled. Until then, `Indev` is the branch that reflects the project.
