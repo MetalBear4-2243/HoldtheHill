@@ -82,12 +82,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 21
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1917632266, guid: 1c46c7b9abaa7934e9f330b2a22d788e, type: 3}
+  m_Sprite: {fileID: -577960542, guid: d8f917983484d384fbb26d65e6dca961, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.75, y: 0.75}
+  m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -107,9 +107,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Animation.SpriteOneShot
   _renderer: {fileID: 863986956692874688}
   _frames:
-  - {fileID: -1917632266, guid: 1c46c7b9abaa7934e9f330b2a22d788e, type: 3}
-  - {fileID: -1243604467, guid: 1c46c7b9abaa7934e9f330b2a22d788e, type: 3}
-  - {fileID: 1469061799, guid: 1c46c7b9abaa7934e9f330b2a22d788e, type: 3}
-  - {fileID: -316871736, guid: 1c46c7b9abaa7934e9f330b2a22d788e, type: 3}
-  - {fileID: -1788501283, guid: 1c46c7b9abaa7934e9f330b2a22d788e, type: 3}
-  _frameSeconds: 0.06
+  - {fileID: -577960542, guid: d8f917983484d384fbb26d65e6dca961, type: 3}
+  - {fileID: -1866860898, guid: d8f917983484d384fbb26d65e6dca961, type: 3}
+  - {fileID: 356382218, guid: d8f917983484d384fbb26d65e6dca961, type: 3}
+  - {fileID: -128287015, guid: d8f917983484d384fbb26d65e6dca961, type: 3}
+  - {fileID: 1894937168, guid: d8f917983484d384fbb26d65e6dca961, type: 3}
+  _frameSeconds: 0.055

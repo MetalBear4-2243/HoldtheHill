@@ -8,7 +8,8 @@ namespace HoldTheHill.Features.Towers
     /// <summary>
     /// A placed tower. Knows its grid cell, picks a target in range by its
     /// <see cref="TargetingPriority"/>, and attacks it on a cooldown: with a projectile when
-    /// it has one, otherwise with a melee swing that hits every ground enemy in reach. Numbers
+    /// it has one, otherwise with a melee swing that hits every ground enemy in reach (or, with a
+    /// cone set, every one in the cone toward the target: the Fire Ant's flames). Numbers
     /// live on the prefab variants, one set per level; <see cref="Upgrade"/> moves to the next set.
     /// </summary>
     /// <remarks>
@@ -34,6 +35,9 @@ namespace HoldTheHill.Features.Towers
 
         [Tooltip("Where shots leave the tower. Defaults to the tower itself.")]
         [SerializeField] private Transform _muzzle;
+
+        [Tooltip("Melee only: 0 hits every ground enemy in reach. Above 0, only those inside a cone this many degrees wide, pointed at the target (the Fire Ant's flames).")]
+        [SerializeField, Range(0f, 360f)] private float _coneDegrees;
 
         [Header("Targeting")]
         [Tooltip("Which enemy to attack when several are in range.")]
@@ -81,6 +85,12 @@ namespace HoldTheHill.Features.Towers
         public event Action Attacked;
 
         /// <summary>
+        /// Raised for each enemy a melee swing hits with real damage, before <see cref="Attacked"/>.
+        /// The Crazy Ant's poison counts hits in a row with it.
+        /// </summary>
+        public event Action<BasicEnemy> HitEnemy;
+
+        /// <summary>
         /// Raised when a tower that works through an ability uses it: the Carpenter Ant lays a mine,
         /// the Sap Ant's aura slows someone. The attack animation plays once for it.
         /// </summary>
@@ -94,6 +104,9 @@ namespace HoldTheHill.Features.Towers
 
         /// <summary>Seconds between attacks.</summary>
         public float FireInterval => _fireInterval;
+
+        /// <summary>Melee only: how wide the swing is, in degrees, pointed at the target. 0 is all round.</summary>
+        public float ConeDegrees => _coneDegrees;
 
         /// <summary>Seconds until the tower may attack again; zero when it is ready.</summary>
         public float CooldownRemaining => Mathf.Max(0f, _cooldown);
@@ -352,15 +365,23 @@ namespace HoldTheHill.Features.Towers
 
             if (_projectilePrefab == null)
             {
-                // A melee swing hits every ground enemy in reach, not just the target. AcquireTarget
-                // filled the list this frame and left flyers out (the wasp rule). A hit can kill and
-                // split a centipede; the list is a copy, so that is safe.
+                // A melee swing hits every ground enemy in reach (or in the cone toward the target), not
+                // just the target. AcquireTarget filled the list this frame and left flyers out (the wasp
+                // rule). A hit can kill and split a centipede; the list is a copy, so that is safe.
+                Vector3 here = transform.position;
+                Vector3 aim = target.transform.position - here;
                 for (int i = 0; i < _inRange.Count; i++)
                 {
                     BasicEnemy enemy = _inRange[i];
-                    if (enemy != null && !enemy.IsDead)
+                    if (enemy == null || enemy.IsDead || !InCone(here, aim, enemy.transform.position, _coneDegrees))
                     {
-                        enemy.TakeDamage(damage);
+                        continue;
+                    }
+
+                    enemy.TakeDamage(damage);
+                    if (damage > 0f)
+                    {
+                        HitEnemy?.Invoke(enemy);
                     }
                 }
 
@@ -371,6 +392,28 @@ namespace HoldTheHill.Features.Towers
             Projectile shot = Instantiate(_projectilePrefab, _muzzle.position, Quaternion.identity);
             shot.Launch(target, damage);
             Attacked?.Invoke();
+        }
+
+        /// <summary>
+        /// The cone rule: true when <paramref name="point"/> lies within <paramref name="coneDegrees"/>
+        /// (the whole width) of the direction <paramref name="aim"/> from <paramref name="from"/>, on the
+        /// map's plane. A cone of 0 (or 360 and over) takes everything; so does a point on the tower itself.
+        /// </summary>
+        public static bool InCone(Vector3 from, Vector3 aim, Vector3 point, float coneDegrees)
+        {
+            if (coneDegrees <= 0f || coneDegrees >= 360f)
+            {
+                return true;
+            }
+
+            var toPoint = new Vector2(point.x - from.x, point.y - from.y);
+            var forward = new Vector2(aim.x, aim.y);
+            if (toPoint.sqrMagnitude < 0.0001f || forward.sqrMagnitude < 0.0001f)
+            {
+                return true;
+            }
+
+            return Vector2.Angle(forward, toPoint) <= coneDegrees * 0.5f;
         }
 
         /// <summary>The tower's ability (mine layer, slow aura) tells the tower it acted, for the animation.</summary>

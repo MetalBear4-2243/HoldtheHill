@@ -36,7 +36,7 @@ namespace HoldTheHill.Features.Towers
         [SerializeField, Min(0f)] private float _splashRadius = 1f;
 
         [Header("Look")]
-        [Tooltip("Optional: an effect (a splash, a blast) left where the shot hits or lands. It removes itself.")]
+        [Tooltip("Optional: what the shot leaves where it hits or lands (a splash, a blast, the Sap Ant's puddle). It removes itself.")]
         [SerializeField] private GameObject _hitEffect;
 
         private static readonly List<BasicEnemy> s_splashBuffer = new List<BasicEnemy>();

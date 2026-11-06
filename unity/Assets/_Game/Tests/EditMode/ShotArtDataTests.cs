@@ -14,7 +14,7 @@ namespace HoldTheHill.Tests
     {
         private const string Folder = "Assets/_Game/Features/Towers/Prefabs";
 
-        [TestCase("Projectile_Bullet", "ProjLinear", "Fly", 4, "_hitEffect", "Fx_BulletHit", "FxImpact", "Acid", 5)]
+        [TestCase("Projectile_Bullet", "WpnStingerDart", "Fly", 4, "_hitEffect", "Fx_BulletHit", "WpnStingerDart", "Hit", 5)]
         [TestCase("Projectile_Lob", "ProjMortar", "Fly", 4, "_hitEffect", "Fx_LobBlast", "FxBlast", "Blast", 6)]
         [TestCase("Mine_Carpenter", "FxMine", "Armed", 2, "_explosionEffect", "Fx_MineBlast", "FxMine", "Explode", 7)]
         public void EachShot_LoopsItsArt_AndLeavesItsEffect(string prefabName, string sheet, string row, int count,

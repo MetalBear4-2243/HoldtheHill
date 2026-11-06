@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 20
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 268568401, guid: baecdb2217544ca4dad6f77b05ca44aa, type: 3}
+  m_Sprite: {fileID: -1927976167, guid: d8f917983484d384fbb26d65e6dca961, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -107,9 +107,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bf5ef1b50fd4fde87e8711e4cab4cca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.Projectile
-  _speed: 10
+  _speed: 24
   _hitRadius: 0.2
-  _lifetime: 3
+  _lifetime: 1
   _lobbed: 0
   _arcHeight: 1.5
   _splashRadius: 1
@@ -128,11 +128,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Animation.SpriteFlipbook
   _renderer: {fileID: 5010976850460415802}
   _frames:
-  - {fileID: 268568401, guid: baecdb2217544ca4dad6f77b05ca44aa, type: 3}
-  - {fileID: 1805506527, guid: baecdb2217544ca4dad6f77b05ca44aa, type: 3}
-  - {fileID: 975997614, guid: baecdb2217544ca4dad6f77b05ca44aa, type: 3}
-  - {fileID: 377398598, guid: baecdb2217544ca4dad6f77b05ca44aa, type: 3}
-  _frameSeconds: 0.06
+  - {fileID: -1927976167, guid: d8f917983484d384fbb26d65e6dca961, type: 3}
+  - {fileID: -1946222204, guid: d8f917983484d384fbb26d65e6dca961, type: 3}
+  - {fileID: -126022706, guid: d8f917983484d384fbb26d65e6dca961, type: 3}
+  - {fileID: 2089882158, guid: d8f917983484d384fbb26d65e6dca961, type: 3}
+  _frameSeconds: 0.07
   _randomStart: 1
 --- !u!114 &2472805096798912768
 MonoBehaviour:

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1681274514025101029}
   - component: {fileID: 149991904082878181}
   - component: {fileID: 6426785060347049558}
+  - component: {fileID: 5309567051154761580}
   m_Layer: 0
   m_Name: Tower_CrazyAnt
   m_TagString: Untagged
@@ -108,19 +109,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.Tower
   _range: 1.5
-  _damage: 6
+  _damage: 4
   _fireInterval: 0.35
   _projectilePrefab: {fileID: 0}
   _muzzle: {fileID: 0}
+  _coneDegrees: 0
   _priority: 0
   _upgrades:
   - Cost: 75
     Range: 1.6
-    Damage: 9
+    Damage: 6
     FireInterval: 0.3
   - Cost: 110
     Range: 1.7
-    Damage: 13
+    Damage: 9
     FireInterval: 0.25
   _scalePerLevel: 1.12
   _burrowedTint: {r: 0.5, g: 0.45, b: 0.4, a: 0.6}
@@ -169,3 +171,26 @@ MonoBehaviour:
   - {fileID: -924487070, guid: db3d33decd84e284db235e7003c75798, type: 3}
   _frameSeconds: 0.075
   _hitFrame: 2
+--- !u!114 &5309567051154761580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 165473272640961510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 583042bb15400054a8e6a42236d86508, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.PoisonOnHits
+  _hitsPerStack: 2
+  _maxStacks: 5
+  _damagePerStackShare: 0.25
+  _tickInterval: 0.5
+  _seconds: 3
+  _overlayFrames:
+  - {fileID: -962502091, guid: e03e13a824a517349ab4a26420f2dac8, type: 3}
+  - {fileID: 344644616, guid: e03e13a824a517349ab4a26420f2dac8, type: 3}
+  - {fileID: 1228234132, guid: e03e13a824a517349ab4a26420f2dac8, type: 3}
+  - {fileID: -556225775, guid: e03e13a824a517349ab4a26420f2dac8, type: 3}
+  _overlayFrameSeconds: 0.15

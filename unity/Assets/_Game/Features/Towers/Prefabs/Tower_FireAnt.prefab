@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7333962735893383698}
   - component: {fileID: 849425033803441468}
   - component: {fileID: 6602107749541955569}
+  - component: {fileID: 6476686259131312673}
   m_Layer: 0
   m_Name: Tower_FireAnt
   m_TagString: Untagged
@@ -107,21 +108,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4deb3d16e7dbe49768b8986b26822e29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.Tower
-  _range: 2.8
-  _damage: 14
-  _fireInterval: 1.6
-  _projectilePrefab: {fileID: 8255434705651037129, guid: d6ff0f18bcc244043955db02a56a0204, type: 3}
+  _range: 2
+  _damage: 3
+  _fireInterval: 0.2
+  _projectilePrefab: {fileID: 0}
   _muzzle: {fileID: 0}
+  _coneDegrees: 70
   _priority: 0
   _upgrades:
   - Cost: 120
-    Range: 3
-    Damage: 20
-    FireInterval: 1.5
+    Range: 2.2
+    Damage: 4.5
+    FireInterval: 0.2
   - Cost: 180
-    Range: 3.3
-    Damage: 30
-    FireInterval: 1.4
+    Range: 2.4
+    Damage: 6
+    FireInterval: 0.2
   _scalePerLevel: 1.12
   _burrowedTint: {r: 0.5, g: 0.45, b: 0.4, a: 0.6}
   _stunnedTint: {r: 0.55, g: 0.7, b: 1, a: 1}
@@ -169,3 +171,20 @@ MonoBehaviour:
   - {fileID: 1960822593, guid: 45c12271588f2cd468f9b20d9a0cef07, type: 3}
   _frameSeconds: 0.08
   _hitFrame: 2
+--- !u!114 &6476686259131312673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4300963872598973903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa5ca16e20aaa47489c84cfbdc82abd4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.FlameJet
+  _puffPrefab: {fileID: 4506325177222932173, guid: 1d778f278407cd648bd2071eb67520ba, type: 3}
+  _puffsPerSecond: 16
+  _puffSpeed: 6
+  _spreadShare: 0.6
+  _startDistance: 0.25

@@ -113,6 +113,7 @@ MonoBehaviour:
   _fireInterval: 3
   _projectilePrefab: {fileID: 0}
   _muzzle: {fileID: 0}
+  _coneDegrees: 0
   _priority: 0
   _upgrades:
   - Cost: 150

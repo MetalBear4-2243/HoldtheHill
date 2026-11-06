@@ -28,8 +28,10 @@ namespace HoldTheHill.EditorTools
     /// <c>B:\Archive\hold-the-hill-drive-offload-2026-10-07.zip</c>), copied into the features' <c>Art/Sheets</c>.
     /// Each sheet is cut by its JSON, one sprite per frame, named as in Aseprite ("EnemyRunner Walk 0").
     /// Tower picks are Nilly's (2026-11-03): the six Alpha towers wear old-roster sheets.
-    /// Shot picks are Nilly's (2026-11-04): each tower's own shot from the same roster (Spitter glob,
-    /// Bombardier shell), the old mine, and the Acid, Blast and mine Explode rows for the hits.
+    /// Shot picks are Nilly's (2026-11-04): the Bombardier shell, the old mine, and the Blast and mine
+    /// Explode rows for the hits; on 2026-11-05 the Bullet Ant's shot became the stinger dart and the
+    /// tower roles (AlphaTowerRolesBuilder) added the honey glob and its puddle, the flame puffs and the
+    /// sap and poison overlays (weapon-picker and Fx sheets from the same Sandbox).
     /// To take the art off again: delete the two Art/Sheets folders and the Fx_ prefabs, and revert the prefabs.
     /// </remarks>
     internal static class AlphaSpritesBuilder
@@ -112,11 +114,56 @@ namespace HoldTheHill.EditorTools
             }
         }
 
+        // The Bullet Ant's fast bullet is the stinger dart (2026-11-05). The Sap Ant's glob leaves its
+        // puddle (Fx_SapPuddle, made and wired by AlphaTowerRolesBuilder), so it has no effect here.
+        // Projectile_Lob is no tower's shot since the Fire Ant became a flamethrower; it keeps its art.
         private static readonly ShotLook[] Shots =
         {
-            new ShotLook("Projectile_Bullet", "ProjLinear", "Fly", facesFlight: true, "_hitEffect", "Fx_BulletHit", "FxImpact", "Acid"),
+            new ShotLook("Projectile_Bullet", "WpnStingerDart", "Fly", facesFlight: true, "_hitEffect", "Fx_BulletHit", "WpnStingerDart", "Hit"),
             new ShotLook("Projectile_Lob", "ProjMortar", "Fly", facesFlight: true, "_hitEffect", "Fx_LobBlast", "FxBlast", "Blast"),
             new ShotLook("Mine_Carpenter", "FxMine", "Armed", facesFlight: false, "_explosionEffect", "Fx_MineBlast", "FxMine", "Explode"),
+            new ShotLook("Projectile_Sap", "WpnHoneyGlob", "Fly", facesFlight: true, null, null, null, null),
+        };
+
+        // Which frame of a row a prefab's own sprite shows in the Editor (the component plays the rest).
+        private enum StillFrame
+        {
+            None,
+            First,
+            Last,
+        }
+
+        // A row of frames for a field pair on one of the tower roles' parts (AlphaTowerRolesBuilder
+        // makes them): the sap puddle's splat and the overlay it puts on stuck enemies, the flame
+        // puff's loop, the Crazy Ant's poison overlay.
+        private readonly struct RowSlot
+        {
+            public readonly string Prefab;
+            public readonly string Component;
+            public readonly string FramesField;
+            public readonly string SecondsField;
+            public readonly string Sheet;
+            public readonly string Row;
+            public readonly StillFrame Still;
+
+            public RowSlot(string prefab, string component, string framesField, string secondsField, string sheet, string row, StillFrame still)
+            {
+                Prefab = prefab;
+                Component = component;
+                FramesField = framesField;
+                SecondsField = secondsField;
+                Sheet = sheet;
+                Row = row;
+                Still = still;
+            }
+        }
+
+        private static readonly RowSlot[] Extras =
+        {
+            new RowSlot("Fx_SapPuddle", nameof(SapPuddle), "_splatFrames", "_splatFrameSeconds", "WpnHoneyGlob", "Hit", StillFrame.Last),
+            new RowSlot("Fx_SapPuddle", nameof(SapPuddle), "_overlayFrames", "_overlayFrameSeconds", "FxStatusOverlay", "Honey", StillFrame.None),
+            new RowSlot("Fx_FlamePuff", nameof(SpriteFlipbook), "_frames", "_frameSeconds", "WpnFlameBurst", "Fly", StillFrame.First),
+            new RowSlot("Tower_CrazyAnt", nameof(PoisonOnHits), "_overlayFrames", "_overlayFrameSeconds", "FxStatusOverlay", "Poison", StillFrame.None),
         };
 
         // Shots, the mine and their effects draw at the towers' pixel size: a sheet pixel is 1/40 unit,
@@ -157,10 +204,17 @@ namespace HoldTheHill.EditorTools
             {
                 foreach (string sheet in new[] { shot.Sheet, shot.EffectSheet })
                 {
-                    if (!shotSheets.Contains(sheet))
+                    if (sheet != null && !shotSheets.Contains(sheet))
                     {
                         shotSheets.Add(sheet);
                     }
+                }
+            }
+            foreach (RowSlot slot in Extras)
+            {
+                if (!shotSheets.Contains(slot.Sheet))
+                {
+                    shotSheets.Add(slot.Sheet);
                 }
             }
             foreach (string sheet in shotSheets)
@@ -181,11 +235,18 @@ namespace HoldTheHill.EditorTools
             // Effects first: a shot points at its effect's prefab.
             foreach (ShotLook shot in Shots)
             {
-                EnsureEffect(shot);
+                if (shot.Effect != null)
+                {
+                    EnsureEffect(shot);
+                }
             }
             foreach (ShotLook shot in Shots)
             {
                 UpgradeShot(shot);
+            }
+            foreach (RowSlot slot in Extras)
+            {
+                SetRowSlot(slot);
             }
 
             AssetDatabase.SaveAssets();
@@ -743,7 +804,7 @@ namespace HoldTheHill.EditorTools
             string prefabPath = PrefabPath(TowerPrefabFolder, look.Prefab);
             if (AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath) == null)
             {
-                Debug.LogError($"{prefabPath} is missing; run the Alpha core loop builder that makes it first.");
+                Debug.LogError($"{prefabPath} is missing; run the builder that makes it first (Alpha core loop, or Tower Roles for the sap shot).");
                 return;
             }
 
@@ -753,7 +814,7 @@ namespace HoldTheHill.EditorTools
                 // Loaded after the prefab, in case opening it let loose assets go (as OpenScene does).
                 string sheetPath = SheetPath(TowerSheetFolder, look.Sheet);
                 Loop loop = LoadLoop(sheetPath, look.Loop);
-                var effect = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath(TowerPrefabFolder, look.Effect));
+                var effect = look.Effect != null ? AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath(TowerPrefabFolder, look.Effect)) : null;
                 var renderer = root.GetComponent<SpriteRenderer>();
                 if (loop.IsEmpty || renderer == null)
                 {
@@ -761,7 +822,8 @@ namespace HoldTheHill.EditorTools
                     return;
                 }
 
-                // Still the placeholder circle: take the towers' pixel size once.
+                // Not yet this sheet (the placeholder circle, or an earlier pick): take the towers' pixel
+                // size once. On a rerun the sprite is from this sheet, so a tuned scale stays.
                 if (AssetDatabase.GetAssetPath(renderer.sprite) != sheetPath)
                 {
                     root.transform.localScale = Vector3.one * ShotScale;
@@ -780,21 +842,77 @@ namespace HoldTheHill.EditorTools
                     face.ApplyModifiedPropertiesWithoutUndo();
                 }
 
-                MonoBehaviour owner = root.GetComponent<Projectile>();
-                if (owner == null)
+                if (look.Effect != null)
                 {
-                    owner = root.GetComponent<Mine>();
+                    MonoBehaviour owner = root.GetComponent<Projectile>();
+                    if (owner == null)
+                    {
+                        owner = root.GetComponent<Mine>();
+                    }
+                    SerializedObject ownerSo = owner != null ? new SerializedObject(owner) : null;
+                    SerializedProperty effectField = ownerSo?.FindProperty(look.EffectField);
+                    if (effectField == null || effect == null)
+                    {
+                        Debug.LogError($"{look.Prefab}: no {look.EffectField} field or no {look.Effect} prefab; it flies without a hit effect.");
+                    }
+                    else
+                    {
+                        effectField.objectReferenceValue = effect;
+                        ownerSo.ApplyModifiedPropertiesWithoutUndo();
+                    }
                 }
-                SerializedObject ownerSo = owner != null ? new SerializedObject(owner) : null;
-                SerializedProperty effectField = ownerSo?.FindProperty(look.EffectField);
-                if (effectField == null || effect == null)
+
+                PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+        }
+
+        // Fills one frames-and-seconds field pair from a sheet row; the prefab and its component are
+        // the tower roles builder's. The prefab's own sprite shows the row's first or last frame.
+        private static void SetRowSlot(RowSlot slot)
+        {
+            string prefabPath = PrefabPath(TowerPrefabFolder, slot.Prefab);
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath) == null)
+            {
+                Debug.LogError($"{prefabPath} is missing; run Build Tower Roles, which makes it.");
+                return;
+            }
+
+            GameObject root = PrefabUtility.LoadPrefabContents(prefabPath);
+            try
+            {
+                Loop row = LoadLoop(SheetPath(TowerSheetFolder, slot.Sheet), slot.Row);
+                Component component = root.GetComponent(slot.Component);
+                if (row.IsEmpty || component == null)
                 {
-                    Debug.LogError($"{look.Prefab}: no {look.EffectField} field or no {look.Effect} prefab; it flies without a hit effect.");
+                    Debug.LogError($"{slot.Prefab}: no {slot.Sheet} {slot.Row} frames or no {slot.Component}; left as it is.");
+                    return;
                 }
-                else
+
+                var so = new SerializedObject(component);
+                SerializedProperty frames = so.FindProperty(slot.FramesField);
+                frames.arraySize = row.Frames.Length;
+                for (int i = 0; i < row.Frames.Length; i++)
                 {
-                    effectField.objectReferenceValue = effect;
-                    ownerSo.ApplyModifiedPropertiesWithoutUndo();
+                    frames.GetArrayElementAtIndex(i).objectReferenceValue = row.Frames[i];
+                }
+                so.FindProperty(slot.SecondsField).floatValue = row.FrameSeconds;
+
+                var renderer = root.GetComponent<SpriteRenderer>();
+                SerializedProperty rendererField = so.FindProperty("_renderer");
+                if (rendererField != null && renderer != null)
+                {
+                    rendererField.objectReferenceValue = renderer;
+                }
+                so.ApplyModifiedPropertiesWithoutUndo();
+
+                if (slot.Still != StillFrame.None && renderer != null)
+                {
+                    renderer.sprite = slot.Still == StillFrame.First ? row.Frames[0] : row.Frames[row.Frames.Length - 1];
+                    renderer.color = Color.white;
                 }
 
                 PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
@@ -860,8 +978,8 @@ namespace HoldTheHill.EditorTools
             foreach (ShotLook look in Shots)
             {
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath(TowerPrefabFolder, look.Prefab));
-                var effect = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath(TowerPrefabFolder, look.Effect));
-                if (prefab == null || effect == null)
+                var effect = look.Effect != null ? AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath(TowerPrefabFolder, look.Effect)) : null;
+                if (prefab == null || (look.Effect != null && effect == null))
                 {
                     Debug.LogError($"{look.Prefab} or {look.Effect} is missing after the build.");
                     continue;
@@ -878,10 +996,16 @@ namespace HoldTheHill.EditorTools
                 {
                     owner = prefab.GetComponent<Mine>();
                 }
-                SerializedProperty field = owner != null ? new SerializedObject(owner).FindProperty(look.EffectField) : null;
-                text.Append($"; {look.EffectField} {(field != null ? NameOf(field.objectReferenceValue) : "MISSING")}");
+                string effectField = look.EffectField ?? "_hitEffect";
+                SerializedProperty field = owner != null ? new SerializedObject(owner).FindProperty(effectField) : null;
+                text.Append($"; {effectField} {(field != null ? NameOf(field.objectReferenceValue) : "MISSING")}");
                 text.Append($"; root scale {prefab.transform.localScale.x}");
                 Debug.Log(text.ToString());
+
+                if (effect == null)
+                {
+                    continue;
+                }
 
                 var effectRenderer = effect.GetComponent<SpriteRenderer>();
                 var oneShot = effect.GetComponent<SpriteOneShot>();
@@ -898,6 +1022,24 @@ namespace HoldTheHill.EditorTools
                 }
                 effectText.Append($"; scale {effect.transform.localScale.x}");
                 Debug.Log(effectText.ToString());
+            }
+
+            foreach (RowSlot slot in Extras)
+            {
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath(TowerPrefabFolder, slot.Prefab));
+                Component component = prefab != null ? prefab.GetComponent(slot.Component) : null;
+                if (component == null)
+                {
+                    Debug.LogError($"{slot.Prefab} or its {slot.Component} is missing after the build.");
+                    continue;
+                }
+
+                var so = new SerializedObject(component);
+                SerializedProperty frames = so.FindProperty(slot.FramesField);
+                Object first = frames.arraySize > 0 ? frames.GetArrayElementAtIndex(0).objectReferenceValue : null;
+                var renderer = prefab.GetComponent<SpriteRenderer>();
+                Debug.Log($"{slot.Prefab} {slot.Component}.{slot.FramesField}: {frames.arraySize} frames from {NameOf(first)} at {so.FindProperty(slot.SecondsField).floatValue:0.###} s"
+                    + (slot.Still != StillFrame.None && renderer != null ? $"; shows {NameOf(renderer.sprite)}, scale {prefab.transform.localScale.x}, order {renderer.sortingOrder}" : ""));
             }
         }
 
