@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ef549c0c2f04322a86ee85666548548, type: 3}
+  m_Name: L00_TutorialHill_Hazards
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Hazards.LevelHazardSchedule
+  Entries:
+  - Wave: 3
+    Delay: 2
+    Hazard: {fileID: 7896879877880640604, guid: 196e008bc5eab3a49ba6ec8a5c5494a7, type: 3}
+    Position: {x: 3.5, y: -2.5}
+  - Wave: 4
+    Delay: 6
+    Hazard: {fileID: 6520107902620943989, guid: 932d5844ef361c34b882e5b69e95332b, type: 3}
+    Position: {x: 0, y: 0}
+  - Wave: 5
+    Delay: 4
+    Hazard: {fileID: 5082117976280161359, guid: ac15a108d66517145b7260f95583511f, type: 3}
+    Position: {x: -4.5, y: 0.5}

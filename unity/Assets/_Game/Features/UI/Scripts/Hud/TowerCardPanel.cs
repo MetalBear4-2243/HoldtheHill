@@ -1,0 +1,264 @@
+using HoldTheHill.Features.Economy;
+using HoldTheHill.Features.GameFlow;
+using HoldTheHill.Features.Towers;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace HoldTheHill.Features.UI
+{
+    /// <summary>
+    /// The card for the selected standing tower: its name and level, an upgrade button with the
+    /// price, the burrow order, and the standing order (First / Last / Closest). Shown while a
+    /// tower is selected, plus a sell button that refunds part of what was spent. No stats page.
+    /// </summary>
+    public class TowerCardPanel : LevelRunListener
+    {
+        [Tooltip("The card root. Inactive while no tower is selected.")]
+        [SerializeField] private GameObject _panel;
+
+        [SerializeField] private TMP_Text _name;
+        [SerializeField] private TMP_Text _level;
+        [SerializeField] private Button _upgrade;
+        [SerializeField] private TMP_Text _upgradeLabel;
+
+        [Tooltip("Burrows the tower or brings it back up. Its label says which.")]
+        [SerializeField] private Button _burrow;
+        [SerializeField] private TMP_Text _burrowLabel;
+
+        [Tooltip("Sells the tower for part of what was spent on it. Its label shows the refund.")]
+        [SerializeField] private Button _sell;
+        [SerializeField] private TMP_Text _sellLabel;
+
+        [Tooltip("One button per standing order, in enum order: First, Last, Closest.")]
+        [SerializeField] private Button[] _orderButtons = new Button[3];
+
+        [Tooltip("The 'Target' heading over the order buttons; hidden with them for a tower that doesn't aim.")]
+        [SerializeField] private GameObject _orderTitle;
+
+        [Tooltip("Where the card sits, from the screen's top-left corner, while the selected tower is in the bottom half. Otherwise it keeps its bottom-left place from the scene.")]
+        [SerializeField] private Vector2 _topLeftOffset = new Vector2(24f, -88f);
+
+        private static readonly string[] OrderNames = { UiStrings.OrderFirst, UiStrings.OrderLast, UiStrings.OrderClosest };
+
+        private TowerPlacer _placer;
+        private Honeydew _honeydew;
+        private Tower _tower;
+        private RectTransform _card;
+        private Vector2 _bottomLeftOffset;
+
+        private void Awake()
+        {
+            _card = (RectTransform)_panel.transform;
+            _bottomLeftOffset = _card.anchoredPosition;
+        }
+
+        protected override void OnEnable()
+        {
+            _upgrade.onClick.AddListener(Upgrade);
+            if (_burrow != null)
+            {
+                _burrow.onClick.AddListener(ToggleBurrow);
+            }
+            if (_sell != null)
+            {
+                _sell.onClick.AddListener(Sell);
+            }
+            for (int i = 0; i < _orderButtons.Length; i++)
+            {
+                TargetingPriority order = (TargetingPriority)i;
+                _orderButtons[i].onClick.AddListener(() => SetOrder(order));
+            }
+
+            Show(null);
+            base.OnEnable();
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            _upgrade.onClick.RemoveListener(Upgrade);
+            if (_burrow != null)
+            {
+                _burrow.onClick.RemoveListener(ToggleBurrow);
+            }
+            if (_sell != null)
+            {
+                _sell.onClick.RemoveListener(Sell);
+            }
+            for (int i = 0; i < _orderButtons.Length; i++)
+            {
+                _orderButtons[i].onClick.RemoveAllListeners();
+            }
+        }
+
+        protected override void Bind(LevelRun run)
+        {
+            _placer = run.Placer;
+            if (_placer == null)
+            {
+                return;
+            }
+
+            _placer.SelectedTowerChanged += Show;
+            if (_placer.Wallet != null)
+            {
+                _honeydew = _placer.Wallet.Honeydew;
+                _honeydew.Changed += HandleHoneydewChanged;
+            }
+
+            Show(_placer.SelectedTower);
+        }
+
+        protected override void Unbind(LevelRun run)
+        {
+            if (_placer != null)
+            {
+                _placer.SelectedTowerChanged -= Show;
+                _placer = null;
+            }
+
+            if (_honeydew != null)
+            {
+                _honeydew.Changed -= HandleHoneydewChanged;
+                _honeydew = null;
+            }
+
+            Show(null);
+        }
+
+        private void Show(Tower tower)
+        {
+            if (_tower != null)
+            {
+                _tower.Upgraded -= HandleUpgraded;
+                _tower.BurrowChanged -= HandleBurrowChanged;
+            }
+
+            _tower = tower;
+            _panel.SetActive(tower != null);
+            if (tower == null)
+            {
+                return;
+            }
+
+            _tower.Upgraded += HandleUpgraded;
+            _tower.BurrowChanged += HandleBurrowChanged;
+            _name.text = tower.ShopData != null ? tower.ShopData.towerName : UiStrings.UnknownTower;
+            PlaceCard(tower);
+            Refresh();
+        }
+
+        // The card opens in the half of the screen away from the selected tower, so it never hides
+        // that tower or the ones beside it. Drawn last, so the help box or the shop list can't cover it.
+        private void PlaceCard(Tower tower)
+        {
+            Camera view = Camera.main;
+            bool towerLow = view != null && view.WorldToScreenPoint(tower.transform.position).y < Screen.height * 0.5f;
+
+            Vector2 corner = towerLow ? new Vector2(0f, 1f) : Vector2.zero;
+            _card.anchorMin = corner;
+            _card.anchorMax = corner;
+            _card.pivot = corner;
+            _card.anchoredPosition = towerLow ? _topLeftOffset : _bottomLeftOffset;
+            _card.SetAsLastSibling();
+        }
+
+        private void Refresh()
+        {
+            if (_tower == null)
+            {
+                return;
+            }
+
+            _level.text = string.Format(UiStrings.TowerLevelFormat, _tower.Level, _tower.MaxLevel);
+
+            int honeydew = _honeydew != null ? _honeydew.Amount : int.MaxValue;
+            TowerUpgradeRule.Verdict verdict = TowerUpgradeRule.Check(
+                _tower.Level, _tower.MaxLevel, _tower.NextUpgradeCost, honeydew);
+            _upgrade.interactable = verdict == TowerUpgradeRule.Verdict.Ready;
+            _upgradeLabel.text = verdict == TowerUpgradeRule.Verdict.AtMaxLevel
+                ? UiStrings.MaxLevel
+                : string.Format(UiStrings.UpgradeFormat, _tower.NextUpgradeCost);
+
+            if (_burrowLabel != null)
+            {
+                _burrowLabel.text = _tower.Burrowed ? UiStrings.Unburrow : UiStrings.Burrow;
+            }
+
+            if (_sellLabel != null && _placer != null)
+            {
+                _sellLabel.text = string.Format(UiStrings.SellFormat, _placer.SellValue(_tower));
+            }
+
+            // The Sap Ant's aura and the Carpenter Ant's mines pick no target, so an order would do nothing.
+            bool aims = _tower.UsesTargeting;
+            if (_orderTitle != null)
+            {
+                _orderTitle.SetActive(aims);
+            }
+
+            for (int i = 0; i < _orderButtons.Length; i++)
+            {
+                _orderButtons[i].gameObject.SetActive(aims);
+                bool current = (int)_tower.Priority == i;
+                TMP_Text label = _orderButtons[i].GetComponentInChildren<TMP_Text>();
+                if (label != null)
+                {
+                    // A mark as well as the colour, so the choice never rides on colour alone.
+                    label.text = (current ? UiStrings.CurrentOrderMark : string.Empty) + OrderNames[i];
+                }
+                _orderButtons[i].interactable = !current;
+            }
+        }
+
+        private void HandleHoneydewChanged(int amount)
+        {
+            Refresh();
+        }
+
+        private void HandleUpgraded(int level)
+        {
+            Refresh();
+        }
+
+        private void HandleBurrowChanged(bool burrowed)
+        {
+            Refresh();
+        }
+
+        // Through the run, like U and B, so Enter on a focused button does nothing while paused or after the run.
+        private void Upgrade()
+        {
+            if (Run != null)
+            {
+                Run.UpgradeSelectedTower();
+            }
+        }
+
+        private void Sell()
+        {
+            if (Run != null)
+            {
+                Run.SellSelectedTower();
+            }
+        }
+
+        private void ToggleBurrow()
+        {
+            if (Run != null)
+            {
+                Run.ToggleBurrowSelectedTower();
+            }
+        }
+
+        private void SetOrder(TargetingPriority order)
+        {
+            if (_tower != null)
+            {
+                _tower.Priority = order;
+                Refresh();
+            }
+        }
+    }
+}

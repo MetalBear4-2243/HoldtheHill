@@ -1,0 +1,63 @@
+using HoldTheHill.Features.Enemies;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+
+namespace HoldTheHill.EditorTools
+{
+    /// <summary>Adds a Tools > Hold the Hill menu to the Unity editor.</summary>
+    internal static class HoldTheHillMenu
+    {
+        // An S-shaped route in grid cells. It enters off the left edge of the default
+        // 2D camera view and leaves off the right edge.
+        private static readonly Vector2Int[] ExampleRoute =
+        {
+            new Vector2Int(-10, 2), new Vector2Int(-4, 2), new Vector2Int(-4, -3),
+            new Vector2Int(2, -3), new Vector2Int(2, 3), new Vector2Int(9, 3),
+        };
+
+        [MenuItem("Tools/Hold the Hill/Create Example Path")]
+        private static void CreateExamplePath()
+        {
+            EnemyPath existing = Object.FindAnyObjectByType<EnemyPath>();
+            if (existing != null)
+            {
+                Selection.activeGameObject = existing.gameObject;
+                EditorGUIUtility.PingObject(existing);
+                Debug.LogWarning("This scene already has an Enemy Path. Move its waypoints to edit it, or delete it first.", existing);
+                return;
+            }
+
+            GameObject pathObject = CreateExamplePathObject();
+            Undo.RegisterCreatedObjectUndo(pathObject, "Create Example Path");
+            Selection.activeGameObject = pathObject;
+            EditorSceneManager.MarkSceneDirty(pathObject.scene);
+        }
+
+        /// <summary>Makes an Enemy Path object following the example route, in the active scene.</summary>
+        internal static GameObject CreateExamplePathObject()
+        {
+            var pathObject = new GameObject("Enemy Path");
+            pathObject.AddComponent<EnemyPath>();
+            SetRoute(pathObject.transform, ExampleRoute);
+            return pathObject;
+        }
+
+        /// <summary>Replaces a path's waypoints with one per grid cell of <paramref name="route"/>.</summary>
+        internal static void SetRoute(Transform path, Vector2Int[] route)
+        {
+            for (int i = path.childCount - 1; i >= 0; i--)
+            {
+                Object.DestroyImmediate(path.GetChild(i).gameObject);
+            }
+
+            for (int i = 0; i < route.Length; i++)
+            {
+                Transform waypoint = new GameObject($"Waypoint {i}").transform;
+                waypoint.SetParent(path);
+                // Waypoints sit in the middle of grid cells (cell size 1).
+                waypoint.position = new Vector3(route[i].x + 0.5f, route[i].y + 0.5f, 0f);
+            }
+        }
+    }
+}

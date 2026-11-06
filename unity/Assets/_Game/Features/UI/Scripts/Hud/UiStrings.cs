@@ -1,0 +1,74 @@
+namespace HoldTheHill.Features.UI
+{
+    /// <summary>Every string the HUD and menus show, in one place, so they can be checked and later localized.</summary>
+    public static class UiStrings
+    {
+        public const string HoneydewFormat = "Honeydew {0}";
+        public const string WaveFormat = "Wave {0} / {1}";
+        public const string QueenHealth = "Queen";
+        public const string NextWave = "Next Wave";
+        public const string Paused = "Paused";
+        public const string Resume = "Resume";
+        public const string RestartLevel = "Restart level";
+        public const string Home = "Home";
+        public const string Victory = "The hill is held!";
+        public const string Defeat = "The Queen has fallen";
+
+        // Tower card, for the selected standing tower.
+        public const string TowerLevelFormat = "Level {0} / {1}";
+        public const string UpgradeFormat = "Upgrade  {0}";
+        public const string MaxLevel = "Max level";
+        public const string StandingOrder = "Target";
+        public const string OrderFirst = "First";
+        public const string OrderLast = "Last";
+        public const string OrderClosest = "Closest";
+        // Plain ASCII: the HUD font (LiberationSans) has no arrow glyphs.
+        public const string CurrentOrderMark = "> ";
+        public const string Burrow = "Burrow";
+        public const string Unburrow = "Come up";
+        public const string UnknownTower = "Tower";
+        public const string SellFormat = "Sell  +{0}";
+
+        // Developer help box listing the controls.
+        public const string ControlsTitle = "Controls  (F1 hides this)";
+        public static readonly string[] ControlsLines =
+        {
+            "1-6 or click a card  pick a tower",
+            "Left click  build, or select a placed tower",
+            "Right click  cancel",
+            "Space  next wave",
+            "T  speed 1x / 2x",
+            "Esc  pause",
+            "U  upgrade the selected tower",
+            "B  burrow or raise all towers",
+            "Click a silverfish to squash it",
+            "Click a drop to collect it, click the slot to use it",
+        };
+
+        /// <summary>The whole help box: the title over one line per control. After <see cref="ControlsLines"/>, which it reads.</summary>
+        public static readonly string ControlsText = ControlsTitle + "\n" + string.Join("\n", ControlsLines);
+
+        // The power-up slot.
+        public const string PowerUpEmpty = "No power-up";
+        public const string SwarmFrenzy = "Swarm Frenzy";
+        public const string RoyalGift = "Royal Gift";
+        public const string PickTowerForGift = "Pick a tower";
+        public const string GiftAtMaxLevel = "Already max level";
+        public const string SlotFull = "Slot full";
+        public const string FrenzyActiveFormat = "Frenzy {0} s";
+
+        // The Queen Mantis boss bar: her name, then what her shade does, in words as well as colour.
+        public const string MantisBarFormat = "{0} - {1}";
+        public const string QueenMantis = "Queen Mantis";
+        public const string MantisWhite = "White: heals";
+        public const string MantisBlack = "Black: raises the fallen";
+        public const string MantisPraying = "Praying: hit her now";
+
+        // Home screen. Level titles come from Core's LevelCatalogue, beside their scene ids.
+        public const string GameTitle = "Hold the Hill";
+        public const string Play = "Play";
+        public const string Quit = "Quit";
+        public const string ChooseLevel = "Choose a hill";
+        public const string Back = "Back";
+    }
+}

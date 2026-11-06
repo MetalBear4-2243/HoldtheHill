@@ -1,0 +1,453 @@
+using System;
+using System.Collections.Generic;
+using HoldTheHill.Core;
+using HoldTheHill.Features.Economy;
+using HoldTheHill.Features.Enemies;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+
+namespace HoldTheHill.Features.Towers
+{
+    /// <summary>
+    /// Places and selects towers. A tower is picked from the shop (<see cref="Select(TowerData)"/>)
+    /// or with the number keys; a ghost then follows the mouse, snapped to the grid. Left-click
+    /// builds it on a free cell if the player can afford it, right-click puts the ghost away.
+    /// Left-click on a standing tower selects it for the tower card (and puts any ghost away),
+    /// <see cref="UpgradeSelectedTower"/> buys its next level and <see cref="ToggleBurrowAll"/>
+    /// is the B key. What a click does is <see cref="TowerClickRule"/>. A tower a hazard removes
+    /// frees its cell through its Removed event.
+    /// </summary>
+    public class TowerPlacer : MonoBehaviour
+    {
+        /// <summary>A tower the player can buy: the shop entry and the prefab it builds.</summary>
+        [Serializable]
+        public struct Offer
+        {
+            [Tooltip("The shop card's data; its Honeydew cost is what the player pays.")]
+            public TowerData Data;
+
+            [Tooltip("The tower prefab built for that card.")]
+            public Tower Prefab;
+        }
+
+        /// <summary>The map's cells, x -10..9 and y -5..4: the area LevelCameraFit frames. Nothing is built outside it.</summary>
+        public static readonly RectInt MapCells = new RectInt(-10, -5, 20, 10);
+
+        [Header("Grid")]
+        [Tooltip("Size of one grid cell in world units.")]
+        [SerializeField] private float _cellSize = 1f;
+
+        [Tooltip("The cells towers can be built on, in grid cells. A click outside them builds nothing.")]
+        [SerializeField] private RectInt _buildArea = MapCells;
+
+        [Header("Level")]
+        [Tooltip("Towers can't be built on this path. Found automatically if left empty.")]
+        [SerializeField] private EnemyPath _path;
+
+        [Tooltip("The wallet towers are paid from.")]
+        [SerializeField] private HoneydewWallet _wallet;
+
+        [Header("Towers")]
+        [Tooltip("Towers for sale, in number-key order (1 is the first).")]
+        [SerializeField] private List<Offer> _offers = new List<Offer>();
+
+        [Header("Selling")]
+        [Tooltip("Share of everything spent on a tower that comes back when it is sold.")]
+        [SerializeField, Range(0f, 1f)] private float _sellRefund = 0.75f;
+
+        [Header("Input")]
+        [Tooltip("The game's actions asset. Uses its Gameplay map: Point, Place, Cancel, SelectTower1-6.")]
+        [SerializeField] private InputActionAsset _actions;
+
+        [Header("Preview")]
+        [SerializeField] private Color _freeCellColor = new Color(1f, 1f, 1f, 0.35f);
+        [SerializeField] private Color _blockedCellColor = new Color(1f, 0.3f, 0.3f, 0.35f);
+        [SerializeField] private Color _unaffordableColor = new Color(1f, 0.8f, 0.2f, 0.35f);
+        [SerializeField] private Color _selectionColor = new Color(0.4f, 0.9f, 1f, 0.45f);
+        [Tooltip("The ring that shows how far the ghost or the selected tower reaches.")]
+        [SerializeField] private Color _rangeColor = new Color(1f, 1f, 1f, 0.55f);
+
+        private const int SelectKeys = 6;
+
+        // Which grid cell holds which tower.
+        private readonly Dictionary<Vector2Int, Tower> _towers = new Dictionary<Vector2Int, Tower>();
+        private readonly InputAction[] _selectActions = new InputAction[SelectKeys];
+
+        private Camera _camera;
+        private SpriteRenderer _preview;
+        private SpriteRenderer _selectionMark;
+        private RangeRing _rangeRing;
+        private InputActionMap _gameplay;
+        private InputAction _point;
+        private InputAction _place;
+        private InputAction _cancel;
+        private int _selected = -1;
+        private Tower _selectedTower;
+
+        /// <summary>Raised when a tower has been built and paid for.</summary>
+        public event Action<Tower> TowerPlaced;
+
+        /// <summary>Raised when the selected tower changes; null means nothing is selected.</summary>
+        public event Action<Tower> SelectedTowerChanged;
+
+        /// <summary>The offer the ghost shows, or null when nothing is selected.</summary>
+        public Offer? Selected => _selected >= 0 ? _offers[_selected] : (Offer?)null;
+
+        /// <summary>The standing tower the card shows, or null.</summary>
+        public Tower SelectedTower => _selectedTower;
+
+        /// <summary>The wallet towers and upgrades are paid from.</summary>
+        public HoneydewWallet Wallet => _wallet;
+
+        /// <summary>Towers currently standing, by grid cell.</summary>
+        public IReadOnlyDictionary<Vector2Int, Tower> Towers => _towers;
+
+        /// <summary>
+        /// False while the run is paused or over: keys and clicks then leave towers alone.
+        /// The level's run sets it.
+        /// </summary>
+        public bool AcceptsInput { get; set; } = true;
+
+        private void Awake()
+        {
+            _camera = Camera.main;
+            if (_path == null)
+            {
+                _path = FindAnyObjectByType<EnemyPath>();
+            }
+
+            _preview = MakeMarker("Placement Preview", 100);
+            _selectionMark = MakeMarker("Selection Mark", 99);
+            _selectionMark.color = _selectionColor;
+            _rangeRing = RangeRing.Create("Range Ring", gameObject.scene, _preview, _rangeColor, 101);
+
+            if (_actions != null)
+            {
+                _gameplay = _actions.FindActionMap("Gameplay", throwIfNotFound: true);
+                _point = _gameplay.FindAction("Point", throwIfNotFound: true);
+                _place = _gameplay.FindAction("Place", throwIfNotFound: true);
+                _cancel = _gameplay.FindAction("Cancel", throwIfNotFound: true);
+                for (int i = 0; i < SelectKeys; i++)
+                {
+                    _selectActions[i] = _gameplay.FindAction($"SelectTower{i + 1}", throwIfNotFound: true);
+                }
+            }
+            else
+            {
+                Debug.LogError("TowerPlacer has no actions asset, so nothing can be placed.", this);
+            }
+        }
+
+        private SpriteRenderer MakeMarker(string name, int sortingOrder)
+        {
+            var marker = new GameObject(name).AddComponent<SpriteRenderer>();
+            // A new object goes into the active scene, which during a level load is still Bootstrap or
+            // UI. Moved into the level's own scene, the marker unloads with it on Restart and Home.
+            SceneManager.MoveGameObjectToScene(marker.gameObject, gameObject.scene);
+            marker.sprite = SpriteUtil.Square;
+            marker.sortingOrder = sortingOrder;
+            marker.transform.localScale = Vector3.one * _cellSize;
+            marker.enabled = false;
+            return marker;
+        }
+
+        private void OnEnable()
+        {
+            if (_gameplay != null)
+            {
+                _gameplay.Enable();
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_gameplay != null)
+            {
+                _gameplay.Disable();
+            }
+        }
+
+        /// <summary>
+        /// Starts placing the tower sold by <paramref name="data"/>. The shop card calls this.
+        /// Does nothing while the run is paused or over, like the number keys.
+        /// </summary>
+        public void Select(TowerData data)
+        {
+            if (!AcceptsInput)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _offers.Count; i++)
+            {
+                if (_offers[i].Data == data)
+                {
+                    Select(i);
+                    return;
+                }
+            }
+
+            Debug.LogWarning($"No tower is on offer for '{(data != null ? data.towerName : "null")}'.", this);
+        }
+
+        /// <summary>Starts placing offer <paramref name="index"/>; an index out of range cancels.</summary>
+        public void Select(int index)
+        {
+            bool valid = index >= 0 && index < _offers.Count && _offers[index].Prefab != null;
+            _selected = valid ? index : -1;
+            _preview.enabled = valid;
+            if (valid)
+            {
+                SelectTower(null);
+            }
+        }
+
+        /// <summary>Puts the ghost away without building anything, and drops the tower selection.</summary>
+        public void Cancel()
+        {
+            Select(-1);
+            SelectTower(null);
+        }
+
+        /// <summary>Makes <paramref name="tower"/> the one the card shows; null clears it.</summary>
+        public void SelectTower(Tower tower)
+        {
+            if (_selectedTower == tower)
+            {
+                return;
+            }
+
+            _selectedTower = tower;
+            _selectionMark.enabled = tower != null;
+            if (tower != null)
+            {
+                _selectionMark.transform.position = CellToWorld(tower.Cell);
+            }
+
+            SelectedTowerChanged?.Invoke(tower);
+        }
+
+        /// <summary>
+        /// Buys the selected tower's next level if it has one and the wallet covers it.
+        /// The card and the U key both come here.
+        /// </summary>
+        public TowerUpgradeRule.Verdict UpgradeSelectedTower()
+        {
+            if (_selectedTower == null)
+            {
+                return TowerUpgradeRule.Verdict.AtMaxLevel;
+            }
+
+            int honeydew = _wallet != null ? _wallet.Honeydew.Amount : int.MaxValue;
+            TowerUpgradeRule.Verdict verdict = TowerUpgradeRule.Check(
+                _selectedTower.Level, _selectedTower.MaxLevel, _selectedTower.NextUpgradeCost, honeydew);
+            if (verdict != TowerUpgradeRule.Verdict.Ready)
+            {
+                return verdict;
+            }
+
+            int cost = _selectedTower.NextUpgradeCost;
+            if (_wallet == null || _wallet.Honeydew.TrySpend(cost))
+            {
+                // Counted first: Upgrade() tells the card, which reads the Sell refund from it.
+                _selectedTower.HoneydewSpent += cost;
+                _selectedTower.Upgrade();
+            }
+
+            return verdict;
+        }
+
+        /// <summary>Honeydew the player would get back for selling <paramref name="tower"/> now.</summary>
+        public int SellValue(Tower tower)
+        {
+            return tower != null ? TowerSellRule.Refund(tower.HoneydewSpent, _sellRefund) : 0;
+        }
+
+        /// <summary>
+        /// Sells the selected tower: refunds its <see cref="SellValue"/> and takes it off the map.
+        /// Removing it frees the cell and clears the selection through its Removed event. The card comes here.
+        /// </summary>
+        public bool SellSelectedTower()
+        {
+            if (_selectedTower == null)
+            {
+                return false;
+            }
+
+            int refund = SellValue(_selectedTower);
+            if (_wallet != null)
+            {
+                _wallet.Honeydew.Earn(refund);
+            }
+
+            _selectedTower.Remove();
+            return true;
+        }
+
+        /// <summary>
+        /// Burrows every tower, or brings every tower up when all of them are already down.
+        /// The B key comes here.
+        /// </summary>
+        public void ToggleBurrowAll()
+        {
+            int burrowed = 0;
+            foreach (Tower tower in _towers.Values)
+            {
+                if (tower.Burrowed)
+                {
+                    burrowed++;
+                }
+            }
+
+            bool burrow = TowerCondition.BurrowAllNext(burrowed, _towers.Count);
+            foreach (Tower tower in _towers.Values)
+            {
+                tower.Burrowed = burrow;
+            }
+        }
+
+        /// <summary>The standing tower on the cell under <paramref name="world"/>, or null.</summary>
+        public Tower TowerAt(Vector3 world)
+        {
+            return _towers.TryGetValue(WorldToCell(world), out Tower tower) ? tower : null;
+        }
+
+        private void HandleTowerRemoved(Tower tower)
+        {
+            tower.Removed -= HandleTowerRemoved;
+            _towers.Remove(tower.Cell);
+            if (_selectedTower == tower)
+            {
+                SelectTower(null);
+            }
+        }
+
+        private void Update()
+        {
+            if (_gameplay == null || _camera == null || !AcceptsInput)
+            {
+                return;
+            }
+
+            for (int i = 0; i < SelectKeys; i++)
+            {
+                if (_selectActions[i].WasPressedThisFrame())
+                {
+                    Select(i);
+                }
+            }
+
+            if (_cancel.WasPressedThisFrame())
+            {
+                Cancel();
+            }
+
+            // A click on the HUD (the shop, a button, the card) is not a click on the map, and a click
+            // that squashed a silverfish must not also clear the selection or build.
+            bool overUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+            bool clicked = _place.WasPressedThisFrame() && !overUi && !SilverfishClickReader.ClickUsedThisFrame;
+            Vector3 mouseWorld = _camera.ScreenToWorldPoint(_point.ReadValue<Vector2>());
+            Vector2Int cell = WorldToCell(mouseWorld);
+            bool armed = _selected >= 0;
+            _towers.TryGetValue(cell, out Tower standing);
+
+            int cost = 0;
+            bool blocked = false;
+            bool affordable = true;
+            if (armed)
+            {
+                Offer armedOffer = _offers[_selected];
+                cost = armedOffer.Data != null ? armedOffer.Data.honeydewCost : 0;
+                // Off the map (under the HUD bands or beside the shop list) there is no cell to build on.
+                bool onMap = _buildArea.Contains(cell);
+                blocked = !onMap || standing != null || IsOnPath(cell);
+                affordable = _wallet == null || _wallet.Honeydew.CanAfford(cost);
+
+                _preview.enabled = onMap;
+                _preview.transform.position = CellToWorld(cell);
+                _preview.color = blocked ? _blockedCellColor : affordable ? _freeCellColor : _unaffordableColor;
+            }
+
+            if (!clicked)
+            {
+                return;
+            }
+
+            switch (TowerClickRule.Decide(armed, standing != null, blocked, affordable))
+            {
+                case TowerClickRule.Outcome.SelectStanding:
+                    // With a tower in hand too: the card, U and Sell then act on the tower clicked.
+                    Select(-1);
+                    SelectTower(standing);
+                    break;
+                case TowerClickRule.Outcome.ClearSelection:
+                    SelectTower(null);
+                    break;
+                case TowerClickRule.Outcome.Build:
+                    if (_wallet == null || _wallet.Honeydew.TrySpend(cost))
+                    {
+                        PlaceTower(_offers[_selected], cell);
+                    }
+                    break;
+            }
+        }
+
+        // After Update, and also while paused: the ring follows the ghost before a tower is bought,
+        // and the selected tower otherwise (its range grows with each upgrade).
+        private void LateUpdate()
+        {
+            if (_rangeRing == null)
+            {
+                return;
+            }
+
+            if (_selected >= 0 && _preview.enabled && _offers[_selected].Prefab != null)
+            {
+                _rangeRing.Show(_preview.transform.position, _offers[_selected].Prefab.Range);
+            }
+            else if (_selected < 0 && _selectedTower != null)
+            {
+                _rangeRing.Show(_selectedTower.transform.position, _selectedTower.Range);
+            }
+            else
+            {
+                _rangeRing.Hide();
+            }
+        }
+
+        private bool IsOnPath(Vector2Int cell)
+        {
+            return _path != null && _path.Blocks(CellToWorld(cell), _cellSize);
+        }
+
+        private void PlaceTower(Offer offer, Vector2Int cell)
+        {
+            Tower tower = Instantiate(offer.Prefab, CellToWorld(cell), Quaternion.identity, transform);
+            tower.Cell = cell;
+            tower.ShopData = offer.Data;
+            tower.HoneydewSpent = offer.Data != null ? offer.Data.honeydewCost : 0;
+            tower.Removed += HandleTowerRemoved;
+            _towers.Add(cell, tower);
+            TowerPlaced?.Invoke(tower);
+
+            // The ghost stays in hand for the next build. Opening the card now would put Upgrade
+            // and Sell under the cursor, where the next build click would land on them.
+            if (_selected < 0)
+            {
+                SelectTower(tower);
+            }
+        }
+
+        private Vector2Int WorldToCell(Vector3 world)
+        {
+            return new Vector2Int(Mathf.FloorToInt(world.x / _cellSize), Mathf.FloorToInt(world.y / _cellSize));
+        }
+
+        private Vector3 CellToWorld(Vector2Int cell)
+        {
+            return new Vector3((cell.x + 0.5f) * _cellSize, (cell.y + 0.5f) * _cellSize, 0f);
+        }
+    }
+}

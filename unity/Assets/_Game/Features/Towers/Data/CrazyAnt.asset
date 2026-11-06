@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d7d87ffd3d324c4188af7248f9e3da8, type: 3}
+  m_Name: CrazyAnt
+  m_EditorClassIdentifier: HoldTheHill.Runtime::TowerData
+  towerName: Crazy Ant
+  honeydewCost: 125
+  towerIcon: {fileID: 1747458572, guid: db3d33decd84e284db235e7003c75798, type: 3}
