@@ -1,8 +1,27 @@
 # The promotion stack: graybox shared code into `_Game`
 
-Proposal from Nilly, for the team meeting on 2026-10-15. Nothing here is merged. The code is on
-the fork `nilly-ctrl/HoldtheHill` as 17 branches, each built on the one before, and each compiles
-against `Indev` (`127d56bf`). Every PR into `Indev` still needs the team's yes.
+## Status on 2026-11-05: not pursued
+
+On 2026-10-14 the team took the other route: the team's own `Indev` code is the foundation, and
+the Alpha was built on it in steps (pull requests 32 to 40 and 46 to 53), each step bringing over
+only the small piece of graybox code the design needed, rewritten onto the team's classes
+(`BasicEnemy`, `EnemySpawner`, `Queen`, `TowerPlacer`, Adam's `TowerData`). None of the 17
+branches below was merged. The fork `nilly-ctrl/HoldtheHill` was retired on 2026-10-17, so the
+branches now exist only on Nilly's computer and in a git bundle. Read the rest of this page as a
+record of the 2026-10-14 proposal, not as a plan.
+
+What this stack asked for that the Alpha got another way: damage interfaces (Jason, pull request
+22); build, upgrade and sell with costs (32, 35, 40); breach damage per enemy with a once-only game
+over, which Jason's `Queen` on `Indev` already did; a living-enemy count that also goes down
+(Jason, 54); the next wave waiting until the last one is cleared, now the default (Jason, 58);
+`TowerData` in `Features/Towers` with a namespace (51). The "Still open after it" list further down was not
+rechecked against the Alpha code.
+
+---
+
+Proposal from Nilly, for the team meeting on 2026-10-15, kept as written. At that time nothing was
+merged; the code was on the fork `nilly-ctrl/HoldtheHill` as 17 branches, each built on the one
+before, and each compiled against `Indev` (`127d56bf`).
 
 ## Why
 
