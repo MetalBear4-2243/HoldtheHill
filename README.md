@@ -9,6 +9,7 @@ A single-player 2D hybrid tower defense by **Turbulent Towers Studio**: control 
 - **[Project map](docs/PROJECT_MAP.md)** — where tasks, documents, builds and code live, and which Notion tasks have code on `Indev`.
 - **[Conventions](docs/CONVENTIONS.md)** — naming and layout where this README leaves it open.
 - **[Technical documents](Documentation/)** — one page per system (enemies, spawner, wave data, and the fork's pages for reference).
+- **[Code bank](docs/code-bank/README.md)** — generated: every script's fields and API, every prefab's stored values, who sets and uses what. Rebuilt from the code; do not edit by hand.
 
 ## Setup (do this once)
 
