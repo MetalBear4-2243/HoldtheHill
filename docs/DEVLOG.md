@@ -26,6 +26,29 @@ Copy this to the top of the log:
 - What you or the team should do next
 ```
 
+## 2026-11-05 — Tower roles: dart, sap puddle, flamethrower, poison
+**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
+**Branch:** `nilly/alpha-projectile-art`
+
+**Worked on**
+- Bullet Ant: fires a fast stinger dart (speed 24, was 10). The dart faces its flight from the frame it is fired, and its hit spark shows on the enemy it hit.
+- Sap Ant: its slow aura is gone. It lobs a slow honey glob (no damage) that splats into a sticky puddle for 4 s. Ground enemies in it walk at half speed and wear the honey overlay; wasps fly over it. The puddle fades out over its last 0.6 s.
+- Fire Ant: a flamethrower. It hits everything in a 70-degree cone toward its target, reach 2, 3 damage five times a second, with flame puffs streaming at the target. No burn afterwards.
+- Crazy Ant: 4 damage a hit (6 and 9 upgraded; the Ant hits 8) at its old speed. Every 2 hits in a row on the same enemy add a poison stack, up to 5. Each stack deals a quarter of a hit every 0.5 s until 3 s after the last new stack, and poisoned enemies wear the poison overlay.
+- `Tools > Hold the Hill > Alpha > Build Tower Roles` converts the four towers, makes the sap shot, puddle and flame puff, then reruns Build Sprites. Rerunning it changes nothing. Tests cover the cone, hits in a row, stacks, the puddle fade and the dart's facing.
+
+**Decisions**
+- Picks are Nilly's: stinger dart, lobbed sap, cone only (no burn), 4 a hit. All art comes from sheets we already had.
+- Melee towers get a cone setting. 0 means all round, so the Ant and the Crazy Ant still hit everything in reach.
+
+**Problems / blockers**
+- Seen only in a windowed Editor capture on Meadow wave 1, not played. With every enemy given 150 health so each walked past all four towers, the dart, lob, puddle slow, flames, cone and poison stacks all did what is listed above.
+- At normal wave-1 health the Fire and Crazy Ants together killed each Basic enemy before its first poison tick.
+- Flame puffs always fly the full reach, so they run on past an enemy standing close to the Fire Ant.
+
+**Next**
+- Play a few waves and judge the numbers, starting with the Fire Ant's damage and how often poison gets past 1 stack.
+
 ## 2026-11-04 — Shot and mine art
 **Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
 **Branch:** `nilly/alpha-projectile-art`
