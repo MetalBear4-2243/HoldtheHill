@@ -4,7 +4,7 @@ namespace HoldTheHill.Features.Levels
 {
     /// <summary>
     /// Frames the level's map on any screen shape, with bands left free above and below for the HUD,
-    /// so the top and bottom rows are not under the Honeydew line, the Queen bar, the power-up slot or
+    /// so the top and bottom rows are not under the wave line, the Queen bar, the power-up slot or
     /// Next Wave, and a band on the right for the shop list, so the Queen is not under it. Sets the
     /// orthographic size and position of the camera it sits on, again whenever the screen size
     /// changes. The map's centre stays at the world origin.
@@ -22,7 +22,7 @@ namespace HoldTheHill.Features.Levels
         [Tooltip("Share of the screen height kept free at the bottom, for the power-up slot and Next Wave.")]
         [SerializeField, Range(0f, 0.4f)] private float _bottomBand = 0.09f;
 
-        [Tooltip("Share of the screen height kept free at the top, for the Honeydew and wave lines and the Queen bar under them.")]
+        [Tooltip("Share of the screen height kept free at the top, for the wave line, the Queen bar and the boss bar.")]
         [SerializeField, Range(0f, 0.4f)] private float _topBand = 0.15f;
 
         [Tooltip("Share of the screen width kept free on the right, for Adam's tower list. 0 uses the whole width.")]

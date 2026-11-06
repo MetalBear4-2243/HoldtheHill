@@ -107,7 +107,7 @@ namespace HoldTheHill.EditorTools
             Transform hud = canvas.transform.Find("HUD");
             Transform parent = hud != null ? hud : canvas.transform;
 
-            // Under the Honeydew count, top-left; the tower card and the power-up slot sit along the bottom.
+            // Top-left, below where the Honeydew line was; the tower card and the power-up slot sit along the bottom.
             Image box = AlphaRunFrameBuilder.MakeImage(parent, "Controls Help", HelpBoxColor, layer);
             AlphaRunFrameBuilder.Anchor(box.rectTransform, new Vector2(0f, 1f), new Vector2(Margin, -Margin - 64f), HelpBoxSize);
             box.raycastTarget = false;

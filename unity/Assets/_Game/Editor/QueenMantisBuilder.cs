@@ -79,7 +79,7 @@ namespace HoldTheHill.EditorTools
         // Build Bosses holds the entry before a boss back this long (AlphaBossesBuilder.GapBeforeBoss).
         private const float GapBeforeBoss = 3f;
 
-        // The boss bar, top left under the Honeydew line: the top centre holds the wave label and
+        // The boss bar, top left (where the Honeydew line was until 2026-11-05): the top centre holds the wave label and
         // the Queen's own bar. The help box opens there only on Tutorial Hill, where she never comes.
         private static readonly Vector2 BarPosition = new Vector2(24f, -80f);
         private static readonly Vector2 BarSize = new Vector2(560f, 64f);
@@ -537,7 +537,7 @@ namespace HoldTheHill.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
 
             panel.gameObject.SetActive(false);
-            Debug.Log("Made the Queen Mantis boss bar at the top left, under the Honeydew line.");
+            Debug.Log("Made the Queen Mantis boss bar at the top left.");
         }
 
         // ---- Report ---------------------------------------------------------------------------

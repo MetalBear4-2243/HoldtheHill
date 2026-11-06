@@ -20,9 +20,10 @@ namespace HoldTheHill.EditorTools
     /// <summary>
     /// Alpha step 2, the run frame. In <c>Hill01_Gameplay</c>: the Queen, and a Level Run object
     /// that reads the run keys and decides win or lose. In the <c>UI</c> scene: one canvas with the
-    /// Honeydew count, the wave count, the Queen bar, the Next Wave button, the pause panel and the
-    /// result panel. The Canvas, its button and the EventSystem that the gameplay scene carried move
-    /// to the UI scene, where the README says they belong.
+    /// wave count, the Queen bar, the Next Wave button, the pause panel and the result panel. The
+    /// Canvas, its button and the EventSystem that the gameplay scene carried move to the UI scene,
+    /// where the README says they belong. The run's Honeydew shows only in the balance box of Adam's
+    /// shop list (<see cref="AlphaShopBindingBuilder"/>); the old top-left Honeydew line is removed.
     /// </summary>
     /// <remarks>
     /// Safe to run again: scene objects are found by component and only their references are refreshed.
@@ -42,6 +43,7 @@ namespace HoldTheHill.EditorTools
 
         private const float Margin = 24f;
         private const int HudFontSize = 36;
+        private const string HoneydewLineName = "Honeydew";
         internal const int TitleFontSize = 64;
         private const int ButtonFontSize = 28;
         internal static readonly Vector2 MenuButtonSize = new Vector2(320f, 72f);
@@ -252,7 +254,7 @@ namespace HoldTheHill.EditorTools
             scaler.matchWidthOrHeight = 0.5f;
 
             RectTransform hud = EnsureStretchedChild(canvas.transform, "HUD", uiLayer);
-            EnsureHoneydewLabel(scene, hud, uiLayer);
+            RemoveHoneydewLine(hud);
             EnsureWaveLabel(scene, hud, uiLayer);
             EnsureQueenBar(scene, hud, uiLayer);
             EnsureNextWaveButton(scene, canvas, hud, uiLayer);
@@ -276,18 +278,29 @@ namespace HoldTheHill.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void EnsureHoneydewLabel(Scene scene, RectTransform hud, int layer)
+        // Earlier runs put a "Honeydew 150" line at the HUD's top left. Nilly dropped it on 2026-11-05:
+        // the shop list's balance box already shows the amount. Only that line goes, found as a direct
+        // child of the HUD; the HoneydewLabel on Adam's balance box sits deeper and stays.
+        private static void RemoveHoneydewLine(Transform hud)
         {
-            HoneydewLabel label = FindInScene<HoneydewLabel>(scene);
-            if (label != null)
+            Transform line;
+            while ((line = FindHoneydewLine(hud)) != null)
             {
-                return;
+                Object.DestroyImmediate(line.gameObject);
+                Debug.Log("Removed the top-left Honeydew line from the HUD; the shop list's balance box shows the amount.");
             }
+        }
 
-            TextMeshProUGUI text = MakeText(hud, "Honeydew", string.Format(UiStrings.HoneydewFormat, 0), HudFontSize,
-                TextAlignmentOptions.MidlineLeft, layer);
-            Anchor(text.rectTransform, new Vector2(0f, 1f), new Vector2(Margin, -Margin), new Vector2(480f, 48f));
-            text.gameObject.AddComponent<HoneydewLabel>();
+        private static Transform FindHoneydewLine(Transform hud)
+        {
+            foreach (Transform child in hud)
+            {
+                if (child.name == HoneydewLineName && child.GetComponent<HoneydewLabel>() != null)
+                {
+                    return child;
+                }
+            }
+            return null;
         }
 
         private static void EnsureWaveLabel(Scene scene, RectTransform hud, int layer)
@@ -569,7 +582,9 @@ namespace HoldTheHill.EditorTools
                       + $"scaler {(scaler != null ? $"{scaler.uiScaleMode} {scaler.referenceResolution}" : "MISSING")}");
             HudPanel hudPanel = FindInScene<HudPanel>(ui);
             Debug.Log($"HUD panel: {(hudPanel != null ? "hud = " + Name(new SerializedObject(hudPanel), "_hud") : "MISSING")}");
-            Debug.Log($"HUD: Honeydew {(FindInScene<HoneydewLabel>(ui) != null ? "present" : "MISSING")}, "
+            Transform hud = canvas != null ? canvas.transform.Find("HUD") : null;
+            bool honeydewLine = hud != null && FindHoneydewLine(hud) != null;
+            Debug.Log($"HUD: Honeydew line {(honeydewLine ? "STILL HERE" : "none (removed)")}, "
                       + $"Wave {(FindInScene<WaveLabel>(ui) != null ? "present" : "MISSING")}, "
                       + $"Next Wave button {(FindInScene<NextWaveButton>(ui) != null ? "present" : "MISSING")}");
 

@@ -6,8 +6,9 @@ using UnityEngine;
 namespace HoldTheHill.Features.UI
 {
     /// <summary>
-    /// Shows the run's Honeydew. Updates only when the amount changes. Also sits on the balance box
-    /// of Adam's shop list, which shows the number alone.
+    /// Shows the run's Honeydew. Updates only when the amount changes. Sits on the balance box of
+    /// Adam's shop list, which shows the number alone; the HUD's top-left Honeydew line that also
+    /// used it was removed on 2026-11-05.
     /// </summary>
     [RequireComponent(typeof(TMP_Text))]
     public class HoneydewLabel : LevelRunListener
