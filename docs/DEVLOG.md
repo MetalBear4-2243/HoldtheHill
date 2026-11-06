@@ -26,6 +26,26 @@ Copy this to the top of the log:
 - What you or the team should do next
 ```
 
+## 2026-11-05 — HUD: Honeydew line removed
+**Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
+**Branch:** `nilly/remove-honeydew-counter`
+
+**Worked on**
+- The "Honeydew 300" line at the top left of the HUD is gone. The balance still shows in the box at the top of Adam's shop list.
+- `Tools > Hold the Hill > Alpha > Build Run Frame` no longer makes the line, and deletes it from `UI.unity` if it is there. Rerunning it changes nothing.
+- New EditMode tests (`HudHoneydewDataTests`) check that the HUD has no Honeydew line of its own and that the shop's balance box is the only Honeydew display.
+
+**Decisions**
+- Removed, not hidden: the shop's balance box already shows the same number, so the HUD showed it twice.
+- `HoneydewLabel` stays: it keeps the shop's balance box up to date.
+- Nothing else on the HUD moved. The Controls Help box and the Queen Mantis bar keep their places in the top-left corner, and the camera still leaves the same band free at the top.
+
+**Problems / blockers**
+- Rerunning Build Run Frame also re-saves `Hill01_Gameplay` with default values for newer TowerPlacer and EnemySpawner fields. That re-save is not in this branch (Hill01 is out of the build).
+
+**Next**
+- Play a level and check that the shop's balance box goes down when you build and up when enemies die.
+
 ## 2026-11-05 — Tower roles: dart, sap puddle, flamethrower, poison
 **Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)
 **Branch:** `nilly/alpha-projectile-art`
