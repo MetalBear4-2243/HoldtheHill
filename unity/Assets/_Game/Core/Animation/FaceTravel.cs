@@ -31,6 +31,22 @@ namespace HoldTheHill.Core.Animation
             _hasFaced = false;
         }
 
+        /// <summary>
+        /// Turns the body to face <paramref name="direction"/> at once, as if it had already moved that
+        /// way: for something that must look the right way on the frame it appears (a fast shot).
+        /// </summary>
+        public void Face(Vector3 direction)
+        {
+            direction.z = 0f;
+            if (_body == null || direction.sqrMagnitude < 0.0000001f)
+            {
+                return;
+            }
+
+            _body.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - _artFacingDegrees);
+            _hasFaced = true;
+        }
+
         private void LateUpdate()
         {
             Vector3 moved = transform.position - _lastPosition;

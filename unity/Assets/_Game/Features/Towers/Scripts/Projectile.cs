@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using HoldTheHill.Core.Animation;
 using HoldTheHill.Features.Enemies;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace HoldTheHill.Features.Towers
 {
@@ -34,6 +36,10 @@ namespace HoldTheHill.Features.Towers
         [Tooltip("Lobbed only: every enemy within this distance of the landing point takes the damage.")]
         [SerializeField, Min(0f)] private float _splashRadius = 1f;
 
+        [Header("Look")]
+        [Tooltip("Optional: what the shot leaves where it hits or lands (a splash, a blast, the Sap Ant's puddle). It removes itself.")]
+        [SerializeField] private GameObject _hitEffect;
+
         private static readonly List<BasicEnemy> s_splashBuffer = new List<BasicEnemy>();
 
         private BasicEnemy _target;
@@ -63,6 +69,13 @@ namespace HoldTheHill.Features.Towers
                 _landing = LobLanding(_target.transform.position, _origin.z);
                 _direction = Direction(_landing);
                 _flightTime = Vector2.Distance(_origin, _landing) / _speed;
+
+                // Look the right way from the frame it appears: the dart is on screen for only a few frames.
+                FaceTravel facing = GetComponent<FaceTravel>();
+                if (facing != null)
+                {
+                    facing.Face(_lobbed ? LobLaunchHeading(_origin, _landing, _arcHeight) : _direction);
+                }
             }
         }
 
@@ -97,6 +110,9 @@ namespace HoldTheHill.Features.Towers
                 if (distance <= _hitRadius + step)
                 {
                     _target.TakeDamage(_damage);
+
+                    // A fast shot counts its hit up to a step early; show it on the target, not in the air short of it.
+                    LeaveHitEffect(HitPoint(transform.position, targetPosition, _hitRadius));
                     Destroy(gameObject);
                     return;
                 }
@@ -126,7 +142,20 @@ namespace HoldTheHill.Features.Towers
             }
 
             Splash(_landing);
+            LeaveHitEffect(_landing);
             Destroy(gameObject);
+        }
+
+        // Not a child of the shot, which goes now; kept in the shot's scene, so it goes with the level.
+        private void LeaveHitEffect(Vector3 at)
+        {
+            if (_hitEffect == null)
+            {
+                return;
+            }
+
+            GameObject effect = Instantiate(_hitEffect, at, Quaternion.identity);
+            SceneManager.MoveGameObjectToScene(effect, gameObject.scene);
         }
 
         // Damages every living enemy on the ground near the point; a splash on the ground misses
@@ -158,6 +187,24 @@ namespace HoldTheHill.Features.Towers
             {
                 s_splashBuffer[i].TakeDamage(_damage);
             }
+        }
+
+        /// <summary>
+        /// Where a straight shot's hit shows: on the target's edge that faces the shot,
+        /// <paramref name="hitRadius"/> from its centre (or where the shot is, if that is nearer), in the shot's plane.
+        /// </summary>
+        public static Vector3 HitPoint(Vector3 shot, Vector3 target, float hitRadius)
+        {
+            target.z = shot.z;
+            return Vector3.MoveTowards(target, shot, hitRadius);
+        }
+
+        /// <summary>Which way a lob leaves: along the start of its arc, climbing toward <paramref name="landing"/>.</summary>
+        public static Vector3 LobLaunchHeading(Vector3 origin, Vector3 landing, float arcHeight)
+        {
+            Vector3 heading = landing - origin + Vector3.up * (arcHeight * Mathf.PI);
+            heading.z = 0f;
+            return heading;
         }
 
         /// <summary>Where a lob comes down for a target at <paramref name="target"/>: on it, in the shot's own plane.</summary>

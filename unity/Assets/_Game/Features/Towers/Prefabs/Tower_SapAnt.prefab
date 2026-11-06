@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 6056635951733399238}
   - component: {fileID: 4493508298982625121}
   - component: {fileID: 4314983547922285816}
-  - component: {fileID: 1061900607795424331}
   - component: {fileID: 2308717287535249415}
   - component: {fileID: 6425677376421554270}
   m_Layer: 0
@@ -110,37 +109,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.Tower
   _range: 2
   _damage: 0
-  _fireInterval: 1
-  _projectilePrefab: {fileID: 0}
+  _fireInterval: 2
+  _projectilePrefab: {fileID: 8475186921115836329, guid: efbfadcaf74338f4cb0908b6e44eae9c, type: 3}
   _muzzle: {fileID: 0}
+  _coneDegrees: 0
   _priority: 0
   _upgrades:
   - Cost: 135
     Range: 2.4
     Damage: 0
-    FireInterval: 1
+    FireInterval: 1.8
   - Cost: 200
     Range: 2.8
     Damage: 0
-    FireInterval: 1
+    FireInterval: 1.6
   _scalePerLevel: 1.12
   _burrowedTint: {r: 0.5, g: 0.45, b: 0.4, a: 0.6}
   _stunnedTint: {r: 0.55, g: 0.7, b: 1, a: 1}
   _missingTint: {r: 1, g: 0.85, b: 0.45, a: 1}
---- !u!114 &1061900607795424331
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8073054547478975021}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41dedf14c8884b5bb4eedb8bdea6ac1a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.SlowAura
-  _slowMultiplier: 0.5
-  _tickInterval: 0.25
 --- !u!114 &2308717287535249415
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1302577394530404877}
   - component: {fileID: 2027181666407290234}
   - component: {fileID: 4503949461332831187}
+  - component: {fileID: 4706732245781713048}
   m_Layer: 0
   m_Name: Mine_Carpenter
   m_TagString: Untagged
@@ -28,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -82,8 +83,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 3
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 69fcb56da855fee42af32540473708ae, type: 3}
-  m_Color: {r: 0.35, g: 0.25, b: 0.2, a: 1}
+  m_Sprite: {fileID: 1847286388, guid: 9bad750b15f159f49b1b1581a9a1ce24, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -107,3 +108,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.Mine
   _triggerRadius: 0.35
   _blastRadius: 0.9
+  _explosionEffect: {fileID: 4240429360803427279, guid: 1998bb924a001dc4f8cb7002c83d447d, type: 3}
+--- !u!114 &4706732245781713048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8135789074782388242}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4bbc85fd0a0ddc4c8ca54197abbe59c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Animation.SpriteFlipbook
+  _renderer: {fileID: 2027181666407290234}
+  _frames:
+  - {fileID: 1847286388, guid: 9bad750b15f159f49b1b1581a9a1ce24, type: 3}
+  - {fileID: 1258328878, guid: 9bad750b15f159f49b1b1581a9a1ce24, type: 3}
+  _frameSeconds: 0.3
+  _randomStart: 1

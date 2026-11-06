@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using HoldTheHill.Features.Enemies;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace HoldTheHill.Features.Towers
 {
@@ -16,6 +17,9 @@ namespace HoldTheHill.Features.Towers
 
         [Tooltip("Every enemy this close to the mine takes the damage when it goes off.")]
         [SerializeField, Min(0.05f)] private float _blastRadius = 0.9f;
+
+        [Tooltip("Optional: an effect (a blast) left where the mine goes off. It removes itself.")]
+        [SerializeField] private GameObject _explosionEffect;
 
         private static readonly List<BasicEnemy> s_blastBuffer = new List<BasicEnemy>();
 
@@ -76,6 +80,13 @@ namespace HoldTheHill.Features.Towers
             for (int i = 0; i < s_blastBuffer.Count; i++)
             {
                 s_blastBuffer[i].TakeDamage(_damage);
+            }
+
+            // Kept in the mine's scene (the level's, where the layer put it), so it goes with the level.
+            if (_explosionEffect != null)
+            {
+                GameObject effect = Instantiate(_explosionEffect, here, Quaternion.identity);
+                SceneManager.MoveGameObjectToScene(effect, gameObject.scene);
             }
 
             Exploded?.Invoke(this);

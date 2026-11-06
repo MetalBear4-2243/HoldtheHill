@@ -1,0 +1,1377 @@
+fileFormatVersion: 2
+guid: 51c532e22f5abec46854cf1600c0756e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7414837985507915905
+    second: WpnFlameBurst_0
+  - first:
+      213: -2829854201610659919
+    second: WpnFlameBurst_1
+  - first:
+      213: 3140869172707892479
+    second: WpnFlameBurst_2
+  - first:
+      213: 7645187268778955249
+    second: WpnFlameBurst_3
+  - first:
+      213: 5585640556220914684
+    second: WpnFlameBurst_4
+  - first:
+      213: -4331928546433664383
+    second: WpnFlameBurst_5
+  - first:
+      213: -5241052633083770986
+    second: WpnFlameBurst_6
+  - first:
+      213: 435282190471408148
+    second: WpnFlameBurst_7
+  - first:
+      213: 3380094010365621140
+    second: WpnFlameBurst_8
+  - first:
+      213: 4998261881035010976
+    second: WpnFlameBurst_9
+  - first:
+      213: -3175931833438076242
+    second: WpnFlameBurst_10
+  - first:
+      213: -4382844065526699155
+    second: WpnFlameBurst_11
+  - first:
+      213: -157239317892613293
+    second: WpnFlameBurst_12
+  - first:
+      213: 8630777665303780116
+    second: WpnFlameBurst_13
+  - first:
+      213: -6027703305614308004
+    second: WpnFlameBurst_14
+  - first:
+      213: 461177004875785522
+    second: WpnFlameBurst_15
+  - first:
+      213: -7865498420886539708
+    second: WpnFlameBurst_16
+  - first:
+      213: 3882064555531387601
+    second: WpnFlameBurst_17
+  - first:
+      213: -3198198127512417021
+    second: WpnFlameBurst_18
+  - first:
+      213: -3569588086971988744
+    second: WpnFlameBurst_19
+  - first:
+      213: -8931954136387974998
+    second: WpnFlameBurst_20
+  - first:
+      213: 3342525838844086730
+    second: WpnFlameBurst_21
+  - first:
+      213: -1182296163527523604
+    second: WpnFlameBurst_22
+  - first:
+      213: 7757029587893904067
+    second: WpnFlameBurst_23
+  - first:
+      213: 4225416811898168701
+    second: WpnFlameBurst_24
+  - first:
+      213: -590614407742320066
+    second: WpnFlameBurst_25
+  - first:
+      213: 1964217880706569326
+    second: WpnFlameBurst_26
+  - first:
+      213: 3576188028676812446
+    second: WpnFlameBurst_27
+  - first:
+      213: -189377703825235774
+    second: WpnFlameBurst_28
+  - first:
+      213: -6075807819222634381
+    second: WpnFlameBurst_29
+  - first:
+      213: 7999886768295578465
+    second: WpnFlameBurst_30
+  - first:
+      213: -6838201413828429475
+    second: WpnFlameBurst_31
+  - first:
+      213: -9079070254113747719
+    second: WpnFlameBurst_32
+  - first:
+      213: -4410646029228654173
+    second: WpnFlameBurst_33
+  - first:
+      213: -1129365252452934898
+    second: WpnFlameBurst_34
+  - first:
+      213: -7454493422936755350
+    second: WpnFlameBurst_35
+  - first:
+      213: 6975949852579406870
+    second: WpnFlameBurst_36
+  - first:
+      213: 1540338323543180290
+    second: WpnFlameBurst_37
+  - first:
+      213: -3266880244652380209
+    second: WpnFlameBurst_38
+  - first:
+      213: 452685578878589413
+    second: WpnFlameBurst_39
+  - first:
+      213: -6630673654473301721
+    second: WpnFlameBurst_40
+  - first:
+      213: -3708944124665683019
+    second: WpnFlameBurst_41
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: VisionOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: tvOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: WpnFlameBurst Fly 0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 288
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b512d7ff46c99f855d36909f70e24f31
+      internalID: -1789490843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Fly 1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 288
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 587ecf95f28ecd0e2520a67ec4d2b015
+      internalID: 641822136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Fly 2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 288
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 754b9a948f29489fbe6e6122d53a4d34
+      internalID: 1922223025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Fly 3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 288
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: efd896a6b40fdad4893d946ef1cb6a4d
+      internalID: 407226626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Trail 0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 256
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 33926b45924c9206c6120a656a92de63
+      internalID: 83670628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Trail 1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 256
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f157576d83891a8229510b36dc69a909
+      internalID: -1155400108
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Trail 2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 256
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b8791b26dc6fc0eb9b44b1483aebf1d8
+      internalID: 1072769188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Trail 3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 256
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bd7c1d8dbffcb1de5803f880e2152825
+      internalID: 238954995
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit 0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 224
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ff0cc377e9ca7ddfc45714aa3b316bd6
+      internalID: 2124355378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit 1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 224
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 90e5e46e9c35d732f0fcc82e0ad44690
+      internalID: 85697287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit 2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 224
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2f613f4a8cb539b1c756616390a4bd95
+      internalID: 870890663
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit 3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 224
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bdcd8566f1617350863c1ae35b13912f
+      internalID: 1598549629
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit 4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 224
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5afd154c8b93bc53c589209518678154
+      internalID: 416317828
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Miss 0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 192
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f16b166e59db0e205dea45914157e1ff
+      internalID: -1745763125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Miss 1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 192
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e3088c0426652f805b8298bbcf6c0e2d
+      internalID: 2143365297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Miss 2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 192
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c06b68e168c9548c025ccce217d9b473
+      internalID: 1037164731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Miss 3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 192
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e518d495f66367a20c7819806312c261
+      internalID: 715136615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Muzzle 0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 160
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af704fd58de2a56dcaff98cc719dff49
+      internalID: 1978709857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Muzzle 1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 160
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d576f90e197173d75ea2610b872f8cab
+      internalID: -1182234255
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Muzzle 2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 160
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 813fc284d4cdaaf11e46cbe494e34c5a
+      internalID: 1631904281
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Charge 0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9744da3537eac57eabfeb2ecc90423d7
+      internalID: -1727715704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Charge 1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6abb8eeebc71658f60f428967a7ca6d3
+      internalID: -956481380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Charge 2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1f73d7b2f779e9285146459145295338
+      internalID: -698021289
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Charge 3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 34f4aafde8b74032e42f1b02c04b4c81
+      internalID: 329723219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Charge 4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32a437f588dc2cdf43b83b3606cd5d61
+      internalID: -1857378773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Charge 5
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 58f93588e5c6f7e0f203034a6fd86ab9
+      internalID: -1164525574
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Fly2 0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 14afe9dfdfb414127ca4aa40a60c50df
+      internalID: 858525857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Fly2 1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b97745123d6cb2a9d82a5d510377310c
+      internalID: -79067155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Fly2 2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 54dae80971048f52b566cb075fab67e0
+      internalID: -1407356428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Fly2 3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7500b44be89d4e39596757aa95c580b5
+      internalID: 2108738045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Fly3 0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6636ff0055db2dd33d9aa9c03c6ee055
+      internalID: -1934254913
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Fly3 1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: afe2c1f205e891c5cf660f135bf14419
+      internalID: -1624068741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Fly3 2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 07ecef891cfa2f730e7a1ee7c359bb78
+      internalID: -263239803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Fly3 3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb9982a1f1252eea9587e4a0ba4a6ed1
+      internalID: -1139030489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit2 0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d6b27cb3388f2bac085da2e71980a3d1
+      internalID: -1245243381
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit2 1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e52b3f0d7079b93f9798bf44a03960b7
+      internalID: 1297601966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit2 2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 94b227fac93e3001a3aed686ae4855fa
+      internalID: 585901833
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit2 3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7c94fc69cbfb1e06f17d3edc85d325eb
+      internalID: -1442334388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit2 4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4aacb467e9859e0a8cfc81c2c7d4f377
+      internalID: -124636802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit3 0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8c449e301fdd2d89525ad6d23362cf67
+      internalID: -354715629
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit3 1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fbcd6ab7d35b0dfa1966fd6ec7aad5d0
+      internalID: 974977543
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit3 2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d3195c8ed7a56f6c028be9bb222815a3
+      internalID: 967350022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit3 3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dd4861d22cea414eb660b7f993d9c903
+      internalID: -1115631107
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WpnFlameBurst Hit3 4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 50f04c4613791eef6b3a9f324a1ac503
+      internalID: -1206344598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 8cd16954782b60e45baff4541042dc3c
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      WpnFlameBurst Charge 0: -1727715704
+      WpnFlameBurst Charge 1: -956481380
+      WpnFlameBurst Charge 2: -698021289
+      WpnFlameBurst Charge 3: 329723219
+      WpnFlameBurst Charge 4: -1857378773
+      WpnFlameBurst Charge 5: -1164525574
+      WpnFlameBurst Fly 0: -1789490843
+      WpnFlameBurst Fly 1: 641822136
+      WpnFlameBurst Fly 2: 1922223025
+      WpnFlameBurst Fly 3: 407226626
+      WpnFlameBurst Fly2 0: 858525857
+      WpnFlameBurst Fly2 1: -79067155
+      WpnFlameBurst Fly2 2: -1407356428
+      WpnFlameBurst Fly2 3: 2108738045
+      WpnFlameBurst Fly3 0: -1934254913
+      WpnFlameBurst Fly3 1: -1624068741
+      WpnFlameBurst Fly3 2: -263239803
+      WpnFlameBurst Fly3 3: -1139030489
+      WpnFlameBurst Hit 0: 2124355378
+      WpnFlameBurst Hit 1: 85697287
+      WpnFlameBurst Hit 2: 870890663
+      WpnFlameBurst Hit 3: 1598549629
+      WpnFlameBurst Hit 4: 416317828
+      WpnFlameBurst Hit2 0: -1245243381
+      WpnFlameBurst Hit2 1: 1297601966
+      WpnFlameBurst Hit2 2: 585901833
+      WpnFlameBurst Hit2 3: -1442334388
+      WpnFlameBurst Hit2 4: -124636802
+      WpnFlameBurst Hit3 0: -354715629
+      WpnFlameBurst Hit3 1: 974977543
+      WpnFlameBurst Hit3 2: 967350022
+      WpnFlameBurst Hit3 3: -1115631107
+      WpnFlameBurst Hit3 4: -1206344598
+      WpnFlameBurst Miss 0: -1745763125
+      WpnFlameBurst Miss 1: 2143365297
+      WpnFlameBurst Miss 2: 1037164731
+      WpnFlameBurst Miss 3: 715136615
+      WpnFlameBurst Muzzle 0: 1978709857
+      WpnFlameBurst Muzzle 1: -1182234255
+      WpnFlameBurst Muzzle 2: 1631904281
+      WpnFlameBurst Trail 0: 83670628
+      WpnFlameBurst Trail 1: -1155400108
+      WpnFlameBurst Trail 2: 1072769188
+      WpnFlameBurst Trail 3: 238954995
+      WpnFlameBurst_0: -7414837985507915905
+      WpnFlameBurst_1: -2829854201610659919
+      WpnFlameBurst_10: -3175931833438076242
+      WpnFlameBurst_11: -4382844065526699155
+      WpnFlameBurst_12: -157239317892613293
+      WpnFlameBurst_13: 8630777665303780116
+      WpnFlameBurst_14: -6027703305614308004
+      WpnFlameBurst_15: 461177004875785522
+      WpnFlameBurst_16: -7865498420886539708
+      WpnFlameBurst_17: 3882064555531387601
+      WpnFlameBurst_18: -3198198127512417021
+      WpnFlameBurst_19: -3569588086971988744
+      WpnFlameBurst_2: 3140869172707892479
+      WpnFlameBurst_20: -8931954136387974998
+      WpnFlameBurst_21: 3342525838844086730
+      WpnFlameBurst_22: -1182296163527523604
+      WpnFlameBurst_23: 7757029587893904067
+      WpnFlameBurst_24: 4225416811898168701
+      WpnFlameBurst_25: -590614407742320066
+      WpnFlameBurst_26: 1964217880706569326
+      WpnFlameBurst_27: 3576188028676812446
+      WpnFlameBurst_28: -189377703825235774
+      WpnFlameBurst_29: -6075807819222634381
+      WpnFlameBurst_3: 7645187268778955249
+      WpnFlameBurst_30: 7999886768295578465
+      WpnFlameBurst_31: -6838201413828429475
+      WpnFlameBurst_32: -9079070254113747719
+      WpnFlameBurst_33: -4410646029228654173
+      WpnFlameBurst_34: -1129365252452934898
+      WpnFlameBurst_35: -7454493422936755350
+      WpnFlameBurst_36: 6975949852579406870
+      WpnFlameBurst_37: 1540338323543180290
+      WpnFlameBurst_38: -3266880244652380209
+      WpnFlameBurst_39: 452685578878589413
+      WpnFlameBurst_4: 5585640556220914684
+      WpnFlameBurst_40: -6630673654473301721
+      WpnFlameBurst_41: -3708944124665683019
+      WpnFlameBurst_5: -4331928546433664383
+      WpnFlameBurst_6: -5241052633083770986
+      WpnFlameBurst_7: 435282190471408148
+      WpnFlameBurst_8: 3380094010365621140
+      WpnFlameBurst_9: 4998261881035010976
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
