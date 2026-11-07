@@ -23,8 +23,10 @@ namespace HoldTheHill.Tests
             "Assets/_Game/Features/Enemies/Data/L00_TutorialHill_Waves.asset",
             "Assets/_Game/Features/Enemies/Data/L01_Meadow_Waves.asset",
             "Assets/_Game/Features/Enemies/Data/Hill01_Waves.asset",
-            "Assets/_Game/Features/Enemies/Scripts/EnemySpawner/Map_01.asset",
         };
+
+        // Jason's template wave list, on his Triangle test enemy: no data asset, but still an enemy.
+        private const string TemplateWaveAsset = "Assets/_Game/Features/Enemies/Scripts/EnemySpawner/Map_01.asset";
 
         private static readonly string[] Variants =
         {
@@ -206,6 +208,17 @@ namespace HoldTheHill.Tests
         [TestCaseSource(nameof(WaveAssets))]
         public void EveryWaveEntry_StillPointsAtAnEnemy(string path)
         {
+            AssertWaveEntries(path, requireData: true);
+        }
+
+        [Test]
+        public void TheTemplateWaveList_StillPointsAtAnEnemy()
+        {
+            AssertWaveEntries(TemplateWaveAsset, requireData: false);
+        }
+
+        private static void AssertWaveEntries(string path, bool requireData)
+        {
             var waves = AssetDatabase.LoadAssetAtPath<MapWaveDataSO>(path);
             Assert.That(waves, Is.Not.Null, $"{path} is missing.");
             Assert.That(waves.waves, Is.Not.Empty);
@@ -219,7 +232,10 @@ namespace HoldTheHill.Tests
                     GameObject enemyPrefab = wave.enemies[e].enemyPrefab;
                     Assert.That(enemyPrefab, Is.Not.Null, $"{waves.name} wave {w + 1} entry {e + 1} points at nothing.");
                     Assert.That(enemyPrefab.GetComponent<BasicEnemy>(), Is.Not.Null, $"{waves.name} wave {w + 1} entry {e + 1} ({enemyPrefab.name}) is no enemy.");
-                    Assert.That(enemyPrefab.GetComponent<BasicEnemy>().Data, Is.Not.Null, $"{waves.name} wave {w + 1} entry {e + 1} ({enemyPrefab.name}) has no data asset.");
+                    if (requireData)
+                    {
+                        Assert.That(enemyPrefab.GetComponent<BasicEnemy>().Data, Is.Not.Null, $"{waves.name} wave {w + 1} entry {e + 1} ({enemyPrefab.name}) has no data asset.");
+                    }
                 }
             }
         }
