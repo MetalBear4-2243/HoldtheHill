@@ -6,7 +6,8 @@ namespace HoldTheHill.Features.Enemies
     /// The numbers behind one kind of enemy: what a designer tunes without touching a prefab or
     /// code. Every enemy prefab (a variant of Enemy_Base) points at one of these, and
     /// <see cref="BasicEnemy"/> reads it when the enemy spawns. An enemy's abilities (the shield,
-    /// the curl, the split) are components on its variant, each with its own numbers.
+    /// the curl, the split) are components on its variant; their numbers are the
+    /// <see cref="Abilities"/> here, so the Balance Table window shows every enemy in one table.
     /// Data, not code (UNITY_RULES 32).
     /// </summary>
     [CreateAssetMenu(fileName = "EnemyData", menuName = "Hold the Hill/Enemy Data")]
@@ -38,5 +39,9 @@ namespace HoldTheHill.Features.Enemies
 
         [Tooltip("If on, one click on it kills it outright (the Silverfish rule).")]
         public bool DiesToClick;
+
+        [Header("Abilities")]
+        [Tooltip("The strength of the abilities this enemy's variant carries (shield, curl, split). Fields for a component it lacks do nothing.")]
+        public EnemyAbilitySettings Abilities;
     }
 }

@@ -6,22 +6,14 @@ namespace HoldTheHill.Features.Enemies
     /// The Rhino Beetle's shield, an ability beside <see cref="BasicEnemy"/> around an
     /// <see cref="EnemyShield"/>. Damage hits the shield first; what gets through reaches the
     /// enemy's health. The shield grows back after a few seconds without a hit. An optional sprite
-    /// over the beetle fades with it.
+    /// over the beetle fades with it. Its capacity, delay and regrowth are the enemy's
+    /// <see cref="EnemyAbilitySettings"/> (its data asset); an enemy without one gets the defaults.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(BasicEnemy))]
     public class RhinoBeetleShield : MonoBehaviour, IDamageModifier
     {
         [Header("Shield")]
-        [Tooltip("How much damage a full shield soaks before anything reaches health.")]
-        [SerializeField, Min(0f)] private float _shieldCapacity = 40f;
-
-        [Tooltip("Seconds without a hit before the shield starts to grow back.")]
-        [SerializeField, Min(0f)] private float _shieldRegrowDelay = 3f;
-
-        [Tooltip("Shield points regained per second once it is growing back.")]
-        [SerializeField, Min(0f)] private float _shieldRegrowPerSecond = 25f;
-
         [Tooltip("Optional: a sprite drawn over the beetle whose alpha follows the shield. Leave empty for none.")]
         [SerializeField] private SpriteRenderer _shieldVisual;
 
@@ -73,7 +65,13 @@ namespace HoldTheHill.Features.Enemies
                 return;
             }
 
-            _shield = new EnemyShield(_shieldCapacity, _shieldRegrowDelay, _shieldRegrowPerSecond);
+            if (_enemy == null)
+            {
+                _enemy = GetComponent<BasicEnemy>();
+            }
+
+            EnemyAbilitySettings settings = _enemy != null && _enemy.Data != null ? _enemy.Data.Abilities : EnemyAbilitySettings.Default;
+            _shield = new EnemyShield(settings.ShieldCapacity, settings.ShieldRegrowDelay, settings.ShieldRegrowPerSecond);
             if (_shieldVisual != null)
             {
                 _shieldVisualAlpha = _shieldVisual.color.a;

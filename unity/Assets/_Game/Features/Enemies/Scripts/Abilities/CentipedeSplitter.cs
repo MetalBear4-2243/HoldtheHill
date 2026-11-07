@@ -9,23 +9,23 @@ namespace HoldTheHill.Features.Enemies
     /// subclass folded into a component). When the enemy dies it splits into 2 smaller enemies with
     /// half of the parent's maximum health and damage. They split again on death until they only
     /// have 1 HP, or until the "splits remaining" counter runs out (-1 for unlimited splits until 1 HP).
+    /// How many splits, how small the halves are and how far forward the second one appears are the
+    /// enemy's <see cref="EnemyAbilitySettings"/> (its data asset), read once when the enemy is made;
+    /// the counter then counts down on this instance (a half starts at its parent's count less one).
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(BasicEnemy))]
     public class CentipedeSplitter : MonoBehaviour, IDeathHandler
     {
         [Header("Centipede Splitting")]
-        [Tooltip("Number of remaining splits allowed. Decrements with each split. Set to -1 for unlimited splits until 1 HP.")]
-        [SerializeField, Min(-1)] private int _splitsRemaining = -1;
-
         [Tooltip("Optional prefab to instantiate for child segments; it must carry a CentipedeSplitter. If null, this GameObject is used as the template.")]
         [SerializeField] private GameObject _splitPrefab = null;
 
-        [Tooltip("Visual scale multiplier applied to child enemies when splitting.")]
-        [SerializeField, Range(0.1f, 1f)] private float _sizeMultiplier = 0.8f;
-
-        [Tooltip("Distance forward along the path where the second child enemy is spawned.")]
-        [SerializeField, Min(0f)] private float _splitForwardDistance = 1.0f;
+        // Per-instance state, taken from the data asset once (ApplySettings); -1 is unlimited.
+        private int _splitsRemaining = -1;
+        private float _sizeMultiplier = 0.8f;
+        private float _splitForwardDistance = 1.0f;
+        private bool _settingsApplied;
 
         private BasicEnemy _enemy;
 
@@ -47,8 +47,16 @@ namespace HoldTheHill.Features.Enemies
         /// </summary>
         public int SplitsRemaining
         {
-            get => _splitsRemaining;
-            set => _splitsRemaining = value;
+            get
+            {
+                ApplySettings();
+                return _splitsRemaining;
+            }
+            set
+            {
+                ApplySettings();
+                _splitsRemaining = value;
+            }
         }
 
         /// <summary>
@@ -56,8 +64,16 @@ namespace HoldTheHill.Features.Enemies
         /// </summary>
         public float SizeMultiplier
         {
-            get => _sizeMultiplier;
-            set => _sizeMultiplier = Mathf.Max(0.1f, value);
+            get
+            {
+                ApplySettings();
+                return _sizeMultiplier;
+            }
+            set
+            {
+                ApplySettings();
+                _sizeMultiplier = Mathf.Max(0.1f, value);
+            }
         }
 
         /// <summary>
@@ -65,8 +81,39 @@ namespace HoldTheHill.Features.Enemies
         /// </summary>
         public float SplitForwardDistance
         {
-            get => _splitForwardDistance;
-            set => _splitForwardDistance = Mathf.Max(0f, value);
+            get
+            {
+                ApplySettings();
+                return _splitForwardDistance;
+            }
+            set
+            {
+                ApplySettings();
+                _splitForwardDistance = Mathf.Max(0f, value);
+            }
+        }
+
+        // Takes the data asset's numbers once per instance, on demand as well as in Awake, so a
+        // prefab asset and an EditMode test (no Awake) read the same values. An enemy without a
+        // data asset keeps the defaults; a value set through a property afterwards wins.
+        private void ApplySettings()
+        {
+            if (_settingsApplied)
+            {
+                return;
+            }
+
+            _settingsApplied = true;
+            BasicEnemy enemy = Enemy;
+            if (enemy == null || enemy.Data == null)
+            {
+                return;
+            }
+
+            EnemyAbilitySettings settings = enemy.Data.Abilities;
+            _splitsRemaining = Mathf.Max(-1, settings.Splits);
+            _sizeMultiplier = Mathf.Max(0.1f, settings.SplitSizeMultiplier);
+            _splitForwardDistance = Mathf.Max(0f, settings.SplitForwardDistance);
         }
 
         /// <summary>
@@ -94,6 +141,7 @@ namespace HoldTheHill.Features.Enemies
         private void Awake()
         {
             _enemy = GetComponent<BasicEnemy>();
+            ApplySettings();
         }
 
         /// <summary>
@@ -102,6 +150,8 @@ namespace HoldTheHill.Features.Enemies
         /// <returns>True if the enemy is eligible to split; otherwise false.</returns>
         public bool CanSplit()
         {
+            ApplySettings();
+
             // Splits remaining constraint: must be -1 (unlimited) or > 0
             bool hasSplitsRemaining = _splitsRemaining == -1 || _splitsRemaining > 0;
             if (!hasSplitsRemaining)
@@ -232,6 +282,7 @@ namespace HoldTheHill.Features.Enemies
         /// <returns>List of the newly instantiated child enemies.</returns>
         public List<BasicEnemy> Split()
         {
+            ApplySettings();
             BasicEnemy parent = Enemy;
             double newMaxHealth = parent.MaxHealth / 2.0;
             int childSplitsRemaining = (_splitsRemaining == -1) ? -1 : (_splitsRemaining - 1);

@@ -10,18 +10,25 @@ namespace HoldTheHill.Features.Enemies
     /// Also makes sure each child carries this component and a <see cref="RegisteredEnemy"/>, so
     /// grandchildren speed up too and the win check sees every part. A <see cref="Economy.Bounty"/>
     /// comes along when the children are copies of the parent (the centipede's split prefab left empty).
+    /// The factor is the enemy's <see cref="EnemyAbilitySettings.ChildSpeedFactor"/> (its data asset).
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CentipedeSplitter))]
     public class CentipedeSpeedUp : MonoBehaviour
     {
-        [Tooltip("Each child's speed is its parent's times this. 1.25 means a quarter faster per split.")]
-        [SerializeField, Min(1f)] private float _childSpeedFactor = 1.25f;
-
         private CentipedeSplitter _centipede;
 
-        /// <summary>How much faster each child is than its parent.</summary>
-        public float ChildSpeedFactor => _childSpeedFactor;
+        /// <summary>How much faster each child is than its parent: the data asset's factor, or the default without one.</summary>
+        public float ChildSpeedFactor
+        {
+            get
+            {
+                BasicEnemy enemy = GetComponent<BasicEnemy>();
+                return enemy != null && enemy.Data != null
+                    ? Mathf.Max(1f, enemy.Data.Abilities.ChildSpeedFactor)
+                    : EnemyAbilitySettings.Default.ChildSpeedFactor;
+            }
+        }
 
         private void Awake()
         {
@@ -40,6 +47,7 @@ namespace HoldTheHill.Features.Enemies
 
         private void SpeedUpChildren(BasicEnemy parent, List<BasicEnemy> children)
         {
+            float factor = ChildSpeedFactor;
             for (int i = 0; i < children.Count; i++)
             {
                 BasicEnemy child = children[i];
@@ -49,20 +57,19 @@ namespace HoldTheHill.Features.Enemies
                 }
 
                 // Split() has just copied the parent's speed onto the child; build on that.
-                child.MoveSpeed = parent.MoveSpeed * _childSpeedFactor;
+                child.MoveSpeed = parent.MoveSpeed * factor;
                 EnsureAlphaComponents(child.gameObject);
             }
         }
 
         // The children are copies of the parent unless a split prefab is set; cover both cases.
-        private void EnsureAlphaComponents(GameObject child)
+        // A child reads the factor from its own data asset, the same one as its parent's.
+        private static void EnsureAlphaComponents(GameObject child)
         {
-            CentipedeSpeedUp speedUp = child.GetComponent<CentipedeSpeedUp>();
-            if (speedUp == null)
+            if (child.GetComponent<CentipedeSpeedUp>() == null)
             {
-                speedUp = child.AddComponent<CentipedeSpeedUp>();
+                child.AddComponent<CentipedeSpeedUp>();
             }
-            speedUp._childSpeedFactor = _childSpeedFactor;
 
             if (child.GetComponent<RegisteredEnemy>() == null)
             {

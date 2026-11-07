@@ -6,25 +6,15 @@ namespace HoldTheHill.Features.Enemies
     /// The Rolly Polly's curl, an ability beside <see cref="BasicEnemy"/> around a
     /// <see cref="RollyPollyCurl"/>. A hit makes it curl up: curled, it takes only a share of each
     /// hit and rolls faster for a few tiles of path, then uncurls. At most a few curls per life;
-    /// after that it is an ordinary walker. The curl shows as a smaller, darker sprite.
+    /// after that it is an ordinary walker. The curl shows as a smaller, darker sprite. How many
+    /// curls, how far, the damage share and the roll speed are the enemy's
+    /// <see cref="EnemyAbilitySettings"/> (its data asset); an enemy without one gets the defaults.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(BasicEnemy))]
     public class RollyPollyCurler : MonoBehaviour, IDamageModifier
     {
         [Header("Curl")]
-        [Tooltip("How many times it can curl in one life.")]
-        [SerializeField, Min(0)] private int _maxCurls = 3;
-
-        [Tooltip("Path distance rolled while curled before it uncurls, in tiles (one tile is one world unit).")]
-        [SerializeField, Min(0f)] private float _rollDistance = 3f;
-
-        [Tooltip("The share of each hit that lands while curled. 0.4 means it takes 40 percent.")]
-        [SerializeField, Range(0f, 1f)] private float _curledDamageShare = 0.4f;
-
-        [Tooltip("Movement speed multiplier while rolling.")]
-        [SerializeField, Min(0f)] private float _curledSpeedMultiplier = 2f;
-
         [Tooltip("How much smaller the sprite is drawn while curled.")]
         [SerializeField, Range(0.1f, 1f)] private float _curledScale = 0.75f;
 
@@ -91,10 +81,18 @@ namespace HoldTheHill.Features.Enemies
         // Made on demand as well as in Awake, so EditMode tests, which never run Awake, work too.
         private void EnsureCurl()
         {
-            if (_curl == null)
+            if (_curl != null)
             {
-                _curl = new RollyPollyCurl(_maxCurls, _rollDistance, _curledDamageShare, _curledSpeedMultiplier);
+                return;
             }
+
+            if (_enemy == null)
+            {
+                _enemy = GetComponent<BasicEnemy>();
+            }
+
+            EnemyAbilitySettings settings = _enemy != null && _enemy.Data != null ? _enemy.Data.Abilities : EnemyAbilitySettings.Default;
+            _curl = new RollyPollyCurl(settings.MaxCurls, settings.RollDistance, settings.CurledDamageShare, settings.CurledSpeedMultiplier);
         }
 
         // The roll speed is the walking speed times the multiplier; Jason's slows still apply on top
