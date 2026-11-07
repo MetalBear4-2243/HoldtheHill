@@ -15,153 +15,73 @@ MonoBehaviour:
   mapId: L00_TutorialHill
   waves:
   - waveName: Wave 1
-    enemies:
+    groups:
     - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1.4
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1.4
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1.4
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1.4
-      spawnPointOverride: {fileID: 0}
+      count: 4
+      spawnInterval: 1.4
+      delayAfter: 1.4
+    enemies: []
   - waveName: Wave 2
-    enemies:
+    groups:
     - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1.2
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1.2
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1.2
-      spawnPointOverride: {fileID: 0}
+      count: 3
+      spawnInterval: 1.2
+      delayAfter: 1.2
     - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
+      count: 8
+      spawnInterval: 0.35
+      delayAfter: 0.35
+    enemies: []
   - waveName: Wave 3
-    enemies:
+    groups:
     - enemyPrefab: {fileID: 8466327555095450031, guid: f4385d581b1ef3f40952803f2be0c75a, type: 3}
-      delayBeforeNext: 2
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 8466327555095450031, guid: f4385d581b1ef3f40952803f2be0c75a, type: 3}
-      delayBeforeNext: 2
-      spawnPointOverride: {fileID: 0}
+      count: 2
+      spawnInterval: 2
+      delayAfter: 2
     - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1
-      spawnPointOverride: {fileID: 0}
+      count: 4
+      spawnInterval: 1
+      delayAfter: 1
+    enemies: []
   - waveName: Wave 4
-    enemies:
+    groups:
     - enemyPrefab: {fileID: 1496529833584991313, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
-      delayBeforeNext: 1.5
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1496529833584991313, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
-      delayBeforeNext: 1.5
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1496529833584991313, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
-      delayBeforeNext: 1.5
-      spawnPointOverride: {fileID: 0}
+      count: 3
+      spawnInterval: 1.5
+      delayAfter: 1.5
     - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 1
-      spawnPointOverride: {fileID: 0}
+      count: 4
+      spawnInterval: 1
+      delayAfter: 1
     - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 5477240412499110298, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
-      delayBeforeNext: 0.35
-      spawnPointOverride: {fileID: 0}
+      count: 6
+      spawnInterval: 0.35
+      delayAfter: 0.35
+    enemies: []
   - waveName: Wave 5
-    enemies:
+    groups:
     - enemyPrefab: {fileID: 571326734285679738, guid: 8c0fe9a39079c2c41be596e41539ee4a, type: 3}
-      delayBeforeNext: 1.2
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 571326734285679738, guid: 8c0fe9a39079c2c41be596e41539ee4a, type: 3}
-      delayBeforeNext: 1.2
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 571326734285679738, guid: 8c0fe9a39079c2c41be596e41539ee4a, type: 3}
-      delayBeforeNext: 1.2
-      spawnPointOverride: {fileID: 0}
+      count: 3
+      spawnInterval: 1.2
+      delayAfter: 1.2
     - enemyPrefab: {fileID: 8466327555095450031, guid: f4385d581b1ef3f40952803f2be0c75a, type: 3}
-      delayBeforeNext: 1.5
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 8466327555095450031, guid: f4385d581b1ef3f40952803f2be0c75a, type: 3}
-      delayBeforeNext: 1.5
-      spawnPointOverride: {fileID: 0}
+      count: 2
+      spawnInterval: 1.5
+      delayAfter: 1.5
     - enemyPrefab: {fileID: 1496529833584991313, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
-      delayBeforeNext: 1.2
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1496529833584991313, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
-      delayBeforeNext: 1.2
-      spawnPointOverride: {fileID: 0}
+      count: 2
+      spawnInterval: 1.2
+      delayAfter: 1.2
     - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 0.8
-      spawnPointOverride: {fileID: 0}
+      count: 4
+      spawnInterval: 0.8
+      delayAfter: 0.8
     - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 0.8
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 0.8
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 0.8
-      spawnPointOverride: {fileID: 0}
-    - enemyPrefab: {fileID: 1077117717952567203, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
-      delayBeforeNext: 3
-      spawnPointOverride: {fileID: 0}
+      count: 1
+      spawnInterval: 3
+      delayAfter: 3
     - enemyPrefab: {fileID: 3810156792700266963, guid: 3eab374bac63d1c43903f26738e9a783, type: 3}
-      delayBeforeNext: 0
-      spawnPointOverride: {fileID: 0}
+      count: 1
+      spawnInterval: 0
+      delayAfter: 0
+    enemies: []
