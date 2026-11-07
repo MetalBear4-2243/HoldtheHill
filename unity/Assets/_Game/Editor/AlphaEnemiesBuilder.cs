@@ -41,7 +41,7 @@ namespace HoldTheHill.EditorTools
             Silverfish
         }
 
-        /// <summary>One enemy prefab: a variant of the basic enemy, or a new prefab on its own subclass.</summary>
+        /// <summary>One enemy prefab: a variant of the basic enemy, or a new prefab with its own ability components.</summary>
         internal readonly struct EnemySpec
         {
             public EnemySpec(Kind kind, string prefabName, Color color, float scale, double health, int damage,
@@ -214,7 +214,8 @@ namespace HoldTheHill.EditorTools
             return instance;
         }
 
-        // Rhino Beetle, Wasp, Rolly Polly, Silverfish: each on its own BasicEnemy subclass.
+        // Rhino Beetle, Wasp, Rolly Polly, Silverfish: a BasicEnemy each, plus the ability component
+        // the species has (the Wasp's flying and the Silverfish's click come from their EnemyData).
         private static GameObject NewSubclassEnemy(EnemySpec spec, Sprite circle)
         {
             var go = new GameObject(spec.PrefabName);
@@ -228,7 +229,8 @@ namespace HoldTheHill.EditorTools
             switch (spec.Kind)
             {
                 case Kind.RhinoBeetle:
-                    var beetle = go.AddComponent<RhinoBeetleEnemy>();
+                    go.AddComponent<BasicEnemy>();
+                    var beetle = go.AddComponent<RhinoBeetleShield>();
                     var shield = new GameObject("Shield");
                     shield.transform.SetParent(go.transform, false);
                     shield.transform.localScale = Vector3.one * 1.35f;
@@ -241,16 +243,17 @@ namespace HoldTheHill.EditorTools
                     beetleSo.ApplyModifiedPropertiesWithoutUndo();
                     break;
                 case Kind.Wasp:
-                    go.AddComponent<WaspEnemy>();
+                    go.AddComponent<BasicEnemy>();
                     break;
                 case Kind.RollyPolly:
-                    go.AddComponent<RollyPollyEnemy>();
+                    go.AddComponent<BasicEnemy>();
+                    go.AddComponent<RollyPollyCurler>();
                     break;
                 case Kind.Silverfish:
-                    // Jason's class requires a Collider2D for its OnMouseDown; the click reader uses the same collider.
+                    // The click reader finds the silverfish through this collider.
                     var collider = go.AddComponent<CircleCollider2D>();
                     collider.radius = 0.8f;
-                    go.AddComponent<SilverfishEnemy>();
+                    go.AddComponent<BasicEnemy>();
                     break;
                 default:
                     go.AddComponent<BasicEnemy>();

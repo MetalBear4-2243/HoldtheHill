@@ -99,9 +99,9 @@ namespace HoldTheHill.Features.Hazards
             for (int i = 0; i < _enemiesTaken.Count; i++)
             {
                 // The bird takes a centipede whole: no halves split off under the shadow.
-                if (_enemiesTaken[i] is CentipedeEnemy centipede)
+                if (_enemiesTaken[i].TryGetComponent(out CentipedeSplitter splitter))
                 {
-                    centipede.SplitsRemaining = 0;
+                    splitter.SplitsRemaining = 0;
                 }
 
                 _enemiesTaken[i].TakeDamage(double.MaxValue);

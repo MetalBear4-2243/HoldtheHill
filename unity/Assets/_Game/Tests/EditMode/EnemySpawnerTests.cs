@@ -106,20 +106,22 @@ namespace HoldTheHill.Tests
         public void CentipedeSplit_ViaStaticEvent_IncrementsLivingEnemyCountByChildCount()
         {
             var centipedePrefab = new GameObject("TestCentipedePrefab");
-            var centipede = centipedePrefab.AddComponent<CentipedeEnemy>();
+            centipedePrefab.AddComponent<BasicEnemy>();
+            centipedePrefab.AddComponent<CentipedeSplitter>();
             _spawnedObjects.Add(centipedePrefab);
 
             // Spawner spawns the centipede
             GameObject spawnedCentipedeObj = _spawner.SpawnEnemy(centipedePrefab);
             _spawnedObjects.Add(spawnedCentipedeObj);
-            CentipedeEnemy spawnedCentipede = spawnedCentipedeObj.GetComponent<CentipedeEnemy>();
+            BasicEnemy spawnedCentipede = spawnedCentipedeObj.GetComponent<BasicEnemy>();
+            CentipedeSplitter spawnedSplitter = spawnedCentipedeObj.GetComponent<CentipedeSplitter>();
             spawnedCentipede.SetMaxHealth(20.0, resetCurrentHealth: true);
-            spawnedCentipede.SplitsRemaining = 1;
+            spawnedSplitter.SplitsRemaining = 1;
 
             Assert.That(_spawner.LivingEnemyCount, Is.EqualTo(1));
 
             // Splitting produces 2 children
-            List<CentipedeEnemy> children = spawnedCentipede.Split();
+            List<BasicEnemy> children = spawnedSplitter.Split();
             foreach (var child in children)
             {
                 _spawnedObjects.Add(child.gameObject);
@@ -133,15 +135,16 @@ namespace HoldTheHill.Tests
         public void CentipedeDefeatAndSplit_EndToEnd_CorrectlyUpdatesCounter()
         {
             var centipedePrefab = new GameObject("TestCentipedePrefab");
-            var centipede = centipedePrefab.AddComponent<CentipedeEnemy>();
+            centipedePrefab.AddComponent<BasicEnemy>();
+            centipedePrefab.AddComponent<CentipedeSplitter>();
             _spawnedObjects.Add(centipedePrefab);
 
             // 1. Spawner spawns centipede (count = 1)
             GameObject spawnedCentipedeObj = _spawner.SpawnEnemy(centipedePrefab);
             _spawnedObjects.Add(spawnedCentipedeObj);
-            CentipedeEnemy spawnedCentipede = spawnedCentipedeObj.GetComponent<CentipedeEnemy>();
+            BasicEnemy spawnedCentipede = spawnedCentipedeObj.GetComponent<BasicEnemy>();
             spawnedCentipede.SetMaxHealth(20.0, resetCurrentHealth: true);
-            spawnedCentipede.SplitsRemaining = 1;
+            spawnedCentipedeObj.GetComponent<CentipedeSplitter>().SplitsRemaining = 1;
 
             Assert.That(_spawner.LivingEnemyCount, Is.EqualTo(1));
 
@@ -151,7 +154,7 @@ namespace HoldTheHill.Tests
             Assert.That(_spawner.LivingEnemyCount, Is.EqualTo(2));
 
             // Find spawned children in scene
-            CentipedeEnemy[] livingCentipedes = Object.FindObjectsByType<CentipedeEnemy>(FindObjectsSortMode.None);
+            CentipedeSplitter[] livingCentipedes = Object.FindObjectsByType<CentipedeSplitter>();
             Assert.That(livingCentipedes.Length, Is.EqualTo(2));
 
             foreach (var child in livingCentipedes)
@@ -160,11 +163,13 @@ namespace HoldTheHill.Tests
             }
 
             // 3. Child 1 dies (-1) -> count = 1
-            livingCentipedes[0].TakeDamage(livingCentipedes[0].CurrentHealth);
+            BasicEnemy child0 = livingCentipedes[0].GetComponent<BasicEnemy>();
+            child0.TakeDamage(child0.CurrentHealth);
             Assert.That(_spawner.LivingEnemyCount, Is.EqualTo(1));
 
             // 4. Child 2 dies (-1) -> count = 0
-            livingCentipedes[1].TakeDamage(livingCentipedes[1].CurrentHealth);
+            BasicEnemy child1 = livingCentipedes[1].GetComponent<BasicEnemy>();
+            child1.TakeDamage(child1.CurrentHealth);
             Assert.That(_spawner.LivingEnemyCount, Is.EqualTo(0));
         }
 

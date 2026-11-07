@@ -6,7 +6,8 @@ using UnityEngine.InputSystem;
 namespace HoldTheHill.Features.Enemies
 {
     /// <summary>
-    /// Kills a <see cref="SilverfishEnemy"/> with one click, read from the game's actions asset.
+    /// Kills a silverfish (an enemy whose <see cref="EnemyData.DiesToClick"/> is on) with one
+    /// click, read from the game's actions asset.
     /// Jason's #43 took out his <c>OnMouseDown</c> in favour of this reader, so it is the only kill
     /// path: one reader per level scene checks the <see cref="EnemyRegistry"/> under the pointer on
     /// the Place action and deals all remaining health as damage. A click that kills is used up:
@@ -30,7 +31,7 @@ namespace HoldTheHill.Features.Enemies
         private InputAction _place;
 
         /// <summary>Raised after a click has killed a silverfish.</summary>
-        public event System.Action<SilverfishEnemy> SilverfishClicked;
+        public event System.Action<BasicEnemy> SilverfishClicked;
 
         /// <summary>True on the frame a click killed a silverfish: that click selects, builds and collects nothing.</summary>
         public static bool ClickUsedThisFrame => s_usedFrame == Time.frameCount;
@@ -80,7 +81,7 @@ namespace HoldTheHill.Features.Enemies
 
             Vector3 world = _camera.ScreenToWorldPoint(_point.ReadValue<Vector2>());
             world.z = 0f;
-            SilverfishEnemy hit = FindSilverfishAt(world);
+            BasicEnemy hit = FindSilverfishAt(world);
             if (hit == null)
             {
                 return;
@@ -95,12 +96,13 @@ namespace HoldTheHill.Features.Enemies
         }
 
         /// <summary>The first living silverfish under <paramref name="world"/>, or null.</summary>
-        public SilverfishEnemy FindSilverfishAt(Vector3 world)
+        public BasicEnemy FindSilverfishAt(Vector3 world)
         {
             IReadOnlyList<BasicEnemy> enemies = EnemyRegistry.All;
             for (int i = 0; i < enemies.Count; i++)
             {
-                if (!(enemies[i] is SilverfishEnemy silverfish) || silverfish.IsDead)
+                BasicEnemy silverfish = enemies[i];
+                if (silverfish.Data == null || !silverfish.Data.DiesToClick || silverfish.IsDead)
                 {
                     continue;
                 }
@@ -114,7 +116,7 @@ namespace HoldTheHill.Features.Enemies
             return null;
         }
 
-        private bool Covers(SilverfishEnemy silverfish, Vector3 world)
+        private bool Covers(BasicEnemy silverfish, Vector3 world)
         {
             Collider2D collider = silverfish.GetComponent<Collider2D>();
             if (collider != null)

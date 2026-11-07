@@ -8,8 +8,8 @@ using UnityEngine;
 namespace HoldTheHill.EditorTools
 {
     /// <summary>
-    /// Alpha step 6, the bosses. Makes the Centipede prefab (Jason's <see cref="CentipedeEnemy"/>
-    /// with a <see cref="CentipedeSpeedUp"/> beside it) and, through <see cref="QueenMantisBuilder"/>,
+    /// Alpha step 6, the bosses. Makes the Centipede prefab (a <see cref="BasicEnemy"/> with a
+    /// <see cref="CentipedeSplitter"/> and a <see cref="CentipedeSpeedUp"/> beside it) and, through <see cref="QueenMantisBuilder"/>,
     /// the Queen Mantis prefab, both with a boss-sized <see cref="Bounty"/>, and puts one of each at
     /// the end of the last wave of its level: the Centipede closes Tutorial Hill, the Queen Mantis
     /// closes Meadow (Build Queen Mantis then moves her up that wave).
@@ -62,7 +62,7 @@ namespace HoldTheHill.EditorTools
             Build();
         }
 
-        // Jason's CentipedeEnemy with no split prefab, so each child is a copy of its parent and
+        // A CentipedeSplitter with no split prefab, so each child is a copy of its parent and
         // brings the speed-up, the registry entry and the bounty with it.
         private static GameObject EnsureCentipedePrefab(Sprite circle)
         {
@@ -73,15 +73,19 @@ namespace HoldTheHill.EditorTools
             }
 
             GameObject go = NewBossObject("Enemy_Centipede", circle, new Color(0.6f, 0.15f, 0.1f), 0.9f);
-            var centipede = go.AddComponent<CentipedeEnemy>();
+            var centipede = go.AddComponent<BasicEnemy>();
             var so = new SerializedObject(centipede);
             so.FindProperty("_maxHealth").doubleValue = 60.0;
             so.FindProperty("_damage").intValue = 20;
             so.FindProperty("_moveSpeed").floatValue = 1.1f;
-            so.FindProperty("_splitsRemaining").intValue = 2;
-            so.FindProperty("_sizeMultiplier").floatValue = 0.8f;
-            so.FindProperty("_splitForwardDistance").floatValue = 0.6f;
             so.ApplyModifiedPropertiesWithoutUndo();
+
+            var splitter = go.AddComponent<CentipedeSplitter>();
+            var splitSo = new SerializedObject(splitter);
+            splitSo.FindProperty("_splitsRemaining").intValue = 2;
+            splitSo.FindProperty("_sizeMultiplier").floatValue = 0.8f;
+            splitSo.FindProperty("_splitForwardDistance").floatValue = 0.6f;
+            splitSo.ApplyModifiedPropertiesWithoutUndo();
 
             go.AddComponent<RegisteredEnemy>();
             SetBounty(go.AddComponent<Bounty>(), 10);
@@ -93,7 +97,7 @@ namespace HoldTheHill.EditorTools
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, CentipedePath);
             Object.DestroyImmediate(go);
-            Debug.Log("Made Enemy_Centipede (CentipedeEnemy + CentipedeSpeedUp; two splits, seven parts in all).");
+            Debug.Log("Made Enemy_Centipede (BasicEnemy + CentipedeSplitter + CentipedeSpeedUp; two splits, seven parts in all).");
             return prefab;
         }
 
@@ -170,11 +174,13 @@ namespace HoldTheHill.EditorTools
             }
             else
             {
-                var enemy = centipede.GetComponent<CentipedeEnemy>();
+                var enemy = centipede.GetComponent<BasicEnemy>();
+                var splitter = centipede.GetComponent<CentipedeSplitter>();
                 var speedUp = centipede.GetComponent<CentipedeSpeedUp>();
                 Debug.Log($"Enemy_Centipede: {Parts(centipede)}"
                     + (speedUp != null ? $", children x{speedUp.ChildSpeedFactor} speed" : ", NO speed-up")
-                    + (enemy != null ? $"; health {enemy.MaxHealth}, speed {enemy.MoveSpeed}, splits {enemy.SplitsRemaining}, split prefab {(enemy.SplitPrefab != null ? enemy.SplitPrefab.name : "none (copies of the parent)")}" : "; NO CentipedeEnemy"));
+                    + (enemy != null ? $"; health {enemy.MaxHealth}, speed {enemy.MoveSpeed}" : "; NO BasicEnemy")
+                    + (splitter != null ? $", splits {splitter.SplitsRemaining}, split prefab {(splitter.SplitPrefab != null ? splitter.SplitPrefab.name : "none (copies of the parent)")}" : ", NO CentipedeSplitter"));
             }
 
             var queen = AssetDatabase.LoadAssetAtPath<GameObject>(QueenMantisPath);

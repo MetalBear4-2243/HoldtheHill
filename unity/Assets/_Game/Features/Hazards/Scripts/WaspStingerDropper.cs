@@ -5,7 +5,7 @@ namespace HoldTheHill.Features.Hazards
 {
     /// <summary>
     /// Makes a wasp drop a <see cref="WaspStinger"/> every few seconds while it is alive and in the
-    /// air. Sits on the Wasp prefab beside <see cref="WaspEnemy"/>; the wasp class is untouched.
+    /// air. Sits on the Wasp prefab beside its <see cref="BasicEnemy"/>, whose data flags it as flying.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(BasicEnemy))]

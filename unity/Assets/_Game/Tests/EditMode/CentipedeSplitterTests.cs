@@ -7,10 +7,16 @@ using HoldTheHill.Features.Enemies;
 
 namespace HoldTheHill.Tests
 {
-    public class CentipedeEnemyTests
+    /// <summary>
+    /// Jason's CentipedeEnemy tests, carried over to the <see cref="CentipedeSplitter"/> ability
+    /// beside a plain <see cref="BasicEnemy"/>: the enemy's numbers go through the enemy, the
+    /// split's through the splitter, and the children are enemies carrying a splitter of their own.
+    /// </summary>
+    public class CentipedeSplitterTests
     {
         private GameObject _centipedeObject;
-        private CentipedeEnemy _centipede;
+        private BasicEnemy _enemy;
+        private CentipedeSplitter _splitter;
         private List<GameObject> _spawnedObjects;
 
         [SetUp]
@@ -18,7 +24,8 @@ namespace HoldTheHill.Tests
         {
             _spawnedObjects = new List<GameObject>();
             _centipedeObject = new GameObject("TestCentipede");
-            _centipede = _centipedeObject.AddComponent<CentipedeEnemy>();
+            _enemy = _centipedeObject.AddComponent<BasicEnemy>();
+            _splitter = _centipedeObject.AddComponent<CentipedeSplitter>();
             _spawnedObjects.Add(_centipedeObject);
         }
 
@@ -38,68 +45,73 @@ namespace HoldTheHill.Tests
             }
         }
 
+        private static int SplitsOf(BasicEnemy child)
+        {
+            return child.GetComponent<CentipedeSplitter>().SplitsRemaining;
+        }
+
         [Test]
         public void SplitsRemaining_DefaultsToMinusOne()
         {
-            Assert.That(_centipede.SplitsRemaining, Is.EqualTo(-1));
+            Assert.That(_splitter.SplitsRemaining, Is.EqualTo(-1));
         }
 
         [Test]
         public void CanSplit_WithHealthGreaterThanOne_AndMinusOneSplits_ReturnsTrue()
         {
-            _centipede.SetMaxHealth(10.0, resetCurrentHealth: true);
-            _centipede.SplitsRemaining = -1;
+            _enemy.SetMaxHealth(10.0, resetCurrentHealth: true);
+            _splitter.SplitsRemaining = -1;
 
-            Assert.That(_centipede.CanSplit(), Is.True);
+            Assert.That(_splitter.CanSplit(), Is.True);
         }
 
         [Test]
         public void CanSplit_WhenHealthIsOneOrLess_ReturnsFalse()
         {
-            _centipede.SetMaxHealth(1.0, resetCurrentHealth: true);
-            _centipede.SplitsRemaining = -1;
+            _enemy.SetMaxHealth(1.0, resetCurrentHealth: true);
+            _splitter.SplitsRemaining = -1;
 
-            Assert.That(_centipede.CanSplit(), Is.False);
+            Assert.That(_splitter.CanSplit(), Is.False);
 
-            _centipede.SetMaxHealth(0.5, resetCurrentHealth: true);
-            Assert.That(_centipede.CanSplit(), Is.False);
+            _enemy.SetMaxHealth(0.5, resetCurrentHealth: true);
+            Assert.That(_splitter.CanSplit(), Is.False);
         }
 
         [Test]
         public void CanSplit_WhenHalvedHealthIsLessThanOne_ReturnsFalse()
         {
             // If MaxHealth is 1.8, half health is 0.9 (< 1.0), so it cannot split
-            _centipede.SetMaxHealth(1.8, resetCurrentHealth: true);
-            _centipede.SplitsRemaining = -1;
+            _enemy.SetMaxHealth(1.8, resetCurrentHealth: true);
+            _splitter.SplitsRemaining = -1;
 
-            Assert.That(_centipede.CanSplit(), Is.False);
+            Assert.That(_splitter.CanSplit(), Is.False);
         }
 
         [Test]
         public void CanSplit_WhenSplitsRemainingIsZero_ReturnsFalse()
         {
-            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
-            _centipede.SplitsRemaining = 0;
+            _enemy.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _splitter.SplitsRemaining = 0;
 
-            Assert.That(_centipede.CanSplit(), Is.False);
+            Assert.That(_splitter.CanSplit(), Is.False);
         }
 
         [Test]
         public void CanSplit_WhenSplitsRemainingPositive_ReturnsTrue()
         {
-            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
-            _centipede.SplitsRemaining = 2;
+            _enemy.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _splitter.SplitsRemaining = 2;
 
-            Assert.That(_centipede.CanSplit(), Is.True);
+            Assert.That(_splitter.CanSplit(), Is.True);
         }
 
         [Test]
         public void Split_CreatesTwoChildrenWithHalfHealth_AndDecrementsSplitsRemaining()
         {
-            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
-            _centipede.SplitsRemaining = 2;
+            _enemy.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _splitter.SplitsRemaining = 2;
 
-            List<CentipedeEnemy> children = _centipede.Split();
+            List<BasicEnemy> children = _splitter.Split();
 
             Assert.That(children.Count, Is.EqualTo(2));
             foreach (var child in children)
@@ -107,35 +119,35 @@ namespace HoldTheHill.Tests
                 _spawnedObjects.Add(child.gameObject);
                 Assert.That(child.MaxHealth, Is.EqualTo(10.0).Within(0.0001));
                 Assert.That(child.CurrentHealth, Is.EqualTo(10.0).Within(0.0001));
-                Assert.That(child.SplitsRemaining, Is.EqualTo(1));
+                Assert.That(SplitsOf(child), Is.EqualTo(1));
             }
         }
 
         [Test]
         public void Split_WithMinusOneSplitsRemaining_PreservesMinusOneInChildren()
         {
-            _centipede.SetMaxHealth(8.0, resetCurrentHealth: true);
-            _centipede.SplitsRemaining = -1;
+            _enemy.SetMaxHealth(8.0, resetCurrentHealth: true);
+            _splitter.SplitsRemaining = -1;
 
-            List<CentipedeEnemy> children = _centipede.Split();
+            List<BasicEnemy> children = _splitter.Split();
 
             Assert.That(children.Count, Is.EqualTo(2));
             foreach (var child in children)
             {
                 _spawnedObjects.Add(child.gameObject);
                 Assert.That(child.MaxHealth, Is.EqualTo(4.0).Within(0.0001));
-                Assert.That(child.SplitsRemaining, Is.EqualTo(-1));
+                Assert.That(SplitsOf(child), Is.EqualTo(-1));
             }
         }
 
         [Test]
         public void Split_ScalesDownChildrenVisualScale()
         {
-            _centipede.SetMaxHealth(10.0, resetCurrentHealth: true);
-            _centipede.transform.localScale = Vector3.one;
-            _centipede.SizeMultiplier = 0.75f;
+            _enemy.SetMaxHealth(10.0, resetCurrentHealth: true);
+            _enemy.transform.localScale = Vector3.one;
+            _splitter.SizeMultiplier = 0.75f;
 
-            List<CentipedeEnemy> children = _centipede.Split();
+            List<BasicEnemy> children = _splitter.Split();
 
             Assert.That(children.Count, Is.EqualTo(2));
             foreach (var child in children)
@@ -149,17 +161,17 @@ namespace HoldTheHill.Tests
         [Test]
         public void Split_ChildrenInheritPathAndCurrentWaypointIndex()
         {
-            _centipede.SetMaxHealth(10.0, resetCurrentHealth: true);
+            _enemy.SetMaxHealth(10.0, resetCurrentHealth: true);
             var pathPoints = new List<Vector3>
             {
                 new Vector3(0, 0, 0),
                 new Vector3(5, 0, 0),
                 new Vector3(5, 5, 0)
             };
-            _centipede.SetPath(pathPoints);
-            _centipede.CurrentWaypointIndex = 1;
+            _enemy.SetPath(pathPoints);
+            _enemy.CurrentWaypointIndex = 1;
 
-            List<CentipedeEnemy> children = _centipede.Split();
+            List<BasicEnemy> children = _splitter.Split();
 
             Assert.That(children.Count, Is.EqualTo(2));
             foreach (var child in children)
@@ -173,42 +185,42 @@ namespace HoldTheHill.Tests
         [Test]
         public void TakeDamage_Fatal_WhenSplitsRemainingIsZero_DoesNotSplit()
         {
-            _centipede.SetMaxHealth(10.0, resetCurrentHealth: true);
-            _centipede.SplitsRemaining = 0;
+            _enemy.SetMaxHealth(10.0, resetCurrentHealth: true);
+            _splitter.SplitsRemaining = 0;
 
             bool splitFired = false;
-            _centipede.OnSplit += (parent, children) => splitFired = true;
+            _splitter.OnSplit += (parent, children) => splitFired = true;
 
-            _centipede.TakeDamage(10.0);
+            _enemy.TakeDamage(10.0);
 
-            Assert.That(_centipede.IsDead, Is.True);
+            Assert.That(_enemy.IsDead, Is.True);
             Assert.That(splitFired, Is.False);
         }
 
         [Test]
         public void TakeDamage_Fatal_WhenOneHp_DoesNotSplit()
         {
-            _centipede.SetMaxHealth(1.0, resetCurrentHealth: true);
-            _centipede.SplitsRemaining = -1;
+            _enemy.SetMaxHealth(1.0, resetCurrentHealth: true);
+            _splitter.SplitsRemaining = -1;
 
             bool splitFired = false;
-            _centipede.OnSplit += (parent, children) => splitFired = true;
+            _splitter.OnSplit += (parent, children) => splitFired = true;
 
-            _centipede.TakeDamage(1.0);
+            _enemy.TakeDamage(1.0);
 
-            Assert.That(_centipede.IsDead, Is.True);
+            Assert.That(_enemy.IsDead, Is.True);
             Assert.That(splitFired, Is.False);
         }
 
         [Test]
         public void TakeDamage_Fatal_WhenEligible_TriggersSplitEvent()
         {
-            _centipede.SetMaxHealth(4.0, resetCurrentHealth: true);
-            _centipede.SplitsRemaining = 1;
+            _enemy.SetMaxHealth(4.0, resetCurrentHealth: true);
+            _splitter.SplitsRemaining = 1;
 
             bool splitFired = false;
-            List<CentipedeEnemy> spawned = null;
-            _centipede.OnSplit += (parent, children) =>
+            List<BasicEnemy> spawned = null;
+            _splitter.OnSplit += (parent, children) =>
             {
                 splitFired = true;
                 spawned = children;
@@ -218,29 +230,51 @@ namespace HoldTheHill.Tests
                 }
             };
 
-            _centipede.TakeDamage(4.0);
+            _enemy.TakeDamage(4.0);
 
-            Assert.That(_centipede.IsDead, Is.True);
+            Assert.That(_enemy.IsDead, Is.True);
             Assert.That(splitFired, Is.True);
             Assert.That(spawned, Is.Not.Null);
             Assert.That(spawned.Count, Is.EqualTo(2));
             Assert.That(spawned[0].MaxHealth, Is.EqualTo(2.0).Within(0.0001));
-            Assert.That(spawned[0].SplitsRemaining, Is.EqualTo(0));
+            Assert.That(SplitsOf(spawned[0]), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void TakeDamage_Fatal_SplitsBeforeTheDeathIsAnnounced()
+        {
+            _enemy.SetMaxHealth(4.0, resetCurrentHealth: true);
+            _splitter.SplitsRemaining = 1;
+
+            var order = new List<string>();
+            _splitter.OnSplit += (parent, children) =>
+            {
+                order.Add("split");
+                foreach (var child in children)
+                {
+                    _spawnedObjects.Add(child.gameObject);
+                }
+            };
+            _enemy.OnDied += enemy => order.Add("died");
+
+            _enemy.TakeDamage(4.0);
+
+            Assert.That(order, Is.EqualTo(new[] { "split", "died" }));
         }
 
         [Test]
         public void Split_SpawnsFirstChildAtOriginalPosition_AndSecondChildForwardOnPath()
         {
-            _centipede.SetMaxHealth(10.0, resetCurrentHealth: true);
+            _enemy.SetMaxHealth(10.0, resetCurrentHealth: true);
             var pathPoints = new List<Vector3>
             {
                 new Vector3(0f, 0f, 0f),
                 new Vector3(10f, 0f, 0f)
             };
-            _centipede.SetPath(pathPoints, startingWaypointIndex: 1, teleportToStart: false);
-            _centipede.transform.position = new Vector3(2f, 0f, 0f);
+            _enemy.SetPath(pathPoints, startingWaypointIndex: 1, teleportToStart: false);
+            _enemy.transform.position = new Vector3(2f, 0f, 0f);
 
-            List<CentipedeEnemy> children = _centipede.Split();
+            List<BasicEnemy> children = _splitter.Split();
 
             Assert.That(children.Count, Is.EqualTo(2));
             _spawnedObjects.Add(children[0].gameObject);
@@ -266,11 +300,11 @@ namespace HoldTheHill.Tests
                 new Vector3(2f, 0f, 0f),
                 new Vector3(2f, 5f, 0f)
             };
-            _centipede.SetPath(pathPoints, startingWaypointIndex: 1, teleportToStart: false);
-            _centipede.transform.position = new Vector3(1.5f, 0f, 0f);
+            _enemy.SetPath(pathPoints, startingWaypointIndex: 1, teleportToStart: false);
+            _enemy.transform.position = new Vector3(1.5f, 0f, 0f);
 
             // 0.5 units to waypoint 1 (2, 0, 0), remaining 0.5 units towards waypoint 2 (2, 5, 0)
-            Vector3 advancedPos = _centipede.CalculatePositionAlongPath(1.0f, out int targetWaypointIndex);
+            Vector3 advancedPos = _splitter.CalculatePositionAlongPath(1.0f, out int targetWaypointIndex);
 
             Assert.That(advancedPos.x, Is.EqualTo(2f).Within(0.001f));
             Assert.That(advancedPos.y, Is.EqualTo(0.5f).Within(0.001f));
@@ -280,12 +314,12 @@ namespace HoldTheHill.Tests
         [Test]
         public void Split_NearTheEndOfThePath_KeepsTheSecondChildOffTheLastWaypoint()
         {
-            _centipede.SetMaxHealth(10.0, resetCurrentHealth: true);
+            _enemy.SetMaxHealth(10.0, resetCurrentHealth: true);
             var pathPoints = new List<Vector3> { new Vector3(0f, 0f, 0f), new Vector3(10f, 0f, 0f) };
-            _centipede.SetPath(pathPoints, startingWaypointIndex: 1, teleportToStart: false);
-            _centipede.transform.position = new Vector3(9.5f, 0f, 0f);
+            _enemy.SetPath(pathPoints, startingWaypointIndex: 1, teleportToStart: false);
+            _enemy.transform.position = new Vector3(9.5f, 0f, 0f);
 
-            List<CentipedeEnemy> children = _centipede.Split();
+            List<BasicEnemy> children = _splitter.Split();
             _spawnedObjects.Add(children[0].gameObject);
             _spawnedObjects.Add(children[1].gameObject);
 
@@ -297,49 +331,48 @@ namespace HoldTheHill.Tests
         [Test]
         public void Split_PastTheLastWaypoint_GivesNoChildAnIndexItCanNeverWalkTo()
         {
-            _centipede.SetMaxHealth(10.0, resetCurrentHealth: true);
+            _enemy.SetMaxHealth(10.0, resetCurrentHealth: true);
             var pathPoints = new List<Vector3> { new Vector3(0f, 0f, 0f), new Vector3(10f, 0f, 0f) };
-            _centipede.SetPath(pathPoints, startingWaypointIndex: pathPoints.Count, teleportToStart: false);
-            _centipede.transform.position = new Vector3(10f, 0f, 0f);
+            _enemy.SetPath(pathPoints, startingWaypointIndex: pathPoints.Count, teleportToStart: false);
+            _enemy.transform.position = new Vector3(10f, 0f, 0f);
 
-            List<CentipedeEnemy> children = _centipede.Split();
-            foreach (CentipedeEnemy child in children)
+            List<BasicEnemy> children = _splitter.Split();
+            foreach (BasicEnemy child in children)
             {
                 _spawnedObjects.Add(child.gameObject);
                 Assert.That(child.CurrentWaypointIndex, Is.LessThan(pathPoints.Count));
             }
         }
 
-
-
         [Test]
-        public void Split_WithASplitPrefabThatIsNoCentipede_ErrorsAndCopiesItselfInstead()
+        public void Split_WithASplitPrefabThatHasNoSplitter_ErrorsAndCopiesItselfInstead()
         {
             var notACentipede = new GameObject("PlainEnemy");
             notACentipede.AddComponent<BasicEnemy>();
             _spawnedObjects.Add(notACentipede);
 
-            _centipede.SetMaxHealth(10.0, resetCurrentHealth: true);
-            _centipede.SplitPrefab = notACentipede;
+            _enemy.SetMaxHealth(10.0, resetCurrentHealth: true);
+            _splitter.SplitPrefab = notACentipede;
 
-            LogAssert.Expect(LogType.Error, new Regex("has no CentipedeEnemy"));
-            List<CentipedeEnemy> children = _centipede.Split();
+            LogAssert.Expect(LogType.Error, new Regex("has no CentipedeSplitter"));
+            List<BasicEnemy> children = _splitter.Split();
 
             Assert.That(children.Count, Is.EqualTo(2));
-            foreach (CentipedeEnemy child in children)
+            foreach (BasicEnemy child in children)
             {
                 _spawnedObjects.Add(child.gameObject);
                 Assert.That(child, Is.Not.Null);
+                Assert.That(child.GetComponent<CentipedeSplitter>(), Is.Not.Null, "A child is a copy of the parent, splitter and all.");
             }
         }
 
         [Test]
         public void Split_HalvesDamageInChildren()
         {
-            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
-            _centipede.Damage = 20;
+            _enemy.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _enemy.Damage = 20;
 
-            List<CentipedeEnemy> children = _centipede.Split();
+            List<BasicEnemy> children = _splitter.Split();
 
             Assert.That(children.Count, Is.EqualTo(2));
             foreach (var child in children)
@@ -352,10 +385,10 @@ namespace HoldTheHill.Tests
         [Test]
         public void Split_WithDamageTen_HalvesDamageToFive()
         {
-            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
-            _centipede.Damage = 10;
+            _enemy.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _enemy.Damage = 10;
 
-            List<CentipedeEnemy> children = _centipede.Split();
+            List<BasicEnemy> children = _splitter.Split();
 
             Assert.That(children.Count, Is.EqualTo(2));
             foreach (var child in children)
@@ -368,10 +401,10 @@ namespace HoldTheHill.Tests
         [Test]
         public void Split_WithDamageOne_MaintainsMinimumDamageOfOne()
         {
-            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
-            _centipede.Damage = 1;
+            _enemy.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _enemy.Damage = 1;
 
-            List<CentipedeEnemy> children = _centipede.Split();
+            List<BasicEnemy> children = _splitter.Split();
 
             Assert.That(children.Count, Is.EqualTo(2));
             foreach (var child in children)
@@ -384,10 +417,10 @@ namespace HoldTheHill.Tests
         [Test]
         public void Split_WithDamageZero_PreservesZeroDamage()
         {
-            _centipede.SetMaxHealth(20.0, resetCurrentHealth: true);
-            _centipede.Damage = 0;
+            _enemy.SetMaxHealth(20.0, resetCurrentHealth: true);
+            _enemy.Damage = 0;
 
-            List<CentipedeEnemy> children = _centipede.Split();
+            List<BasicEnemy> children = _splitter.Split();
 
             Assert.That(children.Count, Is.EqualTo(2));
             foreach (var child in children)

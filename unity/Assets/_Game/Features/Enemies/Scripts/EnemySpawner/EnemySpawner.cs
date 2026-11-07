@@ -125,7 +125,7 @@ public class EnemySpawner : MonoBehaviour
 
         BasicEnemy.OnAnyDied += HandleEnemyDied;
         BasicEnemy.OnAnyDestinationReached += HandleEnemyDestinationReached;
-        CentipedeEnemy.OnAnyCentipedeSplit += HandleCentipedeSplit;
+        CentipedeSplitter.OnAnyCentipedeSplit += HandleCentipedeSplit;
         BasicEnemy.OnAnyEnemiesSpawned += HandleEnemiesSpawned;
     }
 
@@ -136,7 +136,7 @@ public class EnemySpawner : MonoBehaviour
     {
         BasicEnemy.OnAnyDied -= HandleEnemyDied;
         BasicEnemy.OnAnyDestinationReached -= HandleEnemyDestinationReached;
-        CentipedeEnemy.OnAnyCentipedeSplit -= HandleCentipedeSplit;
+        CentipedeSplitter.OnAnyCentipedeSplit -= HandleCentipedeSplit;
         BasicEnemy.OnAnyEnemiesSpawned -= HandleEnemiesSpawned;
     }
 
@@ -170,7 +170,7 @@ public class EnemySpawner : MonoBehaviour
     /// Event handler invoked when a centipede enemy splits into child segments.
     /// Increments the live enemy counter by the number of spawned children.
     /// </summary>
-    public void HandleCentipedeSplit(CentipedeEnemy parent, List<CentipedeEnemy> children)
+    public void HandleCentipedeSplit(BasicEnemy parent, List<BasicEnemy> children)
     {
         if (children != null && children.Count > 0)
         {
