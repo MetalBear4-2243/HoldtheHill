@@ -23,7 +23,7 @@ MonoBehaviour:
   HuskHealthFraction: 0.5
   DeathMemorySeconds: 12
   DeathLogCapacity: 12
-  SpawnPrefab: {fileID: 6867420751157181986, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
+  SpawnPrefab: {fileID: 1491925591731371641, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
   SummonOnEntry: 3
   SummonOnShadeChange: 2
   SummonRingRadius: 0.7

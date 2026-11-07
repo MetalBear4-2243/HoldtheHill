@@ -251,6 +251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ade338c5d05e455583ee3c2e5f2a5813, type: 3}
   m_Name: 
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.QueenMantisBoss
+  _enemyData: {fileID: 11400000, guid: c48790d335a369749abfd852deeb9bad, type: 2}
   _maxHealth: 300
   _damage: 40
   _moveSpeed: 0.8
