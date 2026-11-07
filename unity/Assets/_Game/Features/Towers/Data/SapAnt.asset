@@ -13,5 +13,42 @@ MonoBehaviour:
   m_Name: SapAnt
   m_EditorClassIdentifier: HoldTheHill.Runtime::TowerData
   towerName: Sap Ant
-  honeydewCost: 225
   towerIcon: {fileID: 2142572427, guid: e3aaf7efcdea08d41bb2a8f93e76bc90, type: 3}
+  _prefab: {fileID: 4314983547922285816, guid: 1ce2686849838f34592faa43bba26739, type: 3}
+  _levels:
+  - Cost: 225
+    Damage: 0
+    AttackInterval: 2
+    Range: 2
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0.35
+      SlowMultiplier: 0.5
+      SlowSeconds: 4
+      MaxMines: 0
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0
+  - Cost: 135
+    Damage: 0
+    AttackInterval: 1.8
+    Range: 2.4
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0.35
+      SlowMultiplier: 0.5
+      SlowSeconds: 4
+      MaxMines: 0
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0
+  - Cost: 200
+    Damage: 0
+    AttackInterval: 1.6
+    Range: 2.8
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0.35
+      SlowMultiplier: 0.5
+      SlowSeconds: 4
+      MaxMines: 0
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0
