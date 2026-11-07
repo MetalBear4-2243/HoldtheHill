@@ -13,5 +13,42 @@ MonoBehaviour:
   m_Name: CrazyAnt
   m_EditorClassIdentifier: HoldTheHill.Runtime::TowerData
   towerName: Crazy Ant
-  honeydewCost: 125
   towerIcon: {fileID: 1747458572, guid: db3d33decd84e284db235e7003c75798, type: 3}
+  _prefab: {fileID: 1681274514025101029, guid: d27a3f265c9304e4291f644dc9e3aa88, type: 3}
+  _levels:
+  - Cost: 125
+    Damage: 4
+    AttackInterval: 0.35
+    Range: 1.5
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 0
+      PoisonMaxStacks: 5
+      PoisonDamageShare: 0.25
+  - Cost: 75
+    Damage: 6
+    AttackInterval: 0.3
+    Range: 1.6
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 0
+      PoisonMaxStacks: 5
+      PoisonDamageShare: 0.25
+  - Cost: 110
+    Damage: 9
+    AttackInterval: 0.25
+    Range: 1.7
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 0
+      PoisonMaxStacks: 5
+      PoisonDamageShare: 0.25

@@ -13,5 +13,42 @@ MonoBehaviour:
   m_Name: FireAnt
   m_EditorClassIdentifier: HoldTheHill.Runtime::TowerData
   towerName: Fire Ant
-  honeydewCost: 200
   towerIcon: {fileID: -616928818, guid: 45c12271588f2cd468f9b20d9a0cef07, type: 3}
+  _prefab: {fileID: 7333962735893383698, guid: b720628080511c64fbda8a9fab28e93a, type: 3}
+  _levels:
+  - Cost: 200
+    Damage: 3
+    AttackInterval: 0.2
+    Range: 2
+    Ability:
+      ConeDegrees: 70
+      AreaRadius: 0
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 0
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0
+  - Cost: 120
+    Damage: 4.5
+    AttackInterval: 0.2
+    Range: 2.2
+    Ability:
+      ConeDegrees: 70
+      AreaRadius: 0
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 0
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0
+  - Cost: 180
+    Damage: 6
+    AttackInterval: 0.2
+    Range: 2.4
+    Ability:
+      ConeDegrees: 70
+      AreaRadius: 0
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 0
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0

@@ -13,5 +13,42 @@ MonoBehaviour:
   m_Name: CarpenterAnt
   m_EditorClassIdentifier: HoldTheHill.Runtime::TowerData
   towerName: Carpenter Ant
-  honeydewCost: 250
   towerIcon: {fileID: -1474875671, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
+  _prefab: {fileID: 6340939830100537182, guid: a08c1bbaff98a014fbf8bb54ad0bae4b, type: 3}
+  _levels:
+  - Cost: 250
+    Damage: 30
+    AttackInterval: 3
+    Range: 2.5
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0.9
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 3
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0
+  - Cost: 150
+    Damage: 45
+    AttackInterval: 2.5
+    Range: 2.8
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0.9
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 3
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0
+  - Cost: 225
+    Damage: 65
+    AttackInterval: 2
+    Range: 3.1
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0.9
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 3
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0
