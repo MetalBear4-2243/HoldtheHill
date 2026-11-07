@@ -292,7 +292,12 @@ namespace HoldTheHill.EditorTools
             EditorGUILayout.BeginHorizontal();
             GUILayout.Label(row.Data.towerName, EditorStyles.boldLabel, GUILayout.Width(NameWidth));
             GUILayout.Label("prefab", GUILayout.Width(Narrow));
-            Field(so.FindProperty("_prefab"), Wide);
+            SerializedProperty prefabProperty = so.FindProperty("_prefab");
+            var pickedPrefab = (Tower)EditorGUILayout.ObjectField(GUIContent.none, prefabProperty.objectReferenceValue, typeof(Tower), false, GUILayout.Width(Wide));
+            if (pickedPrefab != prefabProperty.objectReferenceValue)
+            {
+                prefabProperty.objectReferenceValue = pickedPrefab;
+            }
             if (GUILayout.Button("+ level", EditorStyles.miniButton, GUILayout.Width(Cell)))
             {
                 levels.arraySize++;
