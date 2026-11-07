@@ -152,7 +152,7 @@ namespace HoldTheHill.EditorTools
                 Scene scene = EditorSceneManager.OpenScene(Levels[i].scene, OpenSceneMode.Single);
                 LevelRun run = AlphaRunFrameBuilder.FindInScene<LevelRun>(scene);
                 TowerPlacer placer = AlphaRunFrameBuilder.FindInScene<TowerPlacer>(scene);
-                int offers = placer != null ? new SerializedObject(placer).FindProperty("_offers").arraySize : 0;
+                int offers = placer != null ? new SerializedObject(placer).FindProperty("_definitions").arraySize : 0;
                 string runPlacer = run != null ? AlphaRunFrameBuilder.Name(new SerializedObject(run), "_placer") : "no run";
                 Debug.Log($"{System.IO.Path.GetFileNameWithoutExtension(Levels[i].scene)}: {offers} offers, run placer = {runPlacer}");
             }
@@ -161,12 +161,12 @@ namespace HoldTheHill.EditorTools
             {
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AlphaCoreLoopBuilder.Towers[i].PrefabPath);
                 Tower tower = prefab != null ? prefab.GetComponent<Tower>() : null;
-                int levels = tower != null ? new SerializedObject(tower).FindProperty("_upgrades").arraySize : -1;
+                int levels = tower != null && tower.Definition != null ? tower.Definition.LevelCount : -1;
                 string extras = tower == null ? "missing"
                     : tower.GetComponent<SlowAura>() != null ? "slow aura"
                     : tower.GetComponent<MineLayer>() != null ? "mine layer"
                     : new SerializedObject(tower).FindProperty("_projectilePrefab").objectReferenceValue != null ? "projectile" : "melee";
-                Debug.Log($"{AlphaCoreLoopBuilder.Towers[i].PrefabName}: {levels} upgrade levels, {extras}");
+                Debug.Log($"{AlphaCoreLoopBuilder.Towers[i].PrefabName}: {levels} levels on {(tower != null && tower.Definition != null ? tower.Definition.name : "no data")}, {extras}");
             }
 
             Scene ui = EditorSceneManager.OpenScene(UiScenePath, OpenSceneMode.Single);

@@ -240,6 +240,8 @@ namespace HoldTheHill.EditorTools
             SerializedProperty flying = so.FindProperty("_isFlying");
             data.IsFlying = flying != null && flying.boolValue;
             data.DiesToClick = basic.GetType().Name == "SilverfishEnemy";
+            // The ability numbers (shield, curl, split) live here too since 2026-11-06.
+            data.Abilities = BalanceDataBuilder.EnemyAbilitiesFor(enemy);
 
             AssetDatabase.CreateAsset(data, DataPath(enemy));
             Debug.Log($"Made {enemy}.asset from {prefab.name} ({basic.GetType().Name}): {Describe(data)}.");
@@ -452,20 +454,18 @@ namespace HoldTheHill.EditorTools
         // The species subclass's own fields, by name, onto the matching ability component.
         private static void AddAbility(GameObject old, GameObject target, string species)
         {
+            // Only the wiring and the look come across; the numbers are on the data asset (EnemyAbilitySettings).
             var oldEnemy = new SerializedObject(old.GetComponent<BasicEnemy>());
             switch (species)
             {
                 case "CentipedeEnemy":
-                    CopyNamed(oldEnemy, Ensure<CentipedeSplitter>(target), old.transform, target.transform,
-                        "_splitsRemaining", "_splitPrefab", "_sizeMultiplier", "_splitForwardDistance");
+                    CopyNamed(oldEnemy, Ensure<CentipedeSplitter>(target), old.transform, target.transform, "_splitPrefab");
                     break;
                 case "RhinoBeetleEnemy":
-                    CopyNamed(oldEnemy, Ensure<RhinoBeetleShield>(target), old.transform, target.transform,
-                        "_shieldCapacity", "_shieldRegrowDelay", "_shieldRegrowPerSecond", "_shieldVisual");
+                    CopyNamed(oldEnemy, Ensure<RhinoBeetleShield>(target), old.transform, target.transform, "_shieldVisual");
                     break;
                 case "RollyPollyEnemy":
-                    CopyNamed(oldEnemy, Ensure<RollyPollyCurler>(target), old.transform, target.transform,
-                        "_maxCurls", "_rollDistance", "_curledDamageShare", "_curledSpeedMultiplier", "_curledScale", "_curledTint");
+                    CopyNamed(oldEnemy, Ensure<RollyPollyCurler>(target), old.transform, target.transform, "_curledScale", "_curledTint");
                     break;
                 default:
                     // Basic, Scarab, Mantis Spawn: nothing of their own. Wasp and Silverfish: their rule is a flag in the data.

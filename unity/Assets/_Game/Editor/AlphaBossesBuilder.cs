@@ -80,20 +80,13 @@ namespace HoldTheHill.EditorTools
             so.FindProperty("_moveSpeed").floatValue = 1.1f;
             so.ApplyModifiedPropertiesWithoutUndo();
 
-            var splitter = go.AddComponent<CentipedeSplitter>();
-            var splitSo = new SerializedObject(splitter);
-            splitSo.FindProperty("_splitsRemaining").intValue = 2;
-            splitSo.FindProperty("_sizeMultiplier").floatValue = 0.8f;
-            splitSo.FindProperty("_splitForwardDistance").floatValue = 0.6f;
-            splitSo.ApplyModifiedPropertiesWithoutUndo();
+            // Its splits (2, halves at 0.8, 0.6 forward, x1.25 speed) are on Centipede.asset (Build Enemy Data).
+            go.AddComponent<CentipedeSplitter>();
 
             go.AddComponent<RegisteredEnemy>();
             SetBounty(go.AddComponent<Bounty>(), 10);
 
-            var speedUp = go.AddComponent<CentipedeSpeedUp>();
-            var speedSo = new SerializedObject(speedUp);
-            speedSo.FindProperty("_childSpeedFactor").floatValue = 1.25f;
-            speedSo.ApplyModifiedPropertiesWithoutUndo();
+            go.AddComponent<CentipedeSpeedUp>();
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, CentipedePath);
             Object.DestroyImmediate(go);

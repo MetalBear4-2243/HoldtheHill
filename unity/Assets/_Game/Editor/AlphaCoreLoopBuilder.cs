@@ -66,11 +66,11 @@ namespace HoldTheHill.EditorTools
             Mines
         }
 
-        /// <summary>One of the GDD's six towers: its prefab, shop data and numbers for all three levels.</summary>
+        /// <summary>One of the GDD's six towers: its prefab, shop data and numbers for all three levels (on the data asset).</summary>
         internal readonly struct TowerSpec
         {
             public TowerSpec(string prefabName, string dataFile, string title, int cost, Color color, TowerKind kind,
-                float range, float damage, float interval, TowerUpgrade level2, TowerUpgrade level3)
+                float range, float damage, float interval, TowerLevel level2, TowerLevel level3)
             {
                 PrefabName = prefabName;
                 DataFile = dataFile;
@@ -78,11 +78,7 @@ namespace HoldTheHill.EditorTools
                 Cost = cost;
                 Color = color;
                 Kind = kind;
-                Range = range;
-                Damage = damage;
-                Interval = interval;
-                Level2 = level2;
-                Level3 = level3;
+                Levels = new[] { Up(cost, range, damage, interval), level2, level3 };
             }
 
             public string PrefabName { get; }
@@ -91,19 +87,17 @@ namespace HoldTheHill.EditorTools
             public int Cost { get; }
             public Color Color { get; }
             public TowerKind Kind { get; }
-            public float Range { get; }
-            public float Damage { get; }
-            public float Interval { get; }
-            public TowerUpgrade Level2 { get; }
-            public TowerUpgrade Level3 { get; }
+
+            /// <summary>Level 1 (the build price), then levels 2 and 3.</summary>
+            public TowerLevel[] Levels { get; }
 
             public string PrefabPath => $"{TowerPrefabFolder}/{PrefabName}.prefab";
             public string DataPath => $"{TowerDataFolder}/{DataFile}.asset";
         }
 
-        private static TowerUpgrade Up(int cost, float range, float damage, float interval)
+        private static TowerLevel Up(int cost, float range, float damage, float interval)
         {
-            return new TowerUpgrade { Cost = cost, Range = range, Damage = damage, FireInterval = interval };
+            return new TowerLevel { Cost = cost, Range = range, Damage = damage, AttackInterval = interval, Ability = TowerAbilitySettings.Default };
         }
 
         /// <summary>The six towers of the GDD, in number-key and shop order, at the GDD costs.</summary>
@@ -153,8 +147,10 @@ namespace HoldTheHill.EditorTools
                 TowerSpec spec = Towers[i];
                 Projectile projectile = spec.Kind == TowerKind.Shot ? bullet.GetComponent<Projectile>()
                     : spec.Kind == TowerKind.Lob ? lob.GetComponent<Projectile>() : null;
-                EnsureTowerPrefab(spec, square, projectile, mine.GetComponent<Mine>());
-                EnsureTowerData(spec.DataFile, spec.Title, spec.Cost, square);
+                // The data first: the prefab's Tower points at it, and it points back at the prefab.
+                TowerData data = EnsureTowerData(spec, square);
+                GameObject prefab = EnsureTowerPrefab(spec, data, square, projectile, mine.GetComponent<Mine>());
+                BalanceDataBuilder.SetPrefab(data, prefab.GetComponent<Tower>());
             }
 
             AssetDatabase.SaveAssets();
@@ -249,9 +245,9 @@ namespace HoldTheHill.EditorTools
             return SavePrefab(go, path);
         }
 
-        // A new prefab gets everything; one that exists only gains the upgrade levels it lacks, so
-        // Inspector tuning of the level-1 numbers survives.
-        private static GameObject EnsureTowerPrefab(TowerSpec spec, Sprite sprite, Projectile projectile, Mine mine)
+        // A new prefab gets everything; one that exists only gains the definition it lacks. The numbers
+        // live on the data asset, so Inspector tuning there survives a rerun.
+        private static GameObject EnsureTowerPrefab(TowerSpec spec, TowerData data, Sprite sprite, Projectile projectile, Mine mine)
         {
             EnsureFolder(TowerPrefabFolder);
 
@@ -259,12 +255,10 @@ namespace HoldTheHill.EditorTools
             if (existing != null)
             {
                 Tower existingTower = existing.GetComponent<Tower>();
-                var existingSo = new SerializedObject(existingTower);
-                if (existingSo.FindProperty("_upgrades").arraySize == 0)
+                if (existingTower.Definition == null)
                 {
-                    SetUpgrades(existingSo, spec);
-                    existingSo.ApplyModifiedPropertiesWithoutUndo();
-                    Debug.Log($"Added upgrade levels to the existing {spec.PrefabName}.");
+                    BalanceDataBuilder.SetDefinition(existingTower, data);
+                    Debug.Log($"Pointed the existing {spec.PrefabName} at {data.name}.");
                 }
                 return existing;
             }
@@ -272,11 +266,8 @@ namespace HoldTheHill.EditorTools
             GameObject go = NewSpriteObject(spec.PrefabName, sprite, spec.Color, 0.8f, sortingOrder: 10);
             var tower = go.AddComponent<Tower>();
             var so = new SerializedObject(tower);
-            so.FindProperty("_range").floatValue = spec.Range;
-            so.FindProperty("_damage").floatValue = spec.Damage;
-            so.FindProperty("_fireInterval").floatValue = spec.Interval;
+            so.FindProperty("_data").objectReferenceValue = data;
             so.FindProperty("_projectilePrefab").objectReferenceValue = projectile;
-            SetUpgrades(so, spec);
             so.ApplyModifiedPropertiesWithoutUndo();
 
             switch (spec.Kind)
@@ -295,36 +286,26 @@ namespace HoldTheHill.EditorTools
             return SavePrefab(go, spec.PrefabPath);
         }
 
-        private static void SetUpgrades(SerializedObject tower, TowerSpec spec)
-        {
-            SerializedProperty upgrades = tower.FindProperty("_upgrades");
-            upgrades.arraySize = 2;
-            SetUpgrade(upgrades.GetArrayElementAtIndex(0), spec.Level2);
-            SetUpgrade(upgrades.GetArrayElementAtIndex(1), spec.Level3);
-        }
-
-        private static void SetUpgrade(SerializedProperty element, TowerUpgrade upgrade)
-        {
-            element.FindPropertyRelative("Cost").intValue = upgrade.Cost;
-            element.FindPropertyRelative("Range").floatValue = upgrade.Range;
-            element.FindPropertyRelative("Damage").floatValue = upgrade.Damage;
-            element.FindPropertyRelative("FireInterval").floatValue = upgrade.FireInterval;
-        }
-
-        private static TowerData EnsureTowerData(string fileName, string towerName, int cost, Sprite icon)
+        // A new data asset gets the spec's three levels; one that exists keeps its own table unless it has none.
+        private static TowerData EnsureTowerData(TowerSpec spec, Sprite icon)
         {
             EnsureFolder(TowerDataFolder);
-            string path = $"{TowerDataFolder}/{fileName}.asset";
+            string path = spec.DataPath;
 
             TowerData data = AssetDatabase.LoadAssetAtPath<TowerData>(path);
             if (data == null)
             {
                 data = ScriptableObject.CreateInstance<TowerData>();
-                data.towerName = towerName;
-                data.honeydewCost = cost;
+                data.towerName = spec.Title;
                 data.towerIcon = icon;
                 AssetDatabase.CreateAsset(data, path);
                 data = Reimport<TowerData>(path);
+                BalanceDataBuilder.SetLevels(data, spec.Levels);
+            }
+            else if (data.LevelCount == 0)
+            {
+                BalanceDataBuilder.SetLevels(data, spec.Levels);
+                Debug.Log($"Added the level table to the existing {data.name}.");
             }
 
             return data;
@@ -488,27 +469,9 @@ namespace HoldTheHill.EditorTools
             placerSo.FindProperty("_wallet").objectReferenceValue = wallet;
             placerSo.FindProperty("_actions").objectReferenceValue = AssetDatabase.LoadAssetAtPath<InputActionAsset>(ActionsPath);
 
-            SerializedProperty offers = placerSo.FindProperty("_offers");
-            offers.arraySize = Towers.Length;
-            bool refused = false;
-            for (int i = 0; i < Towers.Length; i++)
-            {
-                refused |= !SetOffer(offers.GetArrayElementAtIndex(i), datas[i], prefabs[i]);
-            }
             placerSo.ApplyModifiedPropertiesWithoutUndo();
-
-            if (refused)
-            {
-                // Same fallback as SetAssetReference: write the list straight into the field.
-                var list = new List<TowerPlacer.Offer>(Towers.Length);
-                for (int i = 0; i < Towers.Length; i++)
-                {
-                    list.Add(new TowerPlacer.Offer { Data = datas[i], Prefab = prefabs[i].GetComponent<Tower>() });
-                }
-                typeof(TowerPlacer).GetField("_offers", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                    ?.SetValue(placer, list);
-                EditorUtility.SetDirty(placer);
-            }
+            // The six definitions, in key order; each names its own prefab, so nothing is paired here.
+            BalanceDataBuilder.SetPlacerTowers(placer, datas);
 
             // The run reaches the placer for the tower card and the U key (Alpha step 4).
             LevelRun run = Object.FindAnyObjectByType<LevelRun>();
@@ -522,21 +485,6 @@ namespace HoldTheHill.EditorTools
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             ReportOffersAfterReload(scenePath);
-        }
-
-        // False when Unity's type check refused the TowerData asset.
-        private static bool SetOffer(SerializedProperty offer, TowerData data, GameObject prefab)
-        {
-            SerializedProperty dataProperty = offer.FindPropertyRelative("Data");
-            dataProperty.objectReferenceValue = data;
-            offer.FindPropertyRelative("Prefab").objectReferenceValue = prefab.GetComponent<Tower>();
-
-            bool accepted = data == null || dataProperty.objectReferenceValue != null;
-            if (!accepted)
-            {
-                Debug.LogWarning($"SerializedProperty refused '{data.name}' ({data.GetType().AssemblyQualifiedName}) for TowerPlacer offer data.");
-            }
-            return accepted;
         }
 
         private static GameObject FindEmptyRoot(Scene scene, string name)
@@ -562,13 +510,11 @@ namespace HoldTheHill.EditorTools
                 return;
             }
 
-            SerializedProperty offers = new SerializedObject(placer).FindProperty("_offers");
-            for (int i = 0; i < offers.arraySize; i++)
+            SerializedProperty towers = new SerializedObject(placer).FindProperty("_definitions");
+            for (int i = 0; i < towers.arraySize; i++)
             {
-                SerializedProperty offer = offers.GetArrayElementAtIndex(i);
-                Object data = offer.FindPropertyRelative("Data").objectReferenceValue;
-                Object prefab = offer.FindPropertyRelative("Prefab").objectReferenceValue;
-                Debug.Log($"Offer {i + 1}: data = {(data != null ? data.name : "none")}, prefab = {(prefab != null ? prefab.name : "none")}");
+                var data = towers.GetArrayElementAtIndex(i).objectReferenceValue as TowerData;
+                Debug.Log($"Offer {i + 1}: data = {(data != null ? data.name : "none")}, prefab = {(data != null && data.Prefab != null ? data.Prefab.name : "none")}");
             }
 
             EnemySpawner spawner = Object.FindAnyObjectByType<EnemySpawner>();

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using HoldTheHill.Core.Animation;
 using HoldTheHill.Features.Towers;
@@ -47,6 +48,7 @@ namespace HoldTheHill.EditorTools
         private const float FlameConeDegrees = 70f;
 
         // Level 1, then the two upgrade levels: range, damage, interval. Upgrade prices stay as they are.
+        // Written onto the tower's data asset (its level table), where every tower's numbers live.
         private static readonly Vector3[] SapLevels = { new Vector3(2f, 0f, 2f), new Vector3(2.4f, 0f, 1.8f), new Vector3(2.8f, 0f, 1.6f) };
         private static readonly Vector3[] FireLevels = { new Vector3(2f, 3f, 0.2f), new Vector3(2.2f, 4.5f, 0.2f), new Vector3(2.4f, 6f, 0.2f) };
         private static readonly float[] CrazyDamage = { 4f, 6f, 9f };
@@ -194,8 +196,8 @@ namespace HoldTheHill.EditorTools
                 // Loaded after the prefab was opened, as the sprites builder does.
                 var sap = AssetDatabase.LoadAssetAtPath<GameObject>(PathOf("Projectile_Sap"));
                 shot.objectReferenceValue = sap != null ? sap.GetComponent<Projectile>() : null;
-                SetLevels(tower, SapLevels);
                 tower.ApplyModifiedPropertiesWithoutUndo();
+                SetLevels(root.GetComponent<Tower>().Definition, SapLevels, ability => ability);
                 return true;
             });
         }
@@ -209,9 +211,12 @@ namespace HoldTheHill.EditorTools
                 if (tower.FindProperty("_projectilePrefab").objectReferenceValue != null)
                 {
                     tower.FindProperty("_projectilePrefab").objectReferenceValue = null;
-                    tower.FindProperty("_coneDegrees").floatValue = FlameConeDegrees;
-                    SetLevels(tower, FireLevels);
                     tower.ApplyModifiedPropertiesWithoutUndo();
+                    SetLevels(root.GetComponent<Tower>().Definition, FireLevels, ability =>
+                    {
+                        ability.ConeDegrees = FlameConeDegrees;
+                        return ability;
+                    });
                     changed = true;
                 }
 
@@ -246,32 +251,43 @@ namespace HoldTheHill.EditorTools
                 }
 
                 root.AddComponent<PoisonOnHits>();
-                var tower = new SerializedObject(root.GetComponent<Tower>());
-                tower.FindProperty("_damage").floatValue = CrazyDamage[0];
-                SerializedProperty upgrades = tower.FindProperty("_upgrades");
-                for (int i = 0; i < upgrades.arraySize && i + 1 < CrazyDamage.Length; i++)
+                TowerData data = root.GetComponent<Tower>().Definition;
+                if (data != null)
                 {
-                    upgrades.GetArrayElementAtIndex(i).FindPropertyRelative("Damage").floatValue = CrazyDamage[i + 1];
+                    var levels = new List<TowerLevel>(data.Levels);
+                    for (int i = 0; i < levels.Count && i < CrazyDamage.Length; i++)
+                    {
+                        TowerLevel level = levels[i];
+                        level.Damage = CrazyDamage[i];
+                        levels[i] = level;
+                    }
+                    BalanceDataBuilder.SetLevels(data, levels);
                 }
-                tower.ApplyModifiedPropertiesWithoutUndo();
                 return true;
             });
         }
 
-        // Level 1 on the tower, levels 2 and 3 on its upgrades; each upgrade keeps its price.
-        private static void SetLevels(SerializedObject tower, Vector3[] levels)
+        // Range, damage and interval per level onto the data asset; each level keeps its price, and
+        // the ability is passed through the given change (the Fire Ant's cone).
+        private static void SetLevels(TowerData data, Vector3[] levels, System.Func<TowerAbilitySettings, TowerAbilitySettings> ability)
         {
-            tower.FindProperty("_range").floatValue = levels[0].x;
-            tower.FindProperty("_damage").floatValue = levels[0].y;
-            tower.FindProperty("_fireInterval").floatValue = levels[0].z;
-            SerializedProperty upgrades = tower.FindProperty("_upgrades");
-            for (int i = 0; i < upgrades.arraySize && i + 1 < levels.Length; i++)
+            if (data == null)
             {
-                SerializedProperty level = upgrades.GetArrayElementAtIndex(i);
-                level.FindPropertyRelative("Range").floatValue = levels[i + 1].x;
-                level.FindPropertyRelative("Damage").floatValue = levels[i + 1].y;
-                level.FindPropertyRelative("FireInterval").floatValue = levels[i + 1].z;
+                Debug.LogError("The tower has no data asset; run Build Core Loop first.");
+                return;
             }
+
+            var table = new List<TowerLevel>(data.Levels);
+            for (int i = 0; i < table.Count && i < levels.Length; i++)
+            {
+                TowerLevel level = table[i];
+                level.Range = levels[i].x;
+                level.Damage = levels[i].y;
+                level.AttackInterval = levels[i].z;
+                level.Ability = ability(level.Ability);
+                table[i] = level;
+            }
+            BalanceDataBuilder.SetLevels(data, table);
         }
 
         // Opens a prefab, lets the change run, and saves only if it changed something.
@@ -316,11 +332,10 @@ namespace HoldTheHill.EditorTools
                 var so = new SerializedObject(tower);
                 var text = new StringBuilder($"{name}: ");
                 text.Append($"range {tower.Range}, damage {tower.Damage}, every {tower.FireInterval} s");
-                SerializedProperty upgrades = so.FindProperty("_upgrades");
-                for (int i = 0; i < upgrades.arraySize; i++)
+                for (int i = 2; tower.Definition != null && i <= tower.Definition.LevelCount; i++)
                 {
-                    SerializedProperty level = upgrades.GetArrayElementAtIndex(i);
-                    text.Append($"; L{i + 2} {level.FindPropertyRelative("Range").floatValue}/{level.FindPropertyRelative("Damage").floatValue}/{level.FindPropertyRelative("FireInterval").floatValue}");
+                    TowerLevel level = tower.Definition.LevelAt(i);
+                    text.Append($"; L{i} {level.Range}/{level.Damage}/{level.AttackInterval}");
                 }
                 Object shot = so.FindProperty("_projectilePrefab").objectReferenceValue;
                 text.Append(shot != null ? $"; shoots {shot.name}" : "; melee");
