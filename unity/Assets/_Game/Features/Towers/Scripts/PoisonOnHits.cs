@@ -8,7 +8,8 @@ namespace HoldTheHill.Features.Towers
     /// The Crazy Ant's poison: every few hits in a row on the same enemy (two by default) add a poison
     /// stack to it (<see cref="PoisonStacks"/>). "In a row" means on consecutive swings; a swing that
     /// misses the enemy (it walked out, or the tower was stunned) starts its count again. Each stack
-    /// ticks a share of the tower's hit damage, so it grows with upgrades.
+    /// ticks a share of the tower's hit damage; the share and the most stacks an enemy carries are
+    /// the tower's <see cref="TowerAbilitySettings"/> at its level, so both grow with upgrades.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Tower))]
@@ -16,12 +17,6 @@ namespace HoldTheHill.Features.Towers
     {
         [Tooltip("Hits in a row on one enemy that add a stack.")]
         [SerializeField, Min(1)] private int _hitsPerStack = 2;
-
-        [Tooltip("Most stacks one enemy can carry.")]
-        [SerializeField, Min(1)] private int _maxStacks = 5;
-
-        [Tooltip("Damage each stack deals per tick, as a share of the tower's hit damage (0.25 = a quarter).")]
-        [SerializeField, Min(0f)] private float _damagePerStackShare = 0.25f;
 
         [Tooltip("Seconds between poison ticks.")]
         [SerializeField, Min(0.05f)] private float _tickInterval = 0.5f;
@@ -86,8 +81,9 @@ namespace HoldTheHill.Features.Towers
 
             if (addsStack)
             {
-                PoisonStacks.AddStack(enemy, _tower.Damage * _damagePerStackShare, _tickInterval, _seconds, _maxStacks,
-                    _overlayFrames, _overlayFrameSeconds);
+                TowerAbilitySettings ability = _tower.Ability;
+                PoisonStacks.AddStack(enemy, _tower.Damage * ability.PoisonDamageShare, _tickInterval, _seconds,
+                    Mathf.Max(1, ability.PoisonMaxStacks), _overlayFrames, _overlayFrameSeconds);
             }
         }
 

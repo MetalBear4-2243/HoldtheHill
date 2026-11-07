@@ -8,7 +8,9 @@ namespace HoldTheHill.Features.Towers
     /// <summary>
     /// The Carpenter Ant: keeps a few <see cref="Mine"/>s lying on the stretch of path inside the
     /// tower's range, laying a new one on the tower's cooldown whenever one has gone off. Each mine
-    /// carries the tower's damage at the time it was laid. The mines go when the tower goes.
+    /// carries the tower's damage and blast radius at the time it was laid; how many may lie there
+    /// at once is the tower's <see cref="TowerAbilitySettings.MaxMines"/> at its level. The mines go
+    /// when the tower goes.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Tower))]
@@ -16,9 +18,6 @@ namespace HoldTheHill.Features.Towers
     {
         [Tooltip("The mine laid on the path.")]
         [SerializeField] private Mine _minePrefab;
-
-        [Tooltip("How many of this tower's mines can lie on the path at once.")]
-        [SerializeField, Min(1)] private int _maxMines = 3;
 
         [Tooltip("Gap in world units between the candidate spots sampled along the path.")]
         [SerializeField, Min(0.1f)] private float _spotSpacing = 0.5f;
@@ -33,6 +32,9 @@ namespace HoldTheHill.Features.Towers
 
         /// <summary>Points on the path inside range where a mine may be laid. Empty if none.</summary>
         public IReadOnlyList<Vector3> Spots => _spots;
+
+        /// <summary>How many of this tower's mines can lie on the path at once, at its current level.</summary>
+        public int MaxMines => _tower != null ? _tower.Ability.MaxMines : GetComponent<Tower>().Ability.MaxMines;
 
         private void Awake()
         {
@@ -68,13 +70,14 @@ namespace HoldTheHill.Features.Towers
             _cooldown -= Time.deltaTime;
             // A burrowed, stunned or missing tower lays nothing; mines already down stay armed.
             if (_cooldown > 0f || !_tower.CanAct || _tower.IsMissing || _minePrefab == null || _spots.Count == 0
-                || _mines.Count >= _maxMines)
+                || _mines.Count >= _tower.Ability.MaxMines)
             {
                 return;
             }
 
-            // Same tempo as a tower's own cooldown, so the Swarm Frenzy speeds mine laying too.
-            _cooldown = _tower.FireInterval / TowerTempo.FireRateFactor;
+            // The same cooldown rule as a tower's own attack, tempo included: the Swarm Frenzy speeds
+            // mine laying exactly as it speeds attacks (see TowerTempo).
+            _cooldown = TowerTempo.NextCooldown(_cooldown, _tower.FireInterval, Time.deltaTime, TowerTempo.FireRateFactor);
             Lay(_spots[Random.Range(0, _spots.Count)]);
         }
 
@@ -83,7 +86,7 @@ namespace HoldTheHill.Features.Towers
             // Not a child of the tower: an upgrade scales the tower, which would push its mines off the path.
             Mine mine = Instantiate(_minePrefab, spot, Quaternion.identity);
             SceneManager.MoveGameObjectToScene(mine.gameObject, gameObject.scene);
-            mine.Arm(_tower.Damage);
+            mine.Arm(_tower.Damage, _tower.Ability.AreaRadius);
             mine.Exploded += HandleExploded;
             _mines.Add(mine);
             _tower.ReportAbilityUsed();

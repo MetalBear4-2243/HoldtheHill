@@ -47,6 +47,11 @@ namespace HoldTheHill.Features.Towers
         private Vector3 _direction;
         private float _age;
 
+        // The launching tower's ability at its level: the splash it lands with, and what it hands
+        // to the effect it leaves. A shot launched without one keeps the prefab's own numbers.
+        private TowerAbilitySettings _ability;
+        private bool _hasAbility;
+
         // Lobbed flight: the shot's true position moves in a straight line; the arc is only drawn.
         // The landing point follows the target, and the flight time is fixed at launch.
         private Vector3 _origin;
@@ -56,8 +61,25 @@ namespace HoldTheHill.Features.Towers
         /// <summary>True for a shot that lands and splashes rather than chasing its target.</summary>
         public bool IsLobbed => _lobbed;
 
-        /// <summary>Aims the shot. Called by the tower right after it is spawned.</summary>
+        /// <summary>Lobbed only: how far the landing splash reaches; the tower's area radius when it has one.</summary>
+        public float SplashRadius => _hasAbility && _ability.AreaRadius > 0f ? _ability.AreaRadius : _splashRadius;
+
+        /// <summary>Aims the shot with the prefab's own splash and effect numbers (a shot fired by something other than a tower).</summary>
         public void Launch(BasicEnemy target, double damage)
+        {
+            _hasAbility = false;
+            Aim(target, damage);
+        }
+
+        /// <summary>Aims the shot. Called by the tower right after it is spawned, with its ability at its level.</summary>
+        public void Launch(BasicEnemy target, double damage, in TowerAbilitySettings ability)
+        {
+            _ability = ability;
+            _hasAbility = true;
+            Aim(target, damage);
+        }
+
+        private void Aim(BasicEnemy target, double damage)
         {
             _target = target;
             _damage = damage;
@@ -156,13 +178,20 @@ namespace HoldTheHill.Features.Towers
 
             GameObject effect = Instantiate(_hitEffect, at, Quaternion.identity);
             SceneManager.MoveGameObjectToScene(effect, gameObject.scene);
+
+            // The puddle takes its slow and reach from the tower's level, so an upgrade reaches it.
+            if (_hasAbility && effect.TryGetComponent(out ITowerEffect configured))
+            {
+                configured.Configure(_ability);
+            }
         }
 
         // Damages every living enemy on the ground near the point; a splash on the ground misses
         // anything flying (the wasp rule). The target itself counts only if it is still there.
         private void Splash(Vector3 centre)
         {
-            float radiusSqr = _splashRadius * _splashRadius;
+            float radius = SplashRadius;
+            float radiusSqr = radius * radius;
             s_splashBuffer.Clear();
 
             IReadOnlyList<BasicEnemy> enemies = EnemyRegistry.All;

@@ -21,14 +21,16 @@ namespace HoldTheHill.Features.Towers
     /// </summary>
     public class TowerPlacer : MonoBehaviour
     {
-        /// <summary>A tower the player can buy: the shop entry and the prefab it builds.</summary>
-        [Serializable]
+        /// <summary>
+        /// A tower the player can buy: the definition and the prefab it names. Read off
+        /// <see cref="TowerData"/>; nothing is paired per scene any more.
+        /// </summary>
         public struct Offer
         {
-            [Tooltip("The shop card's data; its Honeydew cost is what the player pays.")]
+            /// <summary>The shop card's data; its build price is what the player pays.</summary>
             public TowerData Data;
 
-            [Tooltip("The tower prefab built for that card.")]
+            /// <summary>The tower prefab built for that card: the definition's.</summary>
             public Tower Prefab;
         }
 
@@ -50,8 +52,8 @@ namespace HoldTheHill.Features.Towers
         [SerializeField] private HoneydewWallet _wallet;
 
         [Header("Towers")]
-        [Tooltip("Towers for sale, in number-key order (1 is the first).")]
-        [SerializeField] private List<Offer> _offers = new List<Offer>();
+        [Tooltip("Towers for sale, in number-key order (1 is the first). Each definition names the prefab it builds.")]
+        [SerializeField] private List<TowerData> _definitions = new List<TowerData>();
 
         [Header("Selling")]
         [Tooltip("Share of everything spent on a tower that comes back when it is sold.")]
@@ -93,7 +95,16 @@ namespace HoldTheHill.Features.Towers
         public event Action<Tower> SelectedTowerChanged;
 
         /// <summary>The offer the ghost shows, or null when nothing is selected.</summary>
-        public Offer? Selected => _selected >= 0 ? _offers[_selected] : (Offer?)null;
+        public Offer? Selected => _selected >= 0 ? OfferAt(_selected) : (Offer?)null;
+
+        /// <summary>The towers for sale, in number-key order.</summary>
+        public IReadOnlyList<TowerData> Offers => _definitions;
+
+        private Offer OfferAt(int index)
+        {
+            TowerData data = _definitions[index];
+            return new Offer { Data = data, Prefab = data != null ? data.Prefab : null };
+        }
 
         /// <summary>The standing tower the card shows, or null.</summary>
         public Tower SelectedTower => _selectedTower;
@@ -180,9 +191,9 @@ namespace HoldTheHill.Features.Towers
                 return;
             }
 
-            for (int i = 0; i < _offers.Count; i++)
+            for (int i = 0; i < _definitions.Count; i++)
             {
-                if (_offers[i].Data == data)
+                if (_definitions[i] == data)
                 {
                     Select(i);
                     return;
@@ -192,10 +203,10 @@ namespace HoldTheHill.Features.Towers
             Debug.LogWarning($"No tower is on offer for '{(data != null ? data.towerName : "null")}'.", this);
         }
 
-        /// <summary>Starts placing offer <paramref name="index"/>; an index out of range cancels.</summary>
+        /// <summary>Starts placing offer <paramref name="index"/>; an index out of range, or a definition without a prefab, cancels.</summary>
         public void Select(int index)
         {
-            bool valid = index >= 0 && index < _offers.Count && _offers[index].Prefab != null;
+            bool valid = index >= 0 && index < _definitions.Count && _definitions[index] != null && _definitions[index].Prefab != null;
             _selected = valid ? index : -1;
             _preview.enabled = valid;
             if (valid)
@@ -358,8 +369,7 @@ namespace HoldTheHill.Features.Towers
             bool affordable = true;
             if (armed)
             {
-                Offer armedOffer = _offers[_selected];
-                cost = armedOffer.Data != null ? armedOffer.Data.honeydewCost : 0;
+                cost = _definitions[_selected].honeydewCost;
                 // Off the map (under the HUD bands or beside the shop list) there is no cell to build on.
                 bool onMap = _buildArea.Contains(cell);
                 blocked = !onMap || standing != null || IsOnPath(cell);
@@ -388,7 +398,7 @@ namespace HoldTheHill.Features.Towers
                 case TowerClickRule.Outcome.Build:
                     if (_wallet == null || _wallet.Honeydew.TrySpend(cost))
                     {
-                        PlaceTower(_offers[_selected], cell);
+                        PlaceTower(_definitions[_selected], cell);
                     }
                     break;
             }
@@ -403,9 +413,10 @@ namespace HoldTheHill.Features.Towers
                 return;
             }
 
-            if (_selected >= 0 && _preview.enabled && _offers[_selected].Prefab != null)
+            if (_selected >= 0 && _preview.enabled)
             {
-                _rangeRing.Show(_preview.transform.position, _offers[_selected].Prefab.Range);
+                // The level-1 reach, straight from the definition: the prefab has not run Awake.
+                _rangeRing.Show(_preview.transform.position, _definitions[_selected].LevelAt(1).Range);
             }
             else if (_selected < 0 && _selectedTower != null)
             {
@@ -422,12 +433,12 @@ namespace HoldTheHill.Features.Towers
             return _path != null && _path.Blocks(CellToWorld(cell), _cellSize);
         }
 
-        private void PlaceTower(Offer offer, Vector2Int cell)
+        private void PlaceTower(TowerData data, Vector2Int cell)
         {
-            Tower tower = Instantiate(offer.Prefab, CellToWorld(cell), Quaternion.identity, transform);
+            Tower tower = Instantiate(data.Prefab, CellToWorld(cell), Quaternion.identity, transform);
             tower.Cell = cell;
-            tower.ShopData = offer.Data;
-            tower.HoneydewSpent = offer.Data != null ? offer.Data.honeydewCost : 0;
+            tower.ShopData = data;
+            tower.HoneydewSpent = data.honeydewCost;
             tower.Removed += HandleTowerRemoved;
             _towers.Add(cell, tower);
             TowerPlaced?.Invoke(tower);

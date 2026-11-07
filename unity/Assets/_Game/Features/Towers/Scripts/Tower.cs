@@ -9,44 +9,35 @@ namespace HoldTheHill.Features.Towers
     /// A placed tower. Knows its grid cell, picks a target in range by its
     /// <see cref="TargetingPriority"/>, and attacks it on a cooldown: with a projectile when
     /// it has one, otherwise with a melee swing that hits every ground enemy in reach (or, with a
-    /// cone set, every one in the cone toward the target: the Fire Ant's flames). Numbers
-    /// live on the prefab variants, one set per level; <see cref="Upgrade"/> moves to the next set.
+    /// cone set, every one in the cone toward the target: the Fire Ant's flames). Its numbers
+    /// (range, damage, interval, cone, ability strength, prices) are the level table of its
+    /// <see cref="TowerData"/>; <see cref="Upgrade"/> moves to the next row. The definition is
+    /// shared and never written at run time: what changes during combat (the level, the cooldown,
+    /// the condition, the priority) lives on this instance.
     /// </summary>
     /// <remarks>
     /// Towers that do something else in range (slow, lay mines) carry an <see cref="ITowerAbility"/>
-    /// component that reads <see cref="Range"/> and <see cref="Damage"/>; such a tower, or one with
-    /// no damage and no projectile, does not attack on its own.
+    /// component that reads <see cref="Range"/>, <see cref="Damage"/> and <see cref="Ability"/>; such a
+    /// tower, or one with no damage and no projectile, does not attack on its own.
     /// </remarks>
     public class Tower : MonoBehaviour
     {
-        [Header("Range")]
-        [Tooltip("How far this tower can reach, in world units.")]
-        [SerializeField, Min(0f)] private float _range = 2.5f;
+        [Header("Definition")]
+        [Tooltip("The data asset with this tower's levels: price, damage, interval, range and ability per level. Its Prefab is this tower.")]
+        [SerializeField] private TowerData _data;
 
         [Header("Attack")]
-        [Tooltip("Damage dealt per hit or per projectile. Zero with no projectile means the tower does not attack.")]
-        [SerializeField, Min(0f)] private float _damage = 10f;
-
-        [Tooltip("Seconds between attacks.")]
-        [SerializeField, Min(0.05f)] private float _fireInterval = 1f;
-
         [Tooltip("Shot fired at the target. Leave empty for a melee tower that hits directly.")]
         [SerializeField] private Projectile _projectilePrefab;
 
         [Tooltip("Where shots leave the tower. Defaults to the tower itself.")]
         [SerializeField] private Transform _muzzle;
 
-        [Tooltip("Melee only: 0 hits every ground enemy in reach. Above 0, only those inside a cone this many degrees wide, pointed at the target (the Fire Ant's flames).")]
-        [SerializeField, Range(0f, 360f)] private float _coneDegrees;
-
         [Header("Targeting")]
         [Tooltip("Which enemy to attack when several are in range.")]
         [SerializeField] private TargetingPriority _priority = TargetingPriority.First;
 
         [Header("Upgrades")]
-        [Tooltip("Levels 2 and 3, in order: what each costs and the numbers the tower has afterwards.")]
-        [SerializeField] private TowerUpgrade[] _upgrades = new TowerUpgrade[0];
-
         [Tooltip("How much bigger the tower is drawn with each level, so an upgrade is visible.")]
         [SerializeField, Min(1f)] private float _scalePerLevel = 1.12f;
 
@@ -68,6 +59,11 @@ namespace HoldTheHill.Features.Towers
         private Color _baseColor = Color.white;
         private float _cooldown;
         private bool _hasAbility;
+
+        // The row of the level table this instance is on, copied once per level so the shared
+        // definition is read, never written. Until Awake (a prefab asset), the row is read on demand.
+        private TowerLevel _current;
+        private bool _hasCurrent;
 
         /// <summary>Raised after an upgrade, with the new level. The card and visuals listen.</summary>
         public event Action<int> Upgraded;
@@ -96,17 +92,26 @@ namespace HoldTheHill.Features.Towers
         /// </summary>
         public event Action AbilityUsed;
 
+        /// <summary>The data asset this tower takes its numbers from; null for a tower made without one (tests).</summary>
+        public TowerData Definition => _data;
+
+        /// <summary>The numbers at the current level: the definition's row, or <see cref="TowerLevel.Default"/> without one.</summary>
+        public TowerLevel Current => _hasCurrent ? _current : LevelAt(Level);
+
         /// <summary>How far this tower can reach, in world units.</summary>
-        public float Range => _range;
+        public float Range => Current.Range;
 
         /// <summary>Damage dealt per hit.</summary>
-        public float Damage => _damage;
+        public float Damage => Current.Damage;
 
-        /// <summary>Seconds between attacks.</summary>
-        public float FireInterval => _fireInterval;
+        /// <summary>Seconds between attacks: the level's attack interval, before any tempo.</summary>
+        public float FireInterval => Current.AttackInterval;
 
         /// <summary>Melee only: how wide the swing is, in degrees, pointed at the target. 0 is all round.</summary>
-        public float ConeDegrees => _coneDegrees;
+        public float ConeDegrees => Current.Ability.ConeDegrees;
+
+        /// <summary>The ability strength at the current level; the mine layer, the poison and the shots read it.</summary>
+        public TowerAbilitySettings Ability => Current.Ability;
 
         /// <summary>Seconds until the tower may attack again; zero when it is ready.</summary>
         public float CooldownRemaining => Mathf.Max(0f, _cooldown);
@@ -123,11 +128,11 @@ namespace HoldTheHill.Features.Towers
         /// <summary>Current level, from 1.</summary>
         public int Level { get; private set; } = 1;
 
-        /// <summary>The last level this tower can reach.</summary>
-        public int MaxLevel => 1 + _upgrades.Length;
+        /// <summary>The last level this tower can reach: the definition's row count, or 1 without one.</summary>
+        public int MaxLevel => _data != null && _data.LevelCount > 0 ? _data.LevelCount : 1;
 
         /// <summary>Honeydew for the next level, or 0 at the last level.</summary>
-        public int NextUpgradeCost => Level < MaxLevel ? _upgrades[Level - 1].Cost : 0;
+        public int NextUpgradeCost => Level < MaxLevel ? LevelAt(Level + 1).Cost : 0;
 
         /// <summary>Which enemy this tower prefers to attack. Set from the tower card.</summary>
         public TargetingPriority Priority
@@ -184,7 +189,7 @@ namespace HoldTheHill.Features.Towers
         /// </summary>
         public bool UsesTargeting => Attacks;
 
-        private bool Attacks => AttacksOnItsOwn(_hasAbility, _damage, _projectilePrefab != null);
+        private bool Attacks => AttacksOnItsOwn(_hasAbility, Damage, _projectilePrefab != null);
 
         /// <summary>
         /// The attack rule: a tower with an <see cref="ITowerAbility"/> (a mine layer or a slow aura) does
@@ -195,6 +200,18 @@ namespace HoldTheHill.Features.Towers
             return !hasAbility && (damage > 0f || hasProjectile);
         }
 
+        // The definition's row for a level (from 1), or the default row for a tower with no definition.
+        private TowerLevel LevelAt(int level)
+        {
+            return _data != null && _data.LevelCount > 0 ? _data.LevelAt(level) : TowerLevel.Default;
+        }
+
+        private void ApplyLevel(int level)
+        {
+            _current = LevelAt(level);
+            _hasCurrent = true;
+        }
+
         private void Awake()
         {
             if (_muzzle == null)
@@ -202,6 +219,12 @@ namespace HoldTheHill.Features.Towers
                 _muzzle = transform;
             }
 
+            if (_data == null)
+            {
+                Debug.LogWarning($"{name} has no Tower Data, so it uses the default numbers.", this);
+            }
+
+            ApplyLevel(Level);
             _hasAbility = GetComponent<ITowerAbility>() != null;
 
             _sprite = GetComponentInChildren<SpriteRenderer>();
@@ -245,7 +268,7 @@ namespace HoldTheHill.Features.Towers
             }
 
             // The tower attacks (Swarm Frenzy's tempo applies here; MineLayer applies it to mines).
-            _cooldown = TowerTempo.NextCooldown(_cooldown, _fireInterval, Time.deltaTime, TowerTempo.FireRateFactor);
+            _cooldown = TowerTempo.NextCooldown(_cooldown, FireInterval, Time.deltaTime, TowerTempo.FireRateFactor);
             Attack(CurrentTarget);
         }
 
@@ -293,8 +316,8 @@ namespace HoldTheHill.Features.Towers
         }
 
         /// <summary>
-        /// Moves to the next level and takes its numbers. False at the last level. The caller
-        /// (the placer) has already checked the price and paid.
+        /// Moves to the next level and takes its row of the definition. False at the last level.
+        /// The caller (the placer) has already checked the price and paid.
         /// </summary>
         public bool Upgrade()
         {
@@ -303,11 +326,8 @@ namespace HoldTheHill.Features.Towers
                 return false;
             }
 
-            TowerUpgrade next = _upgrades[Level - 1];
             Level++;
-            _range = next.Range;
-            _damage = next.Damage;
-            _fireInterval = next.FireInterval;
+            ApplyLevel(Level);
             transform.localScale *= _scalePerLevel;
 
             Upgraded?.Invoke(Level);
@@ -321,7 +341,8 @@ namespace HoldTheHill.Features.Towers
             _candidates.Clear();
 
             Vector3 here = transform.position;
-            float rangeSqr = _range * _range;
+            float range = Range;
+            float rangeSqr = range * range;
             bool reachesFlying = ReachesFlying;
             IReadOnlyList<BasicEnemy> enemies = EnemyRegistry.All;
 
@@ -361,7 +382,7 @@ namespace HoldTheHill.Features.Towers
         private void Attack(BasicEnemy target)
         {
             // A missing tower goes through the motions; its hits carry no damage.
-            float damage = _condition.HitsLand ? _damage : 0f;
+            float damage = _condition.HitsLand ? Damage : 0f;
 
             if (_projectilePrefab == null)
             {
@@ -370,10 +391,11 @@ namespace HoldTheHill.Features.Towers
                 // rule). A hit can kill and split a centipede; the list is a copy, so that is safe.
                 Vector3 here = transform.position;
                 Vector3 aim = target.transform.position - here;
+                float coneDegrees = ConeDegrees;
                 for (int i = 0; i < _inRange.Count; i++)
                 {
                     BasicEnemy enemy = _inRange[i];
-                    if (enemy == null || enemy.IsDead || !InCone(here, aim, enemy.transform.position, _coneDegrees))
+                    if (enemy == null || enemy.IsDead || !InCone(here, aim, enemy.transform.position, coneDegrees))
                     {
                         continue;
                     }
@@ -390,7 +412,7 @@ namespace HoldTheHill.Features.Towers
             }
 
             Projectile shot = Instantiate(_projectilePrefab, _muzzle.position, Quaternion.identity);
-            shot.Launch(target, damage);
+            shot.Launch(target, damage, Ability);
             Attacked?.Invoke();
         }
 
@@ -426,7 +448,7 @@ namespace HoldTheHill.Features.Towers
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.cyan;
-            Gizmos.DrawWireSphere(transform.position, _range);
+            Gizmos.DrawWireSphere(transform.position, Range);
 
             if (Application.isPlaying && CurrentTarget != null)
             {

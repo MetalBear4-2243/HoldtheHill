@@ -7,6 +7,12 @@ namespace HoldTheHill.Features.Towers
     /// <see cref="Tower"/> divides its cooldown by it in one place; the Swarm Frenzy power-up sets
     /// it for a while. A static, like the registries, so no tower needs a reference to anything.
     /// </summary>
+    /// <remarks>
+    /// What the tempo covers, on purpose: every use of a tower's attack interval, which is the
+    /// tower's own attacks and the Carpenter Ant's mine laying (<see cref="MineLayer"/>). It does
+    /// not touch how long an effect lasts or ticks (the sap puddle, the poison); those are durations,
+    /// not attack timing. The Balance Table window shows this beside each tower.
+    /// </remarks>
     public static class TowerTempo
     {
         private static float s_fireRateFactor = 1f;
@@ -16,6 +22,12 @@ namespace HoldTheHill.Features.Towers
         {
             get => s_fireRateFactor;
             set => s_fireRateFactor = Mathf.Max(1f, value);
+        }
+
+        /// <summary>The seconds between attacks under a tempo: <paramref name="interval"/> divided by the factor (never below 1).</summary>
+        public static float IntervalUnder(float interval, float fireRateFactor)
+        {
+            return interval / Mathf.Max(1f, fireRateFactor);
         }
 
         /// <summary>
@@ -31,7 +43,7 @@ namespace HoldTheHill.Features.Towers
         public static float NextCooldown(float cooldown, float interval, float deltaTime, float fireRateFactor)
         {
             float late = Mathf.Clamp(-cooldown, 0f, Mathf.Max(0f, deltaTime));
-            return interval / Mathf.Max(1f, fireRateFactor) - late;
+            return IntervalUnder(interval, fireRateFactor) - late;
         }
 
         // Domain reload is on, but clearing keeps Play mode safe if that ever changes.

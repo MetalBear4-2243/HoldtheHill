@@ -9,11 +9,13 @@ namespace HoldTheHill.Features.Towers
     /// <summary>
     /// Sticky sap left on the floor where the Sap Ant's glob lands. It splats out (the sheet's Hit
     /// row), stays as a puddle, and slows every ground enemy standing in it; then it fades and goes.
-    /// A wasp flies over it (the wasp rule). Spawned as the sap shot's hit effect.
+    /// A wasp flies over it (the wasp rule). Spawned as the sap shot's hit effect, which hands it the
+    /// Sap Ant's slow, reach and seconds at its level (<see cref="ITowerEffect"/>); the numbers on the
+    /// prefab are only used when nothing configures it.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(SpriteRenderer))]
-    public class SapPuddle : MonoBehaviour
+    public class SapPuddle : MonoBehaviour, ITowerEffect
     {
         private const string EffectName = "Sap";
         private const string OverlayKind = "Sap";
@@ -54,6 +56,31 @@ namespace HoldTheHill.Features.Towers
 
         /// <summary>Movement speed while in the sap.</summary>
         public float SlowMultiplier => _slowMultiplier;
+
+        /// <summary>How far from its centre the puddle holds enemies, in world units.</summary>
+        public float Radius => _radius;
+
+        /// <summary>Seconds the puddle lies there.</summary>
+        public float Seconds => _seconds;
+
+        /// <summary>Takes the Sap Ant's slow, reach and seconds at its level. A field at 0 keeps the prefab's own.</summary>
+        public void Configure(in TowerAbilitySettings ability)
+        {
+            if (ability.SlowMultiplier > 0f)
+            {
+                _slowMultiplier = Mathf.Clamp(ability.SlowMultiplier, 0.05f, 1f);
+            }
+
+            if (ability.AreaRadius > 0f)
+            {
+                _radius = ability.AreaRadius;
+            }
+
+            if (ability.SlowSeconds > 0f)
+            {
+                _seconds = ability.SlowSeconds;
+            }
+        }
 
         private void Awake()
         {

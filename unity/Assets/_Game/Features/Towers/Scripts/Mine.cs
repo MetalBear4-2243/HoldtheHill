@@ -28,10 +28,26 @@ namespace HoldTheHill.Features.Towers
         /// <summary>Raised when the mine goes off. The layer uses it to count its mines.</summary>
         public event System.Action<Mine> Exploded;
 
+        /// <summary>How far the blast reaches, in world units.</summary>
+        public float BlastRadius => _blastRadius;
+
         /// <summary>Arms the mine with the damage it will deal. Called by the layer.</summary>
         public void Arm(double damage)
         {
             _damage = damage;
+        }
+
+        /// <summary>
+        /// Arms the mine with the damage it will deal and the blast it reaches: the tower's area
+        /// radius at its level, or the prefab's own when <paramref name="blastRadius"/> is 0.
+        /// </summary>
+        public void Arm(double damage, float blastRadius)
+        {
+            _damage = damage;
+            if (blastRadius > 0f)
+            {
+                _blastRadius = blastRadius;
+            }
         }
 
         private void Update()
