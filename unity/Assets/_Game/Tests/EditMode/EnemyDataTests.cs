@@ -144,11 +144,20 @@ namespace HoldTheHill.Tests
 
             Assert.That(splitter, Is.Not.Null);
             Assert.That(speedUp, Is.Not.Null);
+
+            // The numbers are on the data asset; the components read them from there.
+            EnemyAbilitySettings abilities = Data("Centipede").Abilities;
+            Assert.That(abilities.Splits, Is.EqualTo(2));
+            Assert.That(abilities.SplitSizeMultiplier, Is.EqualTo(0.8f).Within(0.0001f));
+            Assert.That(abilities.SplitForwardDistance, Is.EqualTo(0.6f).Within(0.0001f));
+            Assert.That(abilities.ChildSpeedFactor, Is.EqualTo(1.25f).Within(0.0001f));
+
             Assert.That(splitter.SplitsRemaining, Is.EqualTo(2));
             Assert.That(splitter.SizeMultiplier, Is.EqualTo(0.8f).Within(0.0001f));
             Assert.That(splitter.SplitForwardDistance, Is.EqualTo(0.6f).Within(0.0001f));
             Assert.That(splitter.SplitPrefab, Is.Null, "Children are copies of the parent, so they bring every component along.");
             Assert.That(speedUp.ChildSpeedFactor, Is.EqualTo(1.25f).Within(0.0001f));
+            Assert.That(new SerializedObject(splitter).FindProperty("_splitsRemaining"), Is.Null, "the count moved to the data asset");
         }
 
         [Test]
@@ -158,11 +167,16 @@ namespace HoldTheHill.Tests
             var shield = prefab.GetComponent<RhinoBeetleShield>();
             Assert.That(shield, Is.Not.Null);
 
-            var so = new SerializedObject(shield);
-            Assert.That(so.FindProperty("_shieldCapacity").floatValue, Is.EqualTo(40f));
-            Assert.That(so.FindProperty("_shieldRegrowDelay").floatValue, Is.EqualTo(3f));
-            Assert.That(so.FindProperty("_shieldRegrowPerSecond").floatValue, Is.EqualTo(25f));
+            // 60 health plus a 40 shield, kept apart: the shield is on the data asset beside the health.
+            EnemyData data = Data("RhinoBeetle");
+            Assert.That(data.MaxHealth, Is.EqualTo(60.0));
+            Assert.That(data.Abilities.ShieldCapacity, Is.EqualTo(40f));
+            Assert.That(data.Abilities.ShieldRegrowDelay, Is.EqualTo(3f));
+            Assert.That(data.Abilities.ShieldRegrowPerSecond, Is.EqualTo(25f));
+            Assert.That(shield.Shield.Capacity, Is.EqualTo(40.0), "the component reads the data asset");
 
+            var so = new SerializedObject(shield);
+            Assert.That(so.FindProperty("_shieldCapacity"), Is.Null, "the capacity moved to the data asset");
             var visual = so.FindProperty("_shieldVisual").objectReferenceValue as SpriteRenderer;
             Assert.That(visual, Is.Not.Null, "The shield has no sprite to fade.");
             Assert.That(visual.transform.parent, Is.SameAs(prefab.transform));
@@ -176,11 +190,15 @@ namespace HoldTheHill.Tests
             var curler = prefab.GetComponent<RollyPollyCurler>();
             Assert.That(curler, Is.Not.Null);
 
+            EnemyAbilitySettings abilities = Data("RollyPolly").Abilities;
+            Assert.That(abilities.MaxCurls, Is.EqualTo(3));
+            Assert.That(abilities.RollDistance, Is.EqualTo(3f));
+            Assert.That(abilities.CurledDamageShare, Is.EqualTo(0.4f).Within(0.0001f));
+            Assert.That(abilities.CurledSpeedMultiplier, Is.EqualTo(2f));
+
+            // The look stays on the component.
             var so = new SerializedObject(curler);
-            Assert.That(so.FindProperty("_maxCurls").intValue, Is.EqualTo(3));
-            Assert.That(so.FindProperty("_rollDistance").floatValue, Is.EqualTo(3f));
-            Assert.That(so.FindProperty("_curledDamageShare").floatValue, Is.EqualTo(0.4f).Within(0.0001f));
-            Assert.That(so.FindProperty("_curledSpeedMultiplier").floatValue, Is.EqualTo(2f));
+            Assert.That(so.FindProperty("_maxCurls"), Is.Null, "the count moved to the data asset");
             Assert.That(so.FindProperty("_curledScale").floatValue, Is.EqualTo(0.75f).Within(0.0001f));
             Color tint = so.FindProperty("_curledTint").colorValue;
             Assert.That(tint.r, Is.EqualTo(0.55f).Within(0.0001f));
@@ -226,10 +244,12 @@ namespace HoldTheHill.Tests
             for (int w = 0; w < waves.waves.Count; w++)
             {
                 Wave wave = waves.waves[w];
-                Assert.That(wave.enemies, Is.Not.Empty, $"{waves.name} wave {w + 1} is empty.");
-                for (int e = 0; e < wave.enemies.Count; e++)
+                // Grouped rows unrolled plus single entries: what the spawner sends.
+                System.Collections.Generic.List<EnemySpawnEntry> entries = WaveSpawnPlan.Expand(wave);
+                Assert.That(entries, Is.Not.Empty, $"{waves.name} wave {w + 1} is empty.");
+                for (int e = 0; e < entries.Count; e++)
                 {
-                    GameObject enemyPrefab = wave.enemies[e].enemyPrefab;
+                    GameObject enemyPrefab = entries[e].enemyPrefab;
                     Assert.That(enemyPrefab, Is.Not.Null, $"{waves.name} wave {w + 1} entry {e + 1} points at nothing.");
                     Assert.That(enemyPrefab.GetComponent<BasicEnemy>(), Is.Not.Null, $"{waves.name} wave {w + 1} entry {e + 1} ({enemyPrefab.name}) is no enemy.");
                     if (requireData)

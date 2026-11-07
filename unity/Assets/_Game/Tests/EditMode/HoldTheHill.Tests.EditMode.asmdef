@@ -3,6 +3,7 @@
     "rootNamespace": "HoldTheHill.Tests",
     "references": [
         "HoldTheHill.Runtime",
+        "HoldTheHill.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
