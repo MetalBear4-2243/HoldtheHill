@@ -188,10 +188,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6abdcc5923bbdd744b8aaa49597f42a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.CentipedeSplitter
-  _splitsRemaining: 2
   _splitPrefab: {fileID: 0}
-  _sizeMultiplier: 0.8
-  _splitForwardDistance: 0.6
 --- !u!114 &7871412728667706916
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,4 +201,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7606f015a48147e6893deb1a37795f01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.CentipedeSpeedUp
-  _childSpeedFactor: 1.25

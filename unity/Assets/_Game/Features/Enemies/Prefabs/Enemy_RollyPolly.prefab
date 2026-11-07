@@ -150,9 +150,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71cdb31fbfb4fdf49940e38d6c5a4e80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.RollyPollyCurler
-  _maxCurls: 3
-  _rollDistance: 3
-  _curledDamageShare: 0.4
-  _curledSpeedMultiplier: 2
   _curledScale: 0.75
   _curledTint: {r: 0.55, g: 0.55, b: 0.65, a: 1}

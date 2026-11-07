@@ -20,3 +20,15 @@ MonoBehaviour:
   FlipSpriteFacing: 0
   IsFlying: 0
   DiesToClick: 0
+  Abilities:
+    ShieldCapacity: 40
+    ShieldRegrowDelay: 3
+    ShieldRegrowPerSecond: 25
+    MaxCurls: 0
+    RollDistance: 0
+    CurledDamageShare: 0
+    CurledSpeedMultiplier: 0
+    Splits: 0
+    SplitSizeMultiplier: 0
+    SplitForwardDistance: 0
+    ChildSpeedFactor: 0
