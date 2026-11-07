@@ -108,11 +108,14 @@ namespace HoldTheHill.Tests
         }
 
         [Test]
-        public void ASoundShooter_PassesClean()
+        public void ASoundShooter_IsFlaggedOnlyForItsMissingPrefab()
         {
             TowerData data = MakeTower(Level(100, 3f, 12f, 1.2f), Level(60, 3.3f, 18f, 1.1f), Level(90, 3.6f, 26f, 1f));
 
-            CollectionAssert.IsEmpty(BalanceValidation.CheckTower(data, Shooter));
+            List<string> problems = BalanceValidation.CheckTower(data, Shooter);
+
+            Assert.That(problems, Has.Count.EqualTo(1));
+            Assert.That(problems[0], Does.Contain("no prefab"), "a made-up asset has no prefab; its numbers are sound");
         }
 
         [Test]

@@ -103,6 +103,10 @@ namespace HoldTheHill.Features.Enemies
             if (_enemy == null)
             {
                 _enemy = GetComponent<BasicEnemy>();
+            }
+
+            if (_sprite == null)
+            {
                 _sprite = GetComponentInChildren<SpriteRenderer>();
             }
 
