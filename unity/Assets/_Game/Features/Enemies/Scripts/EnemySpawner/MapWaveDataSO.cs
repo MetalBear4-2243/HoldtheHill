@@ -20,6 +20,29 @@ public class EnemySpawnEntry
 }
 
 /// <summary>
+/// A run of identical enemies in a wave: one row for "twenty Basics, one every 1.2 s".
+/// The spawner plays a wave's groups first, then its single entries (HoldTheHill.Features.Enemies.WaveSpawnPlan).
+/// </summary>
+[Serializable]
+public class EnemySpawnGroup
+{
+    [Tooltip("The 2D enemy prefab to instantiate.")]
+    public GameObject enemyPrefab;
+
+    [Tooltip("How many of this enemy the group sends.")]
+    [Min(1)]
+    public int count = 1;
+
+    [Tooltip("Seconds between one of this group's enemies and the next.")]
+    [Min(0f)]
+    public float spawnInterval = 1f;
+
+    [Tooltip("Seconds after the group's last enemy before whatever comes next in the wave.")]
+    [Min(0f)]
+    public float delayAfter = 1f;
+}
+
+/// <summary>
 /// Represents a wave containing a sequential list of enemies.
 /// </summary>
 [Serializable]
@@ -27,6 +50,9 @@ public class Wave
 {
     [Tooltip("Name or identifier for this wave (e.g. 'Wave 1', 'Boss Wave').")]
     public string waveName = "Wave 1";
+
+    [Tooltip("Runs of identical enemies, sent in order before the single entries below. One row per run.")]
+    public List<EnemySpawnGroup> groups = new List<EnemySpawnGroup>();
 
     [Tooltip("Sequential list of enemies to spawn one at a time in this wave.")]
     public List<EnemySpawnEntry> enemies = new List<EnemySpawnEntry>();

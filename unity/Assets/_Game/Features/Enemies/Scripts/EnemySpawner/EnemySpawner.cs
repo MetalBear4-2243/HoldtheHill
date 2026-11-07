@@ -338,13 +338,15 @@ public class EnemySpawner : MonoBehaviour
     {
         currentState = SpawnerState.Spawning;
         Wave wave = activeWaves[waveIdx];
+        // Grouped rows unrolled, then the single entries (WaveSpawnPlan).
+        List<EnemySpawnEntry> entries = WaveSpawnPlan.Expand(wave);
 
-        LogProgress($"[EnemySpawner] Starting {wave.waveName} ({waveIdx + 1}/{activeWaves.Count}) with {wave.enemies.Count} enemies.");
+        LogProgress($"[EnemySpawner] Starting {wave.waveName} ({waveIdx + 1}/{activeWaves.Count}) with {entries.Count} enemies.");
         onWaveStarted?.Invoke(waveIdx + 1, activeWaves.Count);
 
-        for (int i = 0; i < wave.enemies.Count; i++)
+        for (int i = 0; i < entries.Count; i++)
         {
-            EnemySpawnEntry entry = wave.enemies[i];
+            EnemySpawnEntry entry = entries[i];
 
             if (entry != null && entry.enemyPrefab != null)
             {
