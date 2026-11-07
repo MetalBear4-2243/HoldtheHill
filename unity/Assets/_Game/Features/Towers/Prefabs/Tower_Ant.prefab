@@ -107,22 +107,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4deb3d16e7dbe49768b8986b26822e29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Towers.Tower
-  _range: 1.5
-  _damage: 8
-  _fireInterval: 0.8
+  _data: {fileID: 11400000, guid: 1d161c5ee5411bf4e93ea2221cdf000d, type: 2}
   _projectilePrefab: {fileID: 0}
   _muzzle: {fileID: 0}
-  _coneDegrees: 0
   _priority: 0
-  _upgrades:
-  - Cost: 45
-    Range: 1.6
-    Damage: 12
-    FireInterval: 0.7
-  - Cost: 70
-    Range: 1.7
-    Damage: 18
-    FireInterval: 0.6
   _scalePerLevel: 1.12
   _burrowedTint: {r: 0.5, g: 0.45, b: 0.4, a: 0.6}
   _stunnedTint: {r: 0.55, g: 0.7, b: 1, a: 1}

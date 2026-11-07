@@ -13,5 +13,42 @@ MonoBehaviour:
   m_Name: BulletAnt
   m_EditorClassIdentifier: HoldTheHill.Runtime::TowerData
   towerName: Bullet Ant
-  honeydewCost: 100
   towerIcon: {fileID: 936989453, guid: 750f8748a4cc5944a8cefc1d270037b9, type: 3}
+  _prefab: {fileID: 4765609885644046121, guid: 8925cef9ac51fb342901818f4fcccce5, type: 3}
+  _levels:
+  - Cost: 100
+    Damage: 12
+    AttackInterval: 1.2
+    Range: 3
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 0
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0
+  - Cost: 60
+    Damage: 18
+    AttackInterval: 1.1
+    Range: 3.3
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 0
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0
+  - Cost: 90
+    Damage: 26
+    AttackInterval: 1
+    Range: 3.6
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 0
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0

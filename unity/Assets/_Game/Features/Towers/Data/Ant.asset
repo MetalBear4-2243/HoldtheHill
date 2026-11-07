@@ -13,5 +13,42 @@ MonoBehaviour:
   m_Name: Ant
   m_EditorClassIdentifier: HoldTheHill.Runtime::TowerData
   towerName: Ant
-  honeydewCost: 75
   towerIcon: {fileID: 1927364485, guid: c8ba57472187f3d4694e71240951358c, type: 3}
+  _prefab: {fileID: 2237086629921735221, guid: 15267746cc01eaf4b81c7afef0f65e67, type: 3}
+  _levels:
+  - Cost: 75
+    Damage: 8
+    AttackInterval: 0.8
+    Range: 1.5
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 0
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0
+  - Cost: 45
+    Damage: 12
+    AttackInterval: 0.7
+    Range: 1.6
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 0
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0
+  - Cost: 70
+    Damage: 18
+    AttackInterval: 0.6
+    Range: 1.7
+    Ability:
+      ConeDegrees: 0
+      AreaRadius: 0
+      SlowMultiplier: 0
+      SlowSeconds: 0
+      MaxMines: 0
+      PoisonMaxStacks: 0
+      PoisonDamageShare: 0
