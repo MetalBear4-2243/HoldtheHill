@@ -9,18 +9,24 @@ namespace HoldTheHill.Features.Enemies
     /// Baseline component providing core stats, health management, status effect handling,
     /// and waypoint traversal along a coordinate path.
     /// Implements IDamageable and IHealthReadable to interact seamlessly with towers, weapons, and hazards.
+    /// Its numbers come from an <see cref="EnemyData"/> asset when it has one; its abilities are
+    /// components beside it (<see cref="IDamageModifier"/>, <see cref="IDeathHandler"/>).
     /// </summary>
     [DisallowMultipleComponent]
-    public class BasicEnemy : MonoBehaviour, IDamageable, IHealthReadable
+    public class BasicEnemy : MonoBehaviour, IDamageable, IHealthReadable, IFlyingEnemy
     {
-        [Header("Health & Combat")]
+        [Header("Data")]
+        [Tooltip("The numbers this enemy spawns with: health, damage, speed, bounty and its flags. Every enemy prefab sets one; the fallback fields below are used only without it.")]
+        [SerializeField] private EnemyData _enemyData;
+
+        [Header("Fallback: Health & Combat (used only without Enemy Data)")]
         [Tooltip("Maximum health of this enemy.")]
         [SerializeField] protected double _maxHealth = 100.0;
 
         [Tooltip("Damage dealt by this enemy (e.g. to the hill or player base upon reaching destination).")]
         [SerializeField] protected int _damage = 1;
 
-        [Header("Path & Movement")]
+        [Header("Fallback: Path & Movement (used only without Enemy Data)")]
         [Tooltip("Movement speed along the path in world units per second.")]
         [SerializeField] protected float _moveSpeed = 2f;
 
@@ -30,7 +36,7 @@ namespace HoldTheHill.Features.Enemies
         [Tooltip("Initial path coordinates in world space. Can also be assigned dynamically via SetPath().")]
         [SerializeField] protected List<Vector3> _pathCoordinates = new List<Vector3>();
 
-        [Header("Visuals")]
+        [Header("Fallback: Visuals (used only without Enemy Data)")]
         [Tooltip("If true and a SpriteRenderer is present, flips sprite on the X axis to match movement direction.")]
         [SerializeField] protected bool _flipSpriteFacing = true;
 
@@ -38,6 +44,10 @@ namespace HoldTheHill.Features.Enemies
         protected int _currentWaypointIndex;
         protected float _speedMultiplier = 1f;
         protected SpriteRenderer _spriteRenderer;
+
+        // The abilities on this object, found once: they see each hit and each death first.
+        private IDamageModifier[] _damageModifiers;
+        private IDeathHandler[] _deathHandlers;
 
         /// <summary>
         /// Internal tracking container for an active status effect (slow / DoT).
@@ -70,6 +80,9 @@ namespace HoldTheHill.Features.Enemies
         public event Action<BasicEnemy, DamageInfo, float> OnDamaged;
         public static event Action<BasicEnemy, DamageInfo, float> OnAnyDamaged;
 
+        /// <summary>The data asset this enemy spawns from, or null for one tuned on its own fields.</summary>
+        public EnemyData Data => _enemyData;
+
         /// <summary>Maximum health value as a double.</summary>
         public double MaxHealth => _maxHealth;
 
@@ -92,6 +105,21 @@ namespace HoldTheHill.Features.Enemies
 
         /// <summary>Current movement speed multiplier applied by active status effects (slows).</summary>
         public float SpeedMultiplier => _speedMultiplier;
+
+        /// <summary>Distance threshold to consider a waypoint coordinate reached.</summary>
+        public float WaypointTolerance => _waypointTolerance;
+
+        /// <summary>
+        /// Road walked so far, in world units: only its own steps along the path, not a knockback
+        /// or a teleport. An ability that counts tiles (the Rolly Polly's roll) reads this.
+        /// </summary>
+        public float DistanceWalked { get; private set; }
+
+        /// <summary>
+        /// True while this enemy is off the ground, from its data's flying flag (the Wasp rule):
+        /// melee and lobbed towers skip it. Settable, so a flyer can land.
+        /// </summary>
+        public bool IsFlying { get; set; }
 
         /// <summary>List of coordinates that this enemy follows.</summary>
         public IReadOnlyList<Vector3> PathCoordinates => _pathCoordinates;
@@ -136,9 +164,39 @@ namespace HoldTheHill.Features.Enemies
 
         protected virtual void Awake()
         {
+            ApplyData();
             _currentHealth = _maxHealth;
             _speedMultiplier = 1f;
             _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            FindAbilities();
+        }
+
+        // The data asset's numbers onto the live fields. Without an asset the fields keep what the
+        // prefab (or a test) set on them.
+        private void ApplyData()
+        {
+            if (_enemyData == null)
+            {
+                return;
+            }
+
+            _maxHealth = Math.Max(0.0, _enemyData.MaxHealth);
+            _damage = _enemyData.Damage;
+            _moveSpeed = Mathf.Max(0f, _enemyData.MoveSpeed);
+            _waypointTolerance = _enemyData.WaypointTolerance;
+            _flipSpriteFacing = _enemyData.FlipSpriteFacing;
+            IsFlying = _enemyData.IsFlying;
+        }
+
+        // Once per enemy, in Awake; also on the first hit or death of an enemy made without Awake
+        // (EditMode tests), so the abilities beside it are never skipped.
+        private void FindAbilities()
+        {
+            if (_damageModifiers == null)
+            {
+                _damageModifiers = GetComponents<IDamageModifier>();
+                _deathHandlers = GetComponents<IDeathHandler>();
+            }
         }
 
         protected virtual void Start()
@@ -277,6 +335,7 @@ namespace HoldTheHill.Features.Enemies
                 target,
                 _moveSpeed * _speedMultiplier * Time.deltaTime
             );
+            DistanceWalked += Vector3.Distance(currentPos, transform.position);
 
             UpdateFacing(target - currentPos);
 
@@ -313,8 +372,8 @@ namespace HoldTheHill.Features.Enemies
                 return;
             }
 
-            // Through the double overload, so subclasses that override it (the Rhino Beetle's shield,
-            // the Rolly Polly's curl) still see every hit; it raises the events with these details.
+            // Through the double overload, which asks the abilities beside this enemy (the Rhino
+            // Beetle's shield, the Rolly Polly's curl) and raises the events with these details.
             _pendingHit = info;
             try
             {
@@ -333,6 +392,14 @@ namespace HoldTheHill.Features.Enemies
         public virtual void TakeDamage(double damageAmount)
         {
             if (damageAmount <= 0.0 || !IsActive)
+            {
+                return;
+            }
+
+            // The abilities see the hit first: the shield soaks part of it, the curl lets a share
+            // through. A hit they take whole never lands, so it is no hit at all: no event, no flinch.
+            damageAmount = ModifyDamage(damageAmount);
+            if (damageAmount <= 0.0)
             {
                 return;
             }
@@ -560,6 +627,17 @@ namespace HoldTheHill.Features.Enemies
             OnReachedDestination();
         }
 
+        // Each ability in component order, each seeing what the one before let through.
+        private double ModifyDamage(double damage)
+        {
+            FindAbilities();
+            for (int i = 0; i < _damageModifiers.Length && damage > 0.0; i++)
+            {
+                damage = _damageModifiers[i].ModifyDamage(damage);
+            }
+            return damage;
+        }
+
         /// <summary>
         /// Invoked when health reaches zero.
         /// </summary>
@@ -568,6 +646,14 @@ namespace HoldTheHill.Features.Enemies
             if (!IsActive)
             {
                 return;
+            }
+
+            // The abilities act while it is still in the fight: the centipede splits here, so its
+            // halves are registered before anyone hears of the parent's death.
+            FindAbilities();
+            for (int i = 0; i < _deathHandlers.Length; i++)
+            {
+                _deathHandlers[i].BeforeDeath(this);
             }
 
             IsDead = true;

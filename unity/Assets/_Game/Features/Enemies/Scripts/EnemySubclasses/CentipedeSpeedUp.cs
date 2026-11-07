@@ -4,28 +4,28 @@ using UnityEngine;
 namespace HoldTheHill.Features.Enemies
 {
     /// <summary>
-    /// The Centipede boss's first mechanic, beside Jason's <see cref="CentipedeEnemy"/>, which does
-    /// the second (splitting in two on death). Listens to his <see cref="CentipedeEnemy.OnSplit"/>
+    /// The Centipede boss's first mechanic, beside the <see cref="CentipedeSplitter"/>, which does
+    /// the second (splitting in two on death). Listens to its <see cref="CentipedeSplitter.OnSplit"/>
     /// and makes every child faster than its parent, so the boss speeds up with each lost part.
     /// Also makes sure each child carries this component and a <see cref="RegisteredEnemy"/>, so
     /// grandchildren speed up too and the win check sees every part. A <see cref="Economy.Bounty"/>
     /// comes along when the children are copies of the parent (the centipede's split prefab left empty).
     /// </summary>
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(CentipedeEnemy))]
+    [RequireComponent(typeof(CentipedeSplitter))]
     public class CentipedeSpeedUp : MonoBehaviour
     {
         [Tooltip("Each child's speed is its parent's times this. 1.25 means a quarter faster per split.")]
         [SerializeField, Min(1f)] private float _childSpeedFactor = 1.25f;
 
-        private CentipedeEnemy _centipede;
+        private CentipedeSplitter _centipede;
 
         /// <summary>How much faster each child is than its parent.</summary>
         public float ChildSpeedFactor => _childSpeedFactor;
 
         private void Awake()
         {
-            _centipede = GetComponent<CentipedeEnemy>();
+            _centipede = GetComponent<CentipedeSplitter>();
         }
 
         private void OnEnable()
@@ -38,17 +38,17 @@ namespace HoldTheHill.Features.Enemies
             _centipede.OnSplit -= SpeedUpChildren;
         }
 
-        private void SpeedUpChildren(CentipedeEnemy parent, List<CentipedeEnemy> children)
+        private void SpeedUpChildren(BasicEnemy parent, List<BasicEnemy> children)
         {
             for (int i = 0; i < children.Count; i++)
             {
-                CentipedeEnemy child = children[i];
+                BasicEnemy child = children[i];
                 if (child == null)
                 {
                     continue;
                 }
 
-                // Jason's Split() has just copied the parent's speed onto the child; build on that.
+                // Split() has just copied the parent's speed onto the child; build on that.
                 child.MoveSpeed = parent.MoveSpeed * _childSpeedFactor;
                 EnsureAlphaComponents(child.gameObject);
             }
