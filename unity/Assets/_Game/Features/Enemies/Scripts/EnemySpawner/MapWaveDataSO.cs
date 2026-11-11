@@ -28,6 +28,9 @@ public class Wave
     [Tooltip("Name or identifier for this wave (e.g. 'Wave 1', 'Boss Wave').")]
     public string waveName = "Wave 1";
 
+    [Tooltip("Description of the wave (Like how Bloons gives a description of what the wave will have).")]
+    public string waveDescription = "Default Description";
+
     [Tooltip("Sequential list of enemies to spawn one at a time in this wave.")]
     public List<EnemySpawnEntry> enemies = new List<EnemySpawnEntry>();
 }
