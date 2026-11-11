@@ -20,6 +20,13 @@ namespace HoldTheHill.Features.Towers
         private float _clock;
         private float _remaining;
 
+        // A copy of the enemy (a Centipede half) copies this child but not the private renderer
+        // reference, so the copy finds its own picture again.
+        private void Awake()
+        {
+            _renderer = GetComponent<SpriteRenderer>();
+        }
+
         /// <summary>
         /// Shows the <paramref name="kind"/> overlay on <paramref name="enemy"/> for
         /// <paramref name="seconds"/> more, making it the first time. Frames are drawn at one sheet
@@ -69,9 +76,7 @@ namespace HoldTheHill.Features.Towers
                 renderer.sortingOrder = body.sortingOrder + 1;
             }
 
-            var overlay = go.AddComponent<StatusOverlay>();
-            overlay._renderer = renderer;
-            return overlay;
+            return go.AddComponent<StatusOverlay>();
         }
 
         private void Update()
