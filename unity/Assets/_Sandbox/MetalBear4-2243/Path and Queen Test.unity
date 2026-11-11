@@ -464,6 +464,7 @@ MonoBehaviour:
   inlineMapConfigs: []
   autoStartFirstWave: 1
   requireEnemiesClearedBeforeNextWave: 0
+  logProgress: 0
   onEnemySpawned:
     m_PersistentCalls:
       m_Calls: []
@@ -479,6 +480,7 @@ MonoBehaviour:
   onMapChanged:
     m_PersistentCalls:
       m_Calls: []
+  livingEnemyCount: 0
 --- !u!4 &1253484616
 Transform:
   m_ObjectHideFlags: 0
