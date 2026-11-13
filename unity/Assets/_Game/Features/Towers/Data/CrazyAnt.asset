@@ -15,3 +15,4 @@ MonoBehaviour:
   towerName: Crazy Ant
   honeydewCost: 125
   towerIcon: {fileID: 1747458572, guid: db3d33decd84e284db235e7003c75798, type: 3}
+  towerDescription: Close range ant who poisons enemies.

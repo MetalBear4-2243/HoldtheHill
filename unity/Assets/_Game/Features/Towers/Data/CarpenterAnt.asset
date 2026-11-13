@@ -15,3 +15,4 @@ MonoBehaviour:
   towerName: Carpenter Ant
   honeydewCost: 250
   towerIcon: {fileID: -1474875671, guid: 0c37c0b0c75fb6044aa91671bdcd34a9, type: 3}
+  towerDescription: Crafty ant who plants bombs on the track.
