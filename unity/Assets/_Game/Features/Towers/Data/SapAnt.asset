@@ -15,3 +15,4 @@ MonoBehaviour:
   towerName: Sap Ant
   honeydewCost: 225
   towerIcon: {fileID: 2142572427, guid: e3aaf7efcdea08d41bb2a8f93e76bc90, type: 3}
+  towerDescription: Medium range ant who slows down enemies with sap.

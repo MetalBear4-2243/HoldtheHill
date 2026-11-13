@@ -15,3 +15,4 @@ MonoBehaviour:
   towerName: Bullet Ant
   honeydewCost: 100
   towerIcon: {fileID: 936989453, guid: 750f8748a4cc5944a8cefc1d270037b9, type: 3}
+  towerDescription: Long range sniper ant.
