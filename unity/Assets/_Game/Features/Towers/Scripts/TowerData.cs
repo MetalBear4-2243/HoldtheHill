@@ -17,5 +17,7 @@ namespace HoldTheHill.Features.Towers
         public string towerName;
         public int honeydewCost;
         public Sprite towerIcon;
+
+        public string towerDescription;
     }
 }
