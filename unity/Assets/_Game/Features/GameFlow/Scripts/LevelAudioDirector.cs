@@ -201,11 +201,11 @@ namespace HoldTheHill.Features.GameFlow
 
         private void HandleRunFinished(RunOutcome outcome)
         {
-            if (outcome == RunOutcome.Victory)
+            if (outcome == RunOutcome.Won)
             {
                 _victorySfx?.Play();
             }
-            else if (outcome == RunOutcome.Defeat)
+            else if (outcome == RunOutcome.Lost)
             {
                 _defeatSfx?.Play();
             }

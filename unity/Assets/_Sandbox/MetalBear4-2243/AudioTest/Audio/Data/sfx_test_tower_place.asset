@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c0c4392dd424a2bb21f0e9b758a50ca, type: 3}
+  m_Name: sfx_test_tower_place
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Audio.SoundEffectSO
+  _clips:
+  - {fileID: 8300000, guid: 2df01aa911f894b41961819987d7cf74, type: 3}
+  - {fileID: 8300000, guid: 0ae61b90a4a6ceb489c7d29edbc55896, type: 3}
+  _mixerGroup: {fileID: 0}
+  _volume: 0.8
+  _pitchRange: {x: 0.94, y: 1.06}
+  _cooldown: 0
+  _spatialBlend: 0.35
