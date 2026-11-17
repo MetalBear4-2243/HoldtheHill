@@ -137,6 +137,94 @@ namespace HoldTheHill.Tests
                 _director.UnbindFromRun(null);
             });
         }
+
+        [Test]
+        public void WaveCompletedSfx_DoesNotPlayWhenSpawningStops_PlaysWhenLastEnemyDies()
+        {
+            SoundEffectSO waveCompletedSfx = CreateTestSound("WaveCompleted");
+            _director.WaveCompletedSfx = waveCompletedSfx;
+
+            var runObj = new GameObject("TestLevelRun");
+            var spawnerObj = new GameObject("TestSpawner");
+            var enemyPrefab = new GameObject("TestEnemyPrefab");
+            var spawnedEnemies = new List<BasicEnemy>();
+            MapWaveDataSO waveData = ScriptableObject.CreateInstance<MapWaveDataSO>();
+
+            try
+            {
+                LevelRun run = runObj.AddComponent<LevelRun>();
+                EnemySpawner spawner = spawnerObj.AddComponent<EnemySpawner>();
+                spawner.SubscribeToEvents();
+
+                BasicEnemy prefabEnemy = enemyPrefab.AddComponent<BasicEnemy>();
+                prefabEnemy.SetMaxHealth(50.0, resetCurrentHealth: true);
+
+                spawner.onEnemySpawned.AddListener(go =>
+                {
+                    BasicEnemy enemy = go.GetComponent<BasicEnemy>();
+                    enemy.SetMaxHealth(50.0, resetCurrentHealth: true);
+                    spawnedEnemies.Add(enemy);
+                });
+
+                waveData.mapId = "AudioTestMap";
+                waveData.waves = new List<Wave>
+                {
+                    new Wave
+                    {
+                        waveName = "Wave 1",
+                        enemies = new List<EnemySpawnEntry>
+                        {
+                            new EnemySpawnEntry { enemyPrefab = enemyPrefab, delayBeforeNext = 0f },
+                            new EnemySpawnEntry { enemyPrefab = enemyPrefab, delayBeforeNext = 0f }
+                        }
+                    }
+                };
+
+                var spawnerSo = new UnityEditor.SerializedObject(spawner);
+                spawnerSo.FindProperty("activeMapConfigOverride").objectReferenceValue = waveData;
+                spawnerSo.ApplyModifiedPropertiesWithoutUndo();
+                spawner.SetActiveMap("AudioTestMap");
+
+                var runSo = new UnityEditor.SerializedObject(run);
+                runSo.FindProperty("_spawner").objectReferenceValue = spawner;
+                runSo.ApplyModifiedPropertiesWithoutUndo();
+
+                _director.BindToRun(run);
+                _playedSoundCount = 0;
+                _lastPlayedSfx = null;
+
+                spawner.StartNextWave();
+
+                // Spawning is finished (onWaveCompleted fired), but enemies remain alive:
+                // the wave complete sound must NOT play yet.
+                Assert.AreEqual(0, _playedSoundCount);
+
+                // First enemy dies: still 1 living enemy, sound must NOT play yet.
+                spawnedEnemies[0].TakeDamage(100.0);
+                Assert.AreEqual(0, _playedSoundCount);
+
+                // Last enemy dies: wave complete sound MUST play now.
+                spawnedEnemies[1].TakeDamage(100.0);
+                Assert.AreEqual(1, _playedSoundCount);
+                Assert.AreSame(waveCompletedSfx, _lastPlayedSfx);
+            }
+            finally
+            {
+                _director.UnbindFromRun(runObj.GetComponent<LevelRun>());
+                foreach (var enemy in spawnedEnemies)
+                {
+                    if (enemy != null)
+                    {
+                        Object.DestroyImmediate(enemy.gameObject);
+                    }
+                }
+                Object.DestroyImmediate(enemyPrefab);
+                Object.DestroyImmediate(spawnerObj);
+                Object.DestroyImmediate(runObj);
+                Object.DestroyImmediate(waveData);
+                DestroyTestSound(waveCompletedSfx);
+            }
+        }
     }
 }
 

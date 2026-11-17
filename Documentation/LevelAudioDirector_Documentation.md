@@ -24,7 +24,7 @@
 ```mermaid
 flowchart TD
     subgraph LevelEntities["LevelRun Gameplay Systems"]
-        Spawner["EnemySpawner\n(onWaveStarted, onWaveCompleted)"]
+        Spawner["EnemySpawner\n(onWaveStarted, onWaveCleared)"]
         Queen["Queen\n(OnHealthChanged, OnGameOver)"]
         Placer["TowerPlacer\n(TowerPlaced)"]
         RunOutcome["LevelRun.Finished\n(Victory, Defeat)"]
@@ -97,7 +97,7 @@ classDiagram
 | :--- | :--- | :--- | :--- |
 | `_run` | `LevelRun` | `null` | Optional direct reference to the level run. If unassigned, automatically subscribes to `LevelRun.Started`. |
 | `_waveStartedSfx` | `SoundEffectSO` | `null` | Triggered when a wave begins (`onWaveStarted`). |
-| `_waveCompletedSfx` | `SoundEffectSO` | `null` | Triggered when a wave completes (`onWaveCompleted`). |
+| `_waveCompletedSfx` | `SoundEffectSO` | `null` | Triggered when all enemies in a wave are cleared (`onWaveCleared`). |
 | `_queenDamagedSfx` | `SoundEffectSO` | `null` | Triggered when the Queen's health drops (`OnHealthChanged` where $\Delta \text{HP} < 0$). |
 | `_victorySfx` | `SoundEffectSO` | `null` | Triggered when the run outcome is `RunOutcome.Victory`. |
 | `_defeatSfx` | `SoundEffectSO` | `null` | Triggered when the run outcome is `RunOutcome.Defeat`. |
@@ -143,3 +143,4 @@ The director's behavior is verified by [LevelAudioDirectorTests.cs](file:///c:/U
 | `BossAppeared_PlaysBossAppearedSfx` | Verifies boss appearance event triggers playback. |
 | `Disabled_Director_DoesNotListenToStaticEvents` | Verifies that disabling the component cleans up listeners and prevents zombie event processing. |
 | `UnbindFromRun_HandlesNullSafely` | Asserts null-safety when unbinding from null runs or uninitialized states. |
+| `WaveCompletedSfx_DoesNotPlayWhenSpawningStops_PlaysWhenLastEnemyDies` | Verifies `_waveCompletedSfx` stays silent when spawning ends and plays only once the last enemy dies. |

@@ -77,7 +77,8 @@ stateDiagram-v2
 | :--- | :--- | :--- | :--- |
 | `onEnemySpawned` | `UnityEvent<GameObject>` | Right after an enemy is instantiated. | Minimap tracking, registering enemy with defense towers, spawn SFX. |
 | `onWaveStarted` | `UnityEvent<int, int>` | At the start of a wave `(currentWaveNum, totalWaves)`. | Updating HUD text (e.g., *"Wave 2 / 10"*), playing wave start horn. |
-| `onWaveCompleted` | `UnityEvent<int>` | When the last enemy of a wave finishes spawning `(completedWaveNum)`. | Re-enabling the "Next Wave" button, wave clear bonus audio. |
+| `onWaveCompleted` | `UnityEvent<int>` | When the last enemy of a wave finishes spawning `(completedWaveNum)`. | Re-enabling the "Next Wave" button, wave-spawned Honeydew reward. |
+| `onWaveCleared` | `UnityEvent<int>` | When all entries in a wave have finished spawning and no living enemies remain `(clearedWaveNum)`. | Wave clear audio cue (`LevelAudioDirector`). |
 | `onAllWavesCompleted` | `UnityEvent` | When the final wave on the map finishes. | Triggering the Victory screen, unlocking the next map. |
 | `onMapChanged` | `UnityEvent<string>` | When switching active maps via `SetActiveMap`. | Updating map title HUD, changing background music. |
 

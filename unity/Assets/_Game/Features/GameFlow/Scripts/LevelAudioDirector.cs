@@ -128,7 +128,7 @@ namespace HoldTheHill.Features.GameFlow
             if (run.Spawner != null)
             {
                 run.Spawner.onWaveStarted.AddListener(HandleWaveStarted);
-                run.Spawner.onWaveCompleted.AddListener(HandleWaveCompleted);
+                run.Spawner.onWaveCleared.AddListener(HandleWaveCleared);
             }
 
             if (run.Queen != null)
@@ -164,7 +164,7 @@ namespace HoldTheHill.Features.GameFlow
             if (run.Spawner != null)
             {
                 run.Spawner.onWaveStarted.RemoveListener(HandleWaveStarted);
-                run.Spawner.onWaveCompleted.RemoveListener(HandleWaveCompleted);
+                run.Spawner.onWaveCleared.RemoveListener(HandleWaveCleared);
             }
 
             if (run.Queen != null)
@@ -185,8 +185,13 @@ namespace HoldTheHill.Features.GameFlow
             _waveStartedSfx?.Play();
         }
 
-        private void HandleWaveCompleted(int completedWaveNumber)
+        private void HandleWaveCleared(int clearedWaveNumber)
         {
+            if (_boundRun != null && (_boundRun.Outcome != RunOutcome.Playing || (_boundRun.Queen != null && _boundRun.Queen.IsGameOver)))
+            {
+                return;
+            }
+
             _waveCompletedSfx?.Play();
         }
 
