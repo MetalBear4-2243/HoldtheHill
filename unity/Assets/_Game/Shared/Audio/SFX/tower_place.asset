@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c0c4392dd424a2bb21f0e9b758a50ca, type: 3}
   m_Name: tower_place
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Audio.SoundEffectSO
-  _clips: []
+  _clips:
+  - {fileID: 8300000, guid: 419d5785b796d874c93acc19ef0b8e8b, type: 3}
+  - {fileID: 8300000, guid: 73dd83d8b42c64349b72c0c95655d714, type: 3}
   _mixerGroup: {fileID: 0}
   _volume: 1
   _pitchRange: {x: 0.95, y: 1.05}

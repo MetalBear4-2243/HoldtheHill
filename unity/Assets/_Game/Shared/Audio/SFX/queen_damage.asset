@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c0c4392dd424a2bb21f0e9b758a50ca, type: 3}
   m_Name: queen_damage
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Audio.SoundEffectSO
-  _clips: []
+  _clips:
+  - {fileID: 8300000, guid: 9db0931d65290d84f95dc3e7f4b2eb0a, type: 3}
+  - {fileID: 8300000, guid: c77b29d1455ee7c49b7bbb5b84702068, type: 3}
   _mixerGroup: {fileID: 0}
   _volume: 1
   _pitchRange: {x: 0.95, y: 1.05}

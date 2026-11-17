@@ -206,6 +206,7 @@ MonoBehaviour:
   _blockedCellColor: {r: 1, g: 0.3, b: 0.3, a: 0.35}
   _unaffordableColor: {r: 1, g: 0.8, b: 0.2, a: 0.35}
   _selectionColor: {r: 0.4, g: 0.9, b: 1, a: 0.45}
+  _rangeColor: {r: 1, g: 1, b: 1, a: 0.55}
 --- !u!4 &491186563
 Transform:
   m_ObjectHideFlags: 0
@@ -248,7 +249,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!114 &519420030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -522,6 +523,7 @@ GameObject:
   - component: {fileID: 947532756}
   - component: {fileID: 947532755}
   - component: {fileID: 947532754}
+  - component: {fileID: 947532757}
   m_Layer: 0
   m_Name: Level Run
   m_TagString: Untagged
@@ -575,6 +577,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &947532757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 947532753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6c26d6bf56b4b05bd55a68f908f0238, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.GameFlow.LevelAudioDirector
+  _run: {fileID: 947532755}
+  _waveStartedSfx: {fileID: 11400000, guid: 49274e8ce495f9d45972587b12cad38a, type: 2}
+  _waveCompletedSfx: {fileID: 11400000, guid: f0754c56294cc0d4aa4f79f8e8986ca3, type: 2}
+  _queenDamagedSfx: {fileID: 11400000, guid: 45c40b896510ca147a544bb9acf6b577, type: 2}
+  _victorySfx: {fileID: 11400000, guid: 20b658fcfd29a6b408f2eb6d73a609c5, type: 2}
+  _defeatSfx: {fileID: 11400000, guid: fd5e11e1dc5aa2d40b2f52740a6f6339, type: 2}
+  _bossAppearedSfx: {fileID: 11400000, guid: 930649276e1edc64aa215a8e9508b9ca, type: 2}
+  _centipedeSplitSfx: {fileID: 11400000, guid: 3a1afe4297e280d46b2330f7f223bf46, type: 2}
+  _towerPlacedSfx: {fileID: 11400000, guid: 557b056353339c84ea4cae94d545088e, type: 2}
 --- !u!1 &1456482059
 GameObject:
   m_ObjectHideFlags: 0
@@ -612,7 +635,8 @@ MonoBehaviour:
   scriptableMapConfigs: []
   inlineMapConfigs: []
   autoStartFirstWave: 0
-  requireEnemiesClearedBeforeNextWave: 0
+  requireEnemiesClearedBeforeNextWave: 1
+  logProgress: 0
   onEnemySpawned:
     m_PersistentCalls:
       m_Calls: []
@@ -628,6 +652,7 @@ MonoBehaviour:
   onMapChanged:
     m_PersistentCalls:
       m_Calls: []
+  livingEnemyCount: 0
 --- !u!4 &1456482061
 Transform:
   m_ObjectHideFlags: 0
