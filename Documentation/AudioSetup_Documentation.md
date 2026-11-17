@@ -109,6 +109,39 @@ Macro sounds are managed by `LevelAudioDirector` and cover game-wide milestones.
    * Scans for matching `SoundEffectSO` assets (matching names like `wave_start`, `queen_damage`, etc.) and auto-assigns unassigned slots.
 3. Saves all scenes and leaves `Bootstrap.unity` open ready for Play mode.
 
+### File Names Automatically Matched by AlphaAudioSetupBuilder
+
+When running `Tools > Hold the Hill > Alpha > Setup Audio (Manager and Directors)`, the builder scans the project using `AssetDatabase.FindAssets` and automatically populates any unassigned slots on `LevelAudioDirector` and `AudioManager`.
+
+Matching is **case-insensitive** (using `ToLowerInvariant()`) and uses **substring containment** (`name.Contains(...)`). As long as your `SoundEffectSO` asset filename contains one of the recognized substrings, it will be automatically discovered and wired into the corresponding slot:
+
+#### 1. Level Audio Director (`SoundEffectSO` Slots)
+
+| Director Slot Property | Substring Keywords Matched | Recommended Asset Filename (`SoundEffectSO`) | Companion Audio Clip (`.wav`) | Trigger Event |
+| :--- | :--- | :--- | :--- | :--- |
+| `_waveStartedSfx` | `wave_start`<br>`wavestart` | `sfx_wave_start.asset`<br>`sfx_wavestart.asset`<br>`sfx_wave_start_01.asset` | `sfx_wave_start_01.wav` | Wave begins spawning (`EnemySpawner.onWaveStarted`) |
+| `_waveCompletedSfx` | `wave_clear`<br>`waveclear`<br>`wave_complete` | `sfx_wave_clear.asset`<br>`sfx_waveclear.asset`<br>`sfx_wave_complete.asset` | `sfx_wave_clear_01.wav` | Wave defeated & cooldown starts (`EnemySpawner.onWaveCleared`) |
+| `_queenDamagedSfx` | `queen_damage`<br>`queen_hurt`<br>`queendamage` | `sfx_queen_damage.asset`<br>`sfx_queen_hurt.asset`<br>`sfx_queendamage.asset` | `sfx_queen_damage_01.wav`<br>`sfx_queen_damage_02.wav` | Queen takes damage from arriving enemies (`Queen.HealthChanged`) |
+| `_victorySfx` | `victory`<br>`win` | `sfx_victory.asset`<br>`sfx_win.asset`<br>`sfx_victory_fanfare.asset` | `sfx_victory_01.wav` | Level cleared with Queen intact (`LevelRun.Finished` with `Won`) |
+| `_defeatSfx` | `defeat`<br>`lose`<br>`game_over` | `sfx_defeat.asset`<br>`sfx_lose.asset`<br>`sfx_game_over.asset` | `sfx_defeat_01.wav` | Queen health reaches 0 (`LevelRun.Finished` with `Lost`) |
+| `_bossAppearedSfx` | `boss`<br>`mantis` | `sfx_boss_appear.asset`<br>`sfx_mantis_appear.asset`<br>`sfx_boss_intro.asset` | `sfx_boss_appear_01.wav` | Boss enemy spawns into level (`BasicEnemy.OnAnyEnemiesSpawned`) |
+| `_centipedeSplitSfx` | `centipede`<br>`split` | `sfx_centipede_split.asset`<br>`sfx_split.asset`<br>`sfx_centipede_divide.asset` | `sfx_centipede_split_01.wav` | Centipede divides into child segments (`CentipedeEnemy.OnAnyCentipedeSplit`) |
+| `_towerPlacedSfx` | `tower_place`<br>`towerplace`<br>`place_tower` | `sfx_tower_place.asset`<br>`sfx_towerplace.asset`<br>`sfx_place_tower.asset` | `sfx_tower_place_01.wav`<br>`sfx_tower_place_02.wav` | Tower placed on the grid (`TowerPlacer.TowerPlaced`) |
+
+#### 2. Audio Manager (`AudioMixer` & Buses)
+
+| Manager Slot Property | Asset Query Filter | Matched Asset / Group Name | Purpose |
+| :--- | :--- | :--- | :--- |
+| `_mixer` | `t:AudioMixer` | `MainMixer.mixer` (first matching mixer found in project) | Primary AudioMixer controlling volume attenuation |
+| `_sfxGroup` | `mixer.FindMatchingGroups("SFX")` | AudioMixerGroup named `SFX` | Sound effects bus routed to `AudioManager` |
+| `_musicGroup` | `mixer.FindMatchingGroups("Music")` | AudioMixerGroup named `Music` | Music bus routed to `AudioManager` |
+
+> [!NOTE]
+> **Key Rules for Automatic Matching:**
+> - **ScriptableObject Assets Only:** The builder searches for serialized `SoundEffectSO` assets (`.asset`), not raw `.wav` clips. Create the `.asset` card first via **Create > Hold the Hill > Audio > Sound Effect** and assign your `.wav` clip(s) to it.
+> - **Non-Destructive:** The builder never overwrites a slot that is already assigned (`prop.objectReferenceValue == null`). If you manually assigned a custom asset, your selection is preserved.
+> - **First Match Wins:** If multiple assets match the same keyword, the first match encountered in `AssetDatabase.FindAssets` is bound. To prevent ambiguity, use the recommended naming patterns above in `Assets/_Game/Shared/Audio/Data/`.
+
 ### Method B: Manual Setup in Level Scenes
 If configuring by hand in a level gameplay scene:
 1. Open the level's gameplay scene (e.g. `L00_TutorialHill_Gameplay.unity`).
