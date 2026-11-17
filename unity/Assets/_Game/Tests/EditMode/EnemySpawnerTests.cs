@@ -223,5 +223,209 @@ namespace HoldTheHill.Tests
 
             Assert.That(_spawner.LivingEnemyCount, Is.EqualTo(0));
         }
+
+        [Test]
+        public void WaveCleared_DoesNotFireWhenSpawningStops_FiresWhenLastEnemyDies()
+        {
+            var spawnedEnemies = new List<BasicEnemy>();
+            _spawner.onEnemySpawned.AddListener(go =>
+            {
+                _spawnedObjects.Add(go);
+                BasicEnemy enemy = go.GetComponent<BasicEnemy>();
+                enemy.SetMaxHealth(50.0, resetCurrentHealth: true);
+                spawnedEnemies.Add(enemy);
+            });
+
+            int completedCount = 0;
+            int clearedCount = 0;
+            int lastClearedWave = 0;
+            _spawner.onWaveCompleted.AddListener(_ => completedCount++);
+            _spawner.onWaveCleared.AddListener(wave =>
+            {
+                clearedCount++;
+                lastClearedWave = wave;
+            });
+
+            MapWaveDataSO waveData = ScriptableObject.CreateInstance<MapWaveDataSO>();
+            waveData.mapId = "TestMap";
+            waveData.waves = new List<Wave>
+            {
+                new Wave
+                {
+                    waveName = "Wave 1",
+                    enemies = new List<EnemySpawnEntry>
+                    {
+                        new EnemySpawnEntry { enemyPrefab = _enemyPrefab, delayBeforeNext = 0f },
+                        new EnemySpawnEntry { enemyPrefab = _enemyPrefab, delayBeforeNext = 0f }
+                    }
+                }
+            };
+
+            try
+            {
+                var spawnerSo = new UnityEditor.SerializedObject(_spawner);
+                spawnerSo.FindProperty("activeMapConfigOverride").objectReferenceValue = waveData;
+                spawnerSo.ApplyModifiedPropertiesWithoutUndo();
+                _spawner.SetActiveMap("TestMap");
+
+                _spawner.StartNextWave();
+
+                // Spawning has completed, but enemies are still alive.
+                Assert.That(completedCount, Is.EqualTo(1));
+                Assert.That(clearedCount, Is.EqualTo(0));
+                Assert.That(spawnedEnemies.Count, Is.EqualTo(2));
+
+                // Killing the first enemy must not clear the wave.
+                spawnedEnemies[0].TakeDamage(100.0);
+                Assert.That(clearedCount, Is.EqualTo(0));
+                Assert.That(_spawner.LivingEnemyCount, Is.EqualTo(1));
+
+                // Killing the last enemy clears the wave.
+                spawnedEnemies[1].TakeDamage(100.0);
+                Assert.That(_spawner.LivingEnemyCount, Is.EqualTo(0));
+                Assert.That(clearedCount, Is.EqualTo(1));
+                Assert.That(lastClearedWave, Is.EqualTo(1));
+            }
+            finally
+            {
+                Object.DestroyImmediate(waveData);
+            }
+        }
+
+        [Test]
+        public void WaveCleared_WaitsForCentipedeSplitChildrenToDie()
+        {
+            var centipedePrefab = new GameObject("TestCentipedeWavePrefab");
+            centipedePrefab.AddComponent<CentipedeEnemy>();
+            _spawnedObjects.Add(centipedePrefab);
+
+            var spawnedCentipedes = new List<CentipedeEnemy>();
+            _spawner.onEnemySpawned.AddListener(go =>
+            {
+                _spawnedObjects.Add(go);
+                CentipedeEnemy c = go.GetComponent<CentipedeEnemy>();
+                c.SetMaxHealth(20.0, resetCurrentHealth: true);
+                c.SplitsRemaining = 1;
+                spawnedCentipedes.Add(c);
+            });
+
+            int clearedCount = 0;
+            _spawner.onWaveCleared.AddListener(_ => clearedCount++);
+
+            MapWaveDataSO waveData = ScriptableObject.CreateInstance<MapWaveDataSO>();
+            waveData.mapId = "TestCentipedeMap";
+            waveData.waves = new List<Wave>
+            {
+                new Wave
+                {
+                    waveName = "Wave 1",
+                    enemies = new List<EnemySpawnEntry>
+                    {
+                        new EnemySpawnEntry { enemyPrefab = centipedePrefab, delayBeforeNext = 0f }
+                    }
+                }
+            };
+
+            try
+            {
+                var spawnerSo = new UnityEditor.SerializedObject(_spawner);
+                spawnerSo.FindProperty("activeMapConfigOverride").objectReferenceValue = waveData;
+                spawnerSo.ApplyModifiedPropertiesWithoutUndo();
+                _spawner.SetActiveMap("TestCentipedeMap");
+
+                _spawner.StartNextWave();
+                Assert.That(clearedCount, Is.EqualTo(0));
+
+                // Kill parent: splits into 2 children -> wave is NOT cleared yet.
+                spawnedCentipedes[0].TakeDamage(50.0);
+                Assert.That(_spawner.LivingEnemyCount, Is.EqualTo(2));
+                Assert.That(clearedCount, Is.EqualTo(0));
+
+                CentipedeEnemy[] children = Object.FindObjectsByType<CentipedeEnemy>(FindObjectsSortMode.None);
+                var liveChildren = new List<CentipedeEnemy>();
+                foreach (var c in children)
+                {
+                    if (c.gameObject != centipedePrefab && c.IsActive)
+                    {
+                        _spawnedObjects.Add(c.gameObject);
+                        liveChildren.Add(c);
+                    }
+                }
+                Assert.That(liveChildren.Count, Is.EqualTo(2));
+
+                liveChildren[0].TakeDamage(50.0);
+                Assert.That(clearedCount, Is.EqualTo(0));
+
+                liveChildren[1].TakeDamage(50.0);
+                Assert.That(_spawner.LivingEnemyCount, Is.EqualTo(0));
+                Assert.That(clearedCount, Is.EqualTo(1));
+            }
+            finally
+            {
+                Object.DestroyImmediate(waveData);
+            }
+        }
+
+        [Test]
+        public void WaveCleared_WaitsForExternalRegisteredEnemies()
+        {
+            _enemyPrefab.AddComponent<RegisteredEnemy>();
+
+            var spawnedEnemies = new List<BasicEnemy>();
+            _spawner.onEnemySpawned.AddListener(go =>
+            {
+                _spawnedObjects.Add(go);
+                BasicEnemy enemy = go.GetComponent<BasicEnemy>();
+                enemy.SetMaxHealth(20.0, resetCurrentHealth: true);
+                spawnedEnemies.Add(enemy);
+            });
+
+            int clearedCount = 0;
+            _spawner.onWaveCleared.AddListener(_ => clearedCount++);
+
+            MapWaveDataSO waveData = ScriptableObject.CreateInstance<MapWaveDataSO>();
+            waveData.mapId = "TestRegisteredMap";
+            waveData.waves = new List<Wave>
+            {
+                new Wave
+                {
+                    waveName = "Wave 1",
+                    enemies = new List<EnemySpawnEntry>
+                    {
+                        new EnemySpawnEntry { enemyPrefab = _enemyPrefab, delayBeforeNext = 0f }
+                    }
+                }
+            };
+
+            try
+            {
+                var spawnerSo = new UnityEditor.SerializedObject(_spawner);
+                spawnerSo.FindProperty("activeMapConfigOverride").objectReferenceValue = waveData;
+                spawnerSo.ApplyModifiedPropertiesWithoutUndo();
+                _spawner.SetActiveMap("TestRegisteredMap");
+
+                _spawner.StartNextWave();
+
+                // Simulate an escort/husk spawned directly outside EnemySpawner.
+                GameObject externalObj = Object.Instantiate(_enemyPrefab);
+                _spawnedObjects.Add(externalObj);
+                BasicEnemy externalEnemy = externalObj.GetComponent<BasicEnemy>();
+                externalEnemy.SetMaxHealth(20.0, resetCurrentHealth: true);
+
+                // Killing only the spawner-tracked enemy drops LivingEnemyCount to 0,
+                // but the external registered enemy is still active, so wave is not cleared yet.
+                spawnedEnemies[0].TakeDamage(50.0);
+                Assert.That(_spawner.LivingEnemyCount, Is.EqualTo(0));
+                Assert.That(clearedCount, Is.EqualTo(0));
+
+                // Killing the external registered enemy clears the wave.
+                externalEnemy.TakeDamage(50.0);
+                Assert.That(clearedCount, Is.EqualTo(1));
+            }
+            finally
+            {
+                Object.DestroyImmediate(waveData);
+            }
+        }
     }
 }

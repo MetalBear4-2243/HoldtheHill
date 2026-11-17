@@ -64,6 +64,9 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("Invoked when all enemies in the current wave have finished spawning. Passes (completedWaveNumber).")]
     public UnityEvent<int> onWaveCompleted;
 
+    [Tooltip("Invoked when all enemies in the current wave have finished spawning and no living enemies remain. Passes (clearedWaveNumber).")]
+    public UnityEvent<int> onWaveCleared = new UnityEvent<int>();
+
     [Tooltip("Invoked when all waves for the active map have been finished.")]
     public UnityEvent onAllWavesCompleted;
 
@@ -73,6 +76,9 @@ public class EnemySpawner : MonoBehaviour
     // Runtime state
     private SpawnerState currentState = SpawnerState.Idle;
     private int currentWaveIndex = 0;
+    private int activeWaveNumber = 0;
+    private bool allEntriesSpawnedForActiveWave = false;
+    private bool waveClearPending = false;
     private List<Wave> activeWaves = new List<Wave>();
     private Coroutine spawnCoroutine;
     private readonly List<GameObject> activeLivingEnemies = new List<GameObject>();
@@ -102,6 +108,9 @@ public class EnemySpawner : MonoBehaviour
             defaultSpawnPoint = transform;
         }
         livingEnemyCount = 0;
+        activeWaveNumber = 0;
+        allEntriesSpawnedForActiveWave = false;
+        waveClearPending = false;
         activeLivingEnemies.Clear();
     }
 
@@ -142,7 +151,7 @@ public class EnemySpawner : MonoBehaviour
 
     /// <summary>
     /// Event handler invoked when any enemy dies.
-    /// Decrements the live enemy counter.
+    /// Decrements the live enemy counter and checks whether the wave has been cleared.
     /// </summary>
     public void HandleEnemyDied(BasicEnemy enemy)
     {
@@ -151,11 +160,13 @@ public class EnemySpawner : MonoBehaviour
         {
             activeLivingEnemies.Remove(enemy.gameObject);
         }
+
+        TryInvokeWaveCleared();
     }
 
     /// <summary>
     /// Event handler invoked when an enemy completes its path to the destination.
-    /// Decrements the live enemy counter.
+    /// Decrements the live enemy counter and checks whether the wave has been cleared.
     /// </summary>
     public void HandleEnemyDestinationReached(BasicEnemy enemy)
     {
@@ -164,6 +175,8 @@ public class EnemySpawner : MonoBehaviour
         {
             activeLivingEnemies.Remove(enemy.gameObject);
         }
+
+        TryInvokeWaveCleared();
     }
 
     /// <summary>
@@ -227,6 +240,9 @@ public class EnemySpawner : MonoBehaviour
         activeMapId = mapId;
         LoadMapConfiguration(activeMapId);
         currentWaveIndex = 0;
+        activeWaveNumber = 0;
+        allEntriesSpawnedForActiveWave = false;
+        waveClearPending = false;
         currentState = SpawnerState.Idle;
         activeLivingEnemies.Clear();
         livingEnemyCount = 0;
@@ -338,9 +354,13 @@ public class EnemySpawner : MonoBehaviour
     {
         currentState = SpawnerState.Spawning;
         Wave wave = activeWaves[waveIdx];
+        int completedWaveNumber = waveIdx + 1;
+        activeWaveNumber = completedWaveNumber;
+        allEntriesSpawnedForActiveWave = false;
+        waveClearPending = true;
 
-        LogProgress($"[EnemySpawner] Starting {wave.waveName} ({waveIdx + 1}/{activeWaves.Count}) with {wave.enemies.Count} enemies.");
-        onWaveStarted?.Invoke(waveIdx + 1, activeWaves.Count);
+        LogProgress($"[EnemySpawner] Starting {wave.waveName} ({completedWaveNumber}/{activeWaves.Count}) with {wave.enemies.Count} enemies.");
+        onWaveStarted?.Invoke(completedWaveNumber, activeWaves.Count);
 
         for (int i = 0; i < wave.enemies.Count; i++)
         {
@@ -355,6 +375,12 @@ public class EnemySpawner : MonoBehaviour
                 Debug.LogWarning($"[EnemySpawner] Wave '{wave.waveName}' entry #{i} has no enemy prefab assigned.");
             }
 
+            if (i == wave.enemies.Count - 1)
+            {
+                allEntriesSpawnedForActiveWave = true;
+                TryInvokeWaveCleared();
+            }
+
             // Pause before the next enemy (or wait interval after the last enemy)
             if (entry != null && entry.delayBeforeNext > 0f)
             {
@@ -362,8 +388,9 @@ public class EnemySpawner : MonoBehaviour
             }
         }
 
+        allEntriesSpawnedForActiveWave = true;
+
         // Wave spawning complete: mark wave as finished and pause
-        int completedWaveNumber = waveIdx + 1;
         currentWaveIndex++;
 
         LogProgress($"[EnemySpawner] Finished spawning {wave.waveName}. Pausing spawner until next wave is prompted.");
@@ -382,6 +409,7 @@ public class EnemySpawner : MonoBehaviour
         }
 
         spawnCoroutine = null;
+        TryInvokeWaveCleared();
     }
 
     /// <summary>
@@ -452,9 +480,41 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
+    private bool HasLivingEnemies()
+    {
+        if (livingEnemyCount > 0)
+        {
+            return true;
+        }
+
+        IReadOnlyList<BasicEnemy> registered = EnemyRegistry.All;
+        for (int i = 0; i < registered.Count; i++)
+        {
+            BasicEnemy enemy = registered[i];
+            if (enemy != null && enemy.IsActive)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void TryInvokeWaveCleared()
+    {
+        if (!waveClearPending || !allEntriesSpawnedForActiveWave || HasLivingEnemies())
+        {
+            return;
+        }
+
+        waveClearPending = false;
+        LogProgress($"[EnemySpawner] Wave {activeWaveNumber} cleared (all living enemies defeated).");
+        onWaveCleared?.Invoke(activeWaveNumber);
+    }
+
     /// <summary>
     /// Allows external enemy logic (or health components) to notify the spawner when an enemy dies.
-    /// Decrements the living enemy counter.
+    /// Decrements the living enemy counter and checks whether the wave has been cleared.
     /// </summary>
     public void NotifyEnemyDefeated(GameObject enemy)
     {
@@ -462,6 +522,7 @@ public class EnemySpawner : MonoBehaviour
         {
             activeLivingEnemies.Remove(enemy);
             livingEnemyCount = Mathf.Max(0, livingEnemyCount - 1);
+            TryInvokeWaveCleared();
         }
     }
 
@@ -476,6 +537,8 @@ public class EnemySpawner : MonoBehaviour
             spawnCoroutine = null;
         }
 
+        allEntriesSpawnedForActiveWave = false;
+        waveClearPending = false;
         currentState = SpawnerState.Idle;
     }
 }
