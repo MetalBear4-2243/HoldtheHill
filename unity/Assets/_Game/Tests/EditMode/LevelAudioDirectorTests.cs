@@ -225,6 +225,152 @@ namespace HoldTheHill.Tests
                 DestroyTestSound(waveCompletedSfx);
             }
         }
+
+        [Test]
+        public void WaveCompletedSfx_PlaysWhenSpawningFinishes_WhenPlayOnWaveClearedFalse()
+        {
+            SoundEffectSO waveCompletedSfx = CreateTestSound("WaveCompleted");
+            _director.WaveCompletedSfx = waveCompletedSfx;
+            _director.PlayOnWaveCleared = false;
+
+            var runObj = new GameObject("TestLevelRun");
+            var spawnerObj = new GameObject("TestSpawner");
+            var enemyPrefab = new GameObject("TestEnemyPrefab");
+            var spawnedEnemies = new List<BasicEnemy>();
+            MapWaveDataSO waveData = ScriptableObject.CreateInstance<MapWaveDataSO>();
+
+            try
+            {
+                LevelRun run = runObj.AddComponent<LevelRun>();
+                EnemySpawner spawner = spawnerObj.AddComponent<EnemySpawner>();
+                spawner.SubscribeToEvents();
+
+                BasicEnemy prefabEnemy = enemyPrefab.AddComponent<BasicEnemy>();
+                prefabEnemy.SetMaxHealth(50.0, resetCurrentHealth: true);
+
+                spawner.onEnemySpawned.AddListener(go =>
+                {
+                    BasicEnemy enemy = go.GetComponent<BasicEnemy>();
+                    enemy.SetMaxHealth(50.0, resetCurrentHealth: true);
+                    spawnedEnemies.Add(enemy);
+                });
+
+                waveData.mapId = "AudioTestMap";
+                waveData.waves = new List<Wave>
+                {
+                    new Wave
+                    {
+                        waveName = "Wave 1",
+                        enemies = new List<EnemySpawnEntry>
+                        {
+                            new EnemySpawnEntry { enemyPrefab = enemyPrefab, delayBeforeNext = 0f }
+                        }
+                    }
+                };
+
+                var spawnerSo = new UnityEditor.SerializedObject(spawner);
+                spawnerSo.FindProperty("activeMapConfigOverride").objectReferenceValue = waveData;
+                spawnerSo.ApplyModifiedPropertiesWithoutUndo();
+                spawner.SetActiveMap("AudioTestMap");
+
+                var runSo = new UnityEditor.SerializedObject(run);
+                runSo.FindProperty("_spawner").objectReferenceValue = spawner;
+                runSo.ApplyModifiedPropertiesWithoutUndo();
+
+                _director.BindToRun(run);
+                _playedSoundCount = 0;
+                _lastPlayedSfx = null;
+
+                // Spawning finished immediately since delayBeforeNext = 0:
+                spawner.StartNextWave();
+
+                // With PlayOnWaveCleared = false, onWaveCompleted triggers the sound right when spawning finishes:
+                Assert.AreEqual(1, _playedSoundCount);
+                Assert.AreSame(waveCompletedSfx, _lastPlayedSfx);
+            }
+            finally
+            {
+                _director.UnbindFromRun(runObj.GetComponent<LevelRun>());
+                foreach (var enemy in spawnedEnemies)
+                {
+                    if (enemy != null)
+                    {
+                        Object.DestroyImmediate(enemy.gameObject);
+                    }
+                }
+                Object.DestroyImmediate(enemyPrefab);
+                Object.DestroyImmediate(spawnerObj);
+                Object.DestroyImmediate(runObj);
+                Object.DestroyImmediate(waveData);
+                DestroyTestSound(waveCompletedSfx);
+            }
+        }
+
+        [Test]
+        public void BindToRun_PlaysMusic_WhenAudioManagerPresent()
+        {
+            var audioMgrObj = new GameObject("TestAudioManager");
+            var audioMgr = audioMgrObj.AddComponent<AudioManager>();
+
+            var runObj = new GameObject("TestRun");
+            var run = runObj.AddComponent<LevelRun>();
+
+            var musicClip = AudioClip.Create("TestLevelMusic", 44100, 1, 44100, false);
+            _director.LevelMusic = musicClip;
+            _director.MusicFadeDuration = 0f;
+
+            try
+            {
+                _director.BindToRun(run);
+
+                Assert.IsNotNull(audioMgr.CurrentMusicSource);
+                Assert.AreSame(musicClip, audioMgr.CurrentMusicSource.clip);
+                Assert.IsTrue(audioMgr.CurrentMusicSource.isPlaying);
+                Assert.IsTrue(audioMgr.CurrentMusicSource.loop);
+
+                _director.UnbindFromRun(run);
+
+                Assert.IsFalse(audioMgr.CurrentMusicSource.isPlaying);
+            }
+            finally
+            {
+                Object.DestroyImmediate(musicClip);
+                Object.DestroyImmediate(runObj);
+                Object.DestroyImmediate(audioMgrObj);
+            }
+        }
+
+        [Test]
+        public void BindToRun_FallsBackToDefaultMusic_WhenLevelMusicUnset()
+        {
+            var audioMgrObj = new GameObject("TestAudioManager");
+            var audioMgr = audioMgrObj.AddComponent<AudioManager>();
+
+            var defaultClip = AudioClip.Create("DefaultMusic", 44100, 1, 44100, false);
+            audioMgr.DefaultMusic = defaultClip;
+
+            var runObj = new GameObject("TestRun");
+            var run = runObj.AddComponent<LevelRun>();
+
+            _director.LevelMusic = null;
+            _director.MusicFadeDuration = 0f;
+
+            try
+            {
+                _director.BindToRun(run);
+
+                Assert.IsNotNull(audioMgr.CurrentMusicSource);
+                Assert.AreSame(defaultClip, audioMgr.CurrentMusicSource.clip);
+                Assert.IsTrue(audioMgr.CurrentMusicSource.isPlaying);
+            }
+            finally
+            {
+                _director.UnbindFromRun(run);
+                Object.DestroyImmediate(defaultClip);
+                Object.DestroyImmediate(runObj);
+                Object.DestroyImmediate(audioMgrObj);
+            }
+        }
     }
 }
 
