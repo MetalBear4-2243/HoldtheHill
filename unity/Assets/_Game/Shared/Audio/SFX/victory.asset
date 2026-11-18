@@ -15,7 +15,7 @@ MonoBehaviour:
   _clips:
   - {fileID: 8300000, guid: 3e0d01581c45a584fb37a39a3c9a4f06, type: 3}
   _mixerGroup: {fileID: 0}
-  _volume: 1
+  _volume: 0.57
   _pitchRange: {x: 1, y: 1}
   _cooldown: 0.05
   _spatialBlend: 0

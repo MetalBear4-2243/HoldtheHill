@@ -26,6 +26,9 @@ namespace HoldTheHill.Features.GameFlow
         [Tooltip("Played when a wave is completed.")]
         [SerializeField] private SoundEffectSO _waveCompletedSfx;
 
+        [Tooltip("If true, wave complete sound plays when all enemies are defeated (cleared). If false, plays when all enemies finish spawning.")]
+        [SerializeField] private bool _playOnWaveCleared = true;
+
         [Header("Queen / Base Audio")]
         [Tooltip("Played when the Queen takes damage.")]
         [SerializeField] private SoundEffectSO _queenDamagedSfx;
@@ -48,6 +51,16 @@ namespace HoldTheHill.Features.GameFlow
         [Tooltip("Played when a tower is successfully placed on the grid.")]
         [SerializeField] private SoundEffectSO _towerPlacedSfx;
 
+        [Header("Level Music")]
+        [Tooltip("Optional music track for this level. If left unset, uses AudioManager's default music.")]
+        [SerializeField] private AudioClip _levelMusic;
+
+        [Tooltip("If true, starts music when the level run begins and stops it when leaving the level.")]
+        [SerializeField] private bool _playMusicDuringLevel = true;
+
+        [Tooltip("Crossfade duration in seconds when starting or stopping level music.")]
+        [SerializeField, Min(0f)] private float _musicFadeDuration = 1f;
+
         private LevelRun _boundRun;
         private double _lastQueenHealth = -1;
 
@@ -60,12 +73,16 @@ namespace HoldTheHill.Features.GameFlow
 
         public SoundEffectSO WaveStartedSfx { get => _waveStartedSfx; set => _waveStartedSfx = value; }
         public SoundEffectSO WaveCompletedSfx { get => _waveCompletedSfx; set => _waveCompletedSfx = value; }
+        public bool PlayOnWaveCleared { get => _playOnWaveCleared; set => _playOnWaveCleared = value; }
         public SoundEffectSO QueenDamagedSfx { get => _queenDamagedSfx; set => _queenDamagedSfx = value; }
         public SoundEffectSO VictorySfx { get => _victorySfx; set => _victorySfx = value; }
         public SoundEffectSO DefeatSfx { get => _defeatSfx; set => _defeatSfx = value; }
         public SoundEffectSO BossAppearedSfx { get => _bossAppearedSfx; set => _bossAppearedSfx = value; }
         public SoundEffectSO CentipedeSplitSfx { get => _centipedeSplitSfx; set => _centipedeSplitSfx = value; }
         public SoundEffectSO TowerPlacedSfx { get => _towerPlacedSfx; set => _towerPlacedSfx = value; }
+        public AudioClip LevelMusic { get => _levelMusic; set => _levelMusic = value; }
+        public bool PlayMusicDuringLevel { get => _playMusicDuringLevel; set => _playMusicDuringLevel = value; }
+        public float MusicFadeDuration { get => _musicFadeDuration; set => _musicFadeDuration = value; }
 
         /// <summary>The LevelRun currently bound to this director.</summary>
         public LevelRun BoundRun => _boundRun;
@@ -127,7 +144,12 @@ namespace HoldTheHill.Features.GameFlow
 
             if (run.Spawner != null)
             {
+                if (run.Spawner.onWaveStarted == null) run.Spawner.onWaveStarted = new UnityEngine.Events.UnityEvent<int, int>();
+                if (run.Spawner.onWaveCompleted == null) run.Spawner.onWaveCompleted = new UnityEngine.Events.UnityEvent<int>();
+                if (run.Spawner.onWaveCleared == null) run.Spawner.onWaveCleared = new UnityEngine.Events.UnityEvent<int>();
+
                 run.Spawner.onWaveStarted.AddListener(HandleWaveStarted);
+                run.Spawner.onWaveCompleted.AddListener(HandleWaveCompleted);
                 run.Spawner.onWaveCleared.AddListener(HandleWaveCleared);
             }
 
@@ -142,6 +164,15 @@ namespace HoldTheHill.Features.GameFlow
             }
 
             run.Finished += HandleRunFinished;
+
+            if (_playMusicDuringLevel && AudioManager.Current != null)
+            {
+                AudioClip clipToPlay = _levelMusic != null ? _levelMusic : AudioManager.Current.DefaultMusic;
+                if (clipToPlay != null)
+                {
+                    AudioManager.Current.PlayMusic(clipToPlay, _musicFadeDuration);
+                }
+            }
         }
 
         private void HandleRunEnded(LevelRun run)
@@ -163,8 +194,9 @@ namespace HoldTheHill.Features.GameFlow
 
             if (run.Spawner != null)
             {
-                run.Spawner.onWaveStarted.RemoveListener(HandleWaveStarted);
-                run.Spawner.onWaveCleared.RemoveListener(HandleWaveCleared);
+                run.Spawner.onWaveStarted?.RemoveListener(HandleWaveStarted);
+                run.Spawner.onWaveCompleted?.RemoveListener(HandleWaveCompleted);
+                run.Spawner.onWaveCleared?.RemoveListener(HandleWaveCleared);
             }
 
             if (run.Queen != null)
@@ -178,6 +210,11 @@ namespace HoldTheHill.Features.GameFlow
             }
 
             run.Finished -= HandleRunFinished;
+
+            if (_playMusicDuringLevel && AudioManager.Current != null)
+            {
+                AudioManager.Current.StopMusic(_musicFadeDuration);
+            }
         }
 
         private void HandleWaveStarted(int waveNumber, int totalWaves)
@@ -185,9 +222,25 @@ namespace HoldTheHill.Features.GameFlow
             _waveStartedSfx?.Play();
         }
 
+        private void HandleWaveCompleted(int completedWaveNumber)
+        {
+            if (!_playOnWaveCleared)
+            {
+                PlayWaveCompleteSound();
+            }
+        }
+
         private void HandleWaveCleared(int clearedWaveNumber)
         {
-            if (_boundRun != null && (_boundRun.Outcome != RunOutcome.Playing || (_boundRun.Queen != null && _boundRun.Queen.IsGameOver)))
+            if (_playOnWaveCleared)
+            {
+                PlayWaveCompleteSound();
+            }
+        }
+
+        private void PlayWaveCompleteSound()
+        {
+            if (_boundRun != null && (_boundRun.Outcome == RunOutcome.Lost || (_boundRun.Queen != null && _boundRun.Queen.IsGameOver)))
             {
                 return;
             }

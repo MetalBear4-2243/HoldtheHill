@@ -107,6 +107,14 @@ public class EnemySpawner : MonoBehaviour
         {
             defaultSpawnPoint = transform;
         }
+
+        if (onEnemySpawned == null) onEnemySpawned = new UnityEvent<GameObject>();
+        if (onWaveStarted == null) onWaveStarted = new UnityEvent<int, int>();
+        if (onWaveCompleted == null) onWaveCompleted = new UnityEvent<int>();
+        if (onWaveCleared == null) onWaveCleared = new UnityEvent<int>();
+        if (onAllWavesCompleted == null) onAllWavesCompleted = new UnityEvent();
+        if (onMapChanged == null) onMapChanged = new UnityEvent<string>();
+
         livingEnemyCount = 0;
         activeWaveNumber = 0;
         allEntriesSpawnedForActiveWave = false;
@@ -482,6 +490,9 @@ public class EnemySpawner : MonoBehaviour
 
     private bool HasLivingEnemies()
     {
+        PruneGoneEnemies();
+        livingEnemyCount = activeLivingEnemies.Count;
+
         if (livingEnemyCount > 0)
         {
             return true;

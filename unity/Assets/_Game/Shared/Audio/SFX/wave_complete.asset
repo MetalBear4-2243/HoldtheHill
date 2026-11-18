@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: wave_complete
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Audio.SoundEffectSO
   _clips:
-  - {fileID: 8300000, guid: ebdf8750114768a4f80b7552a460572d, type: 3}
+  - {fileID: 8300000, guid: a704780370f7e3040907d47f7c39ec60, type: 3}
   _mixerGroup: {fileID: 0}
-  _volume: 1
+  _volume: 0.64
   _pitchRange: {x: 1, y: 1}
   _cooldown: 0.05
   _spatialBlend: 0

@@ -42,11 +42,17 @@ namespace HoldTheHill.Core.Audio
         [SerializeField, Min(4)] private int _sfxPoolSize = 16;
 
         [Header("Music Settings")]
+        [Tooltip("Base volume for background music (0.0 to 1.0).")]
+        [SerializeField, Range(0f, 1f)] private float _musicVolume = 0.5f;
+
         [Tooltip("Optional background music to start on enable.")]
         [SerializeField] private AudioClip _defaultMusic;
 
         [Tooltip("If true, starts default music when enabled.")]
         [SerializeField] private bool _playMusicOnStart;
+
+        [Tooltip("If true, background music will loop indefinitely.")]
+        [SerializeField] private bool _loopMusic = true;
 
         // Pooled SFX sources
         private readonly List<AudioSource> _sfxPool = new List<AudioSource>();
@@ -103,6 +109,37 @@ namespace HoldTheHill.Core.Audio
             set => _musicGroup = value;
         }
 
+        /// <summary>Configured default background music clip.</summary>
+        public AudioClip DefaultMusic
+        {
+            get => _defaultMusic;
+            set => _defaultMusic = value;
+        }
+
+        /// <summary>Base volume for background music (0.0 to 1.0).</summary>
+        public float MusicVolume
+        {
+            get => _musicVolume;
+            set
+            {
+                _musicVolume = Mathf.Clamp01(value);
+                if (CurrentMusicSource != null && _musicFadeCoroutine == null && CurrentMusicSource.isPlaying)
+                {
+                    CurrentMusicSource.volume = _musicVolume;
+                }
+            }
+        }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (Application.isPlaying && CurrentMusicSource != null && _musicFadeCoroutine == null && CurrentMusicSource.isPlaying)
+            {
+                CurrentMusicSource.volume = _musicVolume;
+            }
+        }
+#endif
+
         private void Awake()
         {
             if (s_current != null && s_current != this)
@@ -127,7 +164,7 @@ namespace HoldTheHill.Core.Audio
 
             if (_playMusicOnStart && _defaultMusic != null)
             {
-                PlayMusic(_defaultMusic, fadeDuration: 0f);
+                PlayMusic(_defaultMusic, fadeDuration: 0f, loop: _loopMusic);
             }
         }
 
@@ -233,7 +270,7 @@ namespace HoldTheHill.Core.Audio
             {
                 activeSource.Stop();
                 activeSource.volume = 0f;
-                nextSource.volume = 1f;
+                nextSource.volume = _musicVolume;
                 nextSource.Play();
                 _isUsingSourceA = !_isUsingSourceA;
             }
@@ -281,7 +318,11 @@ namespace HoldTheHill.Core.Audio
         public void SetSfxVolume(float linear01) => SetVolume(SfxVolumeParam, linear01);
 
         /// <summary>Sets Music bus volume from a linear 0..1 slider.</summary>
-        public void SetMusicVolume(float linear01) => SetVolume(MusicVolumeParam, linear01);
+        public void SetMusicVolume(float linear01)
+        {
+            MusicVolume = linear01;
+            SetVolume(MusicVolumeParam, linear01);
+        }
 
         /// <summary>
         /// Sets an exposed AudioMixer parameter using logarithmic decibel conversion.
@@ -405,13 +446,13 @@ namespace HoldTheHill.Core.Audio
                 float t = Mathf.Clamp01(elapsed / duration);
 
                 fadeOut.volume = Mathf.Lerp(startOutVol, 0f, t);
-                fadeIn.volume = Mathf.Lerp(0f, 1f, t);
+                fadeIn.volume = Mathf.Lerp(0f, _musicVolume, t);
                 yield return null;
             }
 
             fadeOut.Stop();
             fadeOut.volume = 0f;
-            fadeIn.volume = 1f;
+            fadeIn.volume = _musicVolume;
             _musicFadeCoroutine = null;
         }
 
