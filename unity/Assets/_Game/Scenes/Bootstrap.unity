@@ -204,9 +204,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec7dcf2e47414475848f35e0a2809f86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Audio.AudioManager
-  _mixer: {fileID: 0}
-  _sfxGroup: {fileID: 0}
-  _musicGroup: {fileID: 0}
+  _mixer: {fileID: 24100000, guid: 574da966c6954f64ea8bbe678b8385c0, type: 2}
+  _sfxGroup: {fileID: 4559588099896856248, guid: 574da966c6954f64ea8bbe678b8385c0, type: 2}
+  _musicGroup: {fileID: -2373798999924380123, guid: 574da966c6954f64ea8bbe678b8385c0, type: 2}
   _sfxPoolSize: 16
   _musicVolume: 0.34
   _defaultMusic: {fileID: 8300000, guid: 001842ca77430a843b83cb8a29b4ea55, type: 3}

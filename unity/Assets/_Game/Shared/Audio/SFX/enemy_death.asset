@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Core.Audio.SoundEffectSO
   _clips:
   - {fileID: 8300000, guid: dd06137a852c092488801dc26e3d060f, type: 3}
-  _mixerGroup: {fileID: 0}
-  _volume: 1
+  _mixerGroup: {fileID: 4559588099896856248, guid: 574da966c6954f64ea8bbe678b8385c0, type: 2}
+  _volume: 0.75
   _pitchRange: {x: 0.95, y: 1.05}
   _cooldown: 0.05
   _spatialBlend: 0

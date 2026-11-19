@@ -19,6 +19,15 @@ namespace HoldTheHill.Core.Audio
         public const string SfxVolumeParam = "SfxVolume";
         public const string MusicVolumeParam = "MusicVolume";
 
+        public const string MasterVolumePrefKey = "HoldTheHill.Audio.MasterVolume";
+        public const string SfxVolumePrefKey = "HoldTheHill.Audio.SfxVolume";
+        public const string MusicVolumePrefKey = "HoldTheHill.Audio.MusicVolume";
+
+        public const float MinLinearVolume = 0.0001f;
+        public const float MuteDecibels = -80f;
+        public const float MaxDecibels = 0f;
+        public const float DefaultVolumeSetting = 1f;
+
         private static AudioManager s_current;
 
         /// <summary>The active AudioManager instance, or null if none is in the scene.</summary>
@@ -65,6 +74,16 @@ namespace HoldTheHill.Core.Audio
         private bool _isUsingSourceA = true;
         private Coroutine _musicFadeCoroutine;
 
+        // Player volume settings (0..1), stored independently from _musicVolume base mix trim
+        private float _masterVolumeSetting = DefaultVolumeSetting;
+        private float _sfxVolumeSetting = DefaultVolumeSetting;
+        private float _musicVolumeSetting = DefaultVolumeSetting;
+        private bool _volumePrefsLoaded;
+        private bool _prefsDirty;
+
+        /// <summary>Raised when Master, SFX, or Music volume settings change.</summary>
+        public event Action VolumesChanged;
+
         /// <summary>Total capacity of the SFX voice pool.</summary>
         public int PoolSize => _sfxPool.Count;
 
@@ -92,21 +111,47 @@ namespace HoldTheHill.Core.Audio
         public AudioMixer Mixer
         {
             get => _mixer;
-            set => _mixer = value;
+            set
+            {
+                _mixer = value;
+                ApplyAllVolumesToMixer();
+                RefreshActiveMusicSourceVolume();
+            }
         }
 
         /// <summary>Default AudioMixerGroup for SFX.</summary>
         public AudioMixerGroup SfxGroup
         {
             get => _sfxGroup;
-            set => _sfxGroup = value;
+            set
+            {
+                _sfxGroup = value;
+                for (int i = 0; i < _sfxPool.Count; i++)
+                {
+                    if (_sfxPool[i] != null)
+                    {
+                        _sfxPool[i].outputAudioMixerGroup = _sfxGroup;
+                    }
+                }
+            }
         }
 
         /// <summary>Default AudioMixerGroup for Music.</summary>
         public AudioMixerGroup MusicGroup
         {
             get => _musicGroup;
-            set => _musicGroup = value;
+            set
+            {
+                _musicGroup = value;
+                if (_musicSourceA != null)
+                {
+                    _musicSourceA.outputAudioMixerGroup = _musicGroup;
+                }
+                if (_musicSourceB != null)
+                {
+                    _musicSourceB.outputAudioMixerGroup = _musicGroup;
+                }
+            }
         }
 
         /// <summary>Configured default background music clip.</summary>
@@ -116,26 +161,23 @@ namespace HoldTheHill.Core.Audio
             set => _defaultMusic = value;
         }
 
-        /// <summary>Base volume for background music (0.0 to 1.0).</summary>
+        /// <summary>Base mix trim volume for background music (0.0 to 1.0).</summary>
         public float MusicVolume
         {
             get => _musicVolume;
             set
             {
                 _musicVolume = Mathf.Clamp01(value);
-                if (CurrentMusicSource != null && _musicFadeCoroutine == null && CurrentMusicSource.isPlaying)
-                {
-                    CurrentMusicSource.volume = _musicVolume;
-                }
+                RefreshActiveMusicSourceVolume();
             }
         }
 
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            if (Application.isPlaying && CurrentMusicSource != null && _musicFadeCoroutine == null && CurrentMusicSource.isPlaying)
+            if (Application.isPlaying)
             {
-                CurrentMusicSource.volume = _musicVolume;
+                RefreshActiveMusicSourceVolume();
             }
         }
 #endif
@@ -149,8 +191,15 @@ namespace HoldTheHill.Core.Audio
             }
             s_current = this;
 
+            LoadSavedVolumes();
             EnsurePoolInitialized();
             InitializeMusicSources();
+        }
+
+        private void Start()
+        {
+            // Unity's AudioMixer ignores SetFloat during Awake/OnEnable before DSP initialization.
+            ApplyAllVolumesToMixer();
         }
 
         private void OnEnable()
@@ -174,6 +223,13 @@ namespace HoldTheHill.Core.Audio
             {
                 SoundEffectSO.PlaybackHandler = null;
             }
+
+            SaveVolumeSettings();
+        }
+
+        private void OnApplicationQuit()
+        {
+            SaveVolumeSettings();
         }
 
         private void OnDestroy()
@@ -227,7 +283,9 @@ namespace HoldTheHill.Core.Audio
             source.transform.position = position;
             source.clip = clip;
             source.outputAudioMixerGroup = group != null ? group : _sfxGroup;
-            source.volume = Mathf.Clamp01(volume);
+            source.volume = _mixer != null
+                ? Mathf.Clamp01(volume)
+                : Mathf.Clamp01(volume) * _sfxVolumeSetting * _masterVolumeSetting;
             source.pitch = pitch;
             source.spatialBlend = Mathf.Clamp01(spatialBlend);
             source.loop = false;
@@ -270,7 +328,7 @@ namespace HoldTheHill.Core.Audio
             {
                 activeSource.Stop();
                 activeSource.volume = 0f;
-                nextSource.volume = _musicVolume;
+                nextSource.volume = GetEffectiveMusicSourceVolume();
                 nextSource.Play();
                 _isUsingSourceA = !_isUsingSourceA;
             }
@@ -311,17 +369,69 @@ namespace HoldTheHill.Core.Audio
 
         // --- AudioMixer UI Volume Controls ---
 
+        /// <summary>Converts a linear 0..1 volume scalar into logarithmic decibels (-80 dB to 0 dB).</summary>
+        public static float LinearToDecibels(float linear01)
+        {
+            float clamped = Mathf.Clamp01(linear01);
+            return clamped > MinLinearVolume ? Mathf.Log10(clamped) * 20f : MuteDecibels;
+        }
+
+        /// <summary>Converts decibels (-80 dB to 0 dB) back into a linear 0..1 volume scalar.</summary>
+        public static float DecibelsToLinear(float decibels)
+        {
+            if (decibels <= MuteDecibels)
+            {
+                return 0f;
+            }
+
+            return Mathf.Clamp01(Mathf.Pow(10f, Mathf.Min(decibels, MaxDecibels) / 20f));
+        }
+
+        /// <summary>Current Master bus linear volume setting (0.0 to 1.0).</summary>
+        public float GetMasterVolume() => _masterVolumeSetting;
+
+        /// <summary>Current SFX bus linear volume setting (0.0 to 1.0).</summary>
+        public float GetSfxVolume() => _sfxVolumeSetting;
+
+        /// <summary>Current Music bus linear volume setting (0.0 to 1.0).</summary>
+        public float GetMusicVolume() => _musicVolumeSetting;
+
         /// <summary>Sets Master volume from a linear 0..1 slider.</summary>
-        public void SetMasterVolume(float linear01) => SetVolume(MasterVolumeParam, linear01);
+        public void SetMasterVolume(float linear01)
+        {
+            float clamped = Mathf.Clamp01(linear01);
+            _masterVolumeSetting = clamped;
+            _volumePrefsLoaded = true;
+            PlayerPrefs.SetFloat(MasterVolumePrefKey, clamped);
+            _prefsDirty = true;
+            SetVolume(MasterVolumeParam, clamped);
+            RefreshActiveMusicSourceVolume();
+            VolumesChanged?.Invoke();
+        }
 
         /// <summary>Sets SFX bus volume from a linear 0..1 slider.</summary>
-        public void SetSfxVolume(float linear01) => SetVolume(SfxVolumeParam, linear01);
+        public void SetSfxVolume(float linear01)
+        {
+            float clamped = Mathf.Clamp01(linear01);
+            _sfxVolumeSetting = clamped;
+            _volumePrefsLoaded = true;
+            PlayerPrefs.SetFloat(SfxVolumePrefKey, clamped);
+            _prefsDirty = true;
+            SetVolume(SfxVolumeParam, clamped);
+            VolumesChanged?.Invoke();
+        }
 
-        /// <summary>Sets Music bus volume from a linear 0..1 slider.</summary>
+        /// <summary>Sets Music bus volume from a linear 0..1 slider without altering the base mix trim.</summary>
         public void SetMusicVolume(float linear01)
         {
-            MusicVolume = linear01;
-            SetVolume(MusicVolumeParam, linear01);
+            float clamped = Mathf.Clamp01(linear01);
+            _musicVolumeSetting = clamped;
+            _volumePrefsLoaded = true;
+            PlayerPrefs.SetFloat(MusicVolumePrefKey, clamped);
+            _prefsDirty = true;
+            SetVolume(MusicVolumeParam, clamped);
+            RefreshActiveMusicSourceVolume();
+            VolumesChanged?.Invoke();
         }
 
         /// <summary>
@@ -334,9 +444,73 @@ namespace HoldTheHill.Core.Audio
                 return;
             }
 
-            float clamped = Mathf.Clamp01(linear01);
-            float db = clamped > 0.0001f ? Mathf.Log10(clamped) * 20f : -80f;
-            _mixer.SetFloat(parameterName, db);
+            _mixer.SetFloat(parameterName, LinearToDecibels(linear01));
+        }
+
+        /// <summary>Loads saved linear 0..1 volume preferences from PlayerPrefs.</summary>
+        public void LoadSavedVolumes()
+        {
+            _masterVolumeSetting = Mathf.Clamp01(PlayerPrefs.GetFloat(MasterVolumePrefKey, DefaultVolumeSetting));
+            _sfxVolumeSetting = Mathf.Clamp01(PlayerPrefs.GetFloat(SfxVolumePrefKey, DefaultVolumeSetting));
+            _musicVolumeSetting = Mathf.Clamp01(PlayerPrefs.GetFloat(MusicVolumePrefKey, DefaultVolumeSetting));
+            _volumePrefsLoaded = true;
+        }
+
+        /// <summary>Applies the current Master, SFX, and Music volume settings to the configured AudioMixer.</summary>
+        public void ApplyAllVolumesToMixer()
+        {
+            if (!_volumePrefsLoaded)
+            {
+                LoadSavedVolumes();
+            }
+
+            SetVolume(MasterVolumeParam, _masterVolumeSetting);
+            SetVolume(SfxVolumeParam, _sfxVolumeSetting);
+            SetVolume(MusicVolumeParam, _musicVolumeSetting);
+            RefreshActiveMusicSourceVolume();
+        }
+
+        /// <summary>Resets Master, SFX, and Music volume preferences to 1.0 and persists them.</summary>
+        public void ResetVolumesToDefaults()
+        {
+            _masterVolumeSetting = DefaultVolumeSetting;
+            _sfxVolumeSetting = DefaultVolumeSetting;
+            _musicVolumeSetting = DefaultVolumeSetting;
+            _volumePrefsLoaded = true;
+
+            PlayerPrefs.SetFloat(MasterVolumePrefKey, DefaultVolumeSetting);
+            PlayerPrefs.SetFloat(SfxVolumePrefKey, DefaultVolumeSetting);
+            PlayerPrefs.SetFloat(MusicVolumePrefKey, DefaultVolumeSetting);
+            _prefsDirty = true;
+
+            SaveVolumeSettings();
+            ApplyAllVolumesToMixer();
+            VolumesChanged?.Invoke();
+        }
+
+        /// <summary>Flushes dirty volume preferences to PlayerPrefs on disk.</summary>
+        public void SaveVolumeSettings()
+        {
+            if (_prefsDirty)
+            {
+                PlayerPrefs.Save();
+                _prefsDirty = false;
+            }
+        }
+
+        private float GetEffectiveMusicSourceVolume()
+        {
+            return _mixer != null
+                ? _musicVolume
+                : _musicVolume * _musicVolumeSetting * _masterVolumeSetting;
+        }
+
+        private void RefreshActiveMusicSourceVolume()
+        {
+            if (CurrentMusicSource != null && _musicFadeCoroutine == null && CurrentMusicSource.isPlaying)
+            {
+                CurrentMusicSource.volume = GetEffectiveMusicSourceVolume();
+            }
         }
 
         private void HandlePlaybackRequest(SoundEffectSO sfx, Vector3 position, float spatialBlend)
@@ -446,13 +620,13 @@ namespace HoldTheHill.Core.Audio
                 float t = Mathf.Clamp01(elapsed / duration);
 
                 fadeOut.volume = Mathf.Lerp(startOutVol, 0f, t);
-                fadeIn.volume = Mathf.Lerp(0f, _musicVolume, t);
+                fadeIn.volume = Mathf.Lerp(0f, GetEffectiveMusicSourceVolume(), t);
                 yield return null;
             }
 
             fadeOut.Stop();
             fadeOut.volume = 0f;
-            fadeIn.volume = _musicVolume;
+            fadeIn.volume = GetEffectiveMusicSourceVolume();
             _musicFadeCoroutine = null;
         }
 

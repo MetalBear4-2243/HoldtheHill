@@ -1,17 +1,43 @@
 using HoldTheHill.Core.Audio;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace HoldTheHill.Tests
 {
     public class AudioManagerTests
     {
+        private const string MainMixerPath = "Assets/_Game/Shared/Audio/MainMixer.mixer";
+
+        private static readonly string[] VolumePrefKeys =
+        {
+            AudioManager.MasterVolumePrefKey,
+            AudioManager.SfxVolumePrefKey,
+            AudioManager.MusicVolumePrefKey,
+        };
+
         private GameObject _managerObj;
         private AudioManager _audioManager;
+        private bool[] _hadPrefKeys;
+        private float[] _savedPrefValues;
 
         [SetUp]
         public void SetUp()
         {
+            _hadPrefKeys = new bool[VolumePrefKeys.Length];
+            _savedPrefValues = new float[VolumePrefKeys.Length];
+            for (int i = 0; i < VolumePrefKeys.Length; i++)
+            {
+                string key = VolumePrefKeys[i];
+                _hadPrefKeys[i] = PlayerPrefs.HasKey(key);
+                if (_hadPrefKeys[i])
+                {
+                    _savedPrefValues[i] = PlayerPrefs.GetFloat(key);
+                    PlayerPrefs.DeleteKey(key);
+                }
+            }
+
             _managerObj = new GameObject("TestAudioManager");
             _audioManager = _managerObj.AddComponent<AudioManager>();
         }
@@ -24,6 +50,20 @@ namespace HoldTheHill.Tests
                 Object.DestroyImmediate(_managerObj);
             }
             SoundEffectSO.PlaybackHandler = null;
+
+            for (int i = 0; i < VolumePrefKeys.Length; i++)
+            {
+                string key = VolumePrefKeys[i];
+                if (_hadPrefKeys[i])
+                {
+                    PlayerPrefs.SetFloat(key, _savedPrefValues[i]);
+                }
+                else
+                {
+                    PlayerPrefs.DeleteKey(key);
+                }
+            }
+            PlayerPrefs.Save();
         }
 
         [Test]
@@ -115,6 +155,185 @@ namespace HoldTheHill.Tests
                 _audioManager.SetSfxVolume(0.8f);
                 _audioManager.SetMusicVolume(0f);
             });
+        }
+
+        [Test]
+        public void LinearToDecibels_MapsBoundariesAndMidpointCorrectly()
+        {
+            Assert.AreEqual(0f, AudioManager.LinearToDecibels(1f), 0.001f);
+            Assert.AreEqual(-6.0206f, AudioManager.LinearToDecibels(0.5f), 0.001f);
+            Assert.AreEqual(-80f, AudioManager.LinearToDecibels(0.0001f), 0.001f);
+            Assert.AreEqual(-80f, AudioManager.LinearToDecibels(0f), 0.001f);
+            Assert.AreEqual(-80f, AudioManager.LinearToDecibels(-0.5f), 0.001f);
+            Assert.AreEqual(0f, AudioManager.LinearToDecibels(2f), 0.001f);
+        }
+
+        [Test]
+        public void DecibelsToLinear_InvertsLinearToDecibels()
+        {
+            Assert.AreEqual(1f, AudioManager.DecibelsToLinear(0f), 0.001f);
+            Assert.AreEqual(0.5f, AudioManager.DecibelsToLinear(-6.0206f), 0.001f);
+            Assert.AreEqual(0f, AudioManager.DecibelsToLinear(-80f), 0.001f);
+            Assert.AreEqual(0f, AudioManager.DecibelsToLinear(-100f), 0.001f);
+            Assert.AreEqual(1f, AudioManager.DecibelsToLinear(6f), 0.001f);
+        }
+
+        [Test]
+        public void SetVolumes_ClampsPersistsAndRaisesEvent()
+        {
+            int eventCount = 0;
+            _audioManager.VolumesChanged += () => eventCount++;
+
+            _audioManager.SetMasterVolume(1.5f);
+            _audioManager.SetSfxVolume(-0.25f);
+            _audioManager.SetMusicVolume(0.42f);
+
+            Assert.AreEqual(1f, _audioManager.GetMasterVolume(), 0.0001f);
+            Assert.AreEqual(0f, _audioManager.GetSfxVolume(), 0.0001f);
+            Assert.AreEqual(0.42f, _audioManager.GetMusicVolume(), 0.0001f);
+
+            Assert.AreEqual(1f, PlayerPrefs.GetFloat(AudioManager.MasterVolumePrefKey), 0.0001f);
+            Assert.AreEqual(0f, PlayerPrefs.GetFloat(AudioManager.SfxVolumePrefKey), 0.0001f);
+            Assert.AreEqual(0.42f, PlayerPrefs.GetFloat(AudioManager.MusicVolumePrefKey), 0.0001f);
+            Assert.AreEqual(3, eventCount);
+        }
+
+        [Test]
+        public void SetMusicVolume_PreservesBaseMusicVolumeTrim()
+        {
+            var mixer = AssetDatabase.LoadAssetAtPath<AudioMixer>(MainMixerPath);
+            _audioManager.Mixer = mixer;
+            _audioManager.MusicVolume = 0.34f;
+
+            AudioClip musicClip = AudioClip.Create("TrimTestMusic", 44100, 1, 44100, false);
+            try
+            {
+                _audioManager.PlayMusic(musicClip, fadeDuration: 0f);
+                _audioManager.SetMusicVolume(0.5f);
+
+                Assert.AreEqual(0.34f, _audioManager.MusicVolume, 0.0001f);
+                Assert.AreEqual(0.5f, _audioManager.GetMusicVolume(), 0.0001f);
+                if (mixer != null)
+                {
+                    Assert.AreEqual(0.34f, _audioManager.CurrentMusicSource.volume, 0.0001f);
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(musicClip);
+            }
+        }
+
+        [Test]
+        public void LoadSavedVolumes_RestoresPersistedPlayerPrefs()
+        {
+            PlayerPrefs.SetFloat(AudioManager.MasterVolumePrefKey, 0.7f);
+            PlayerPrefs.SetFloat(AudioManager.SfxVolumePrefKey, 0.35f);
+            PlayerPrefs.SetFloat(AudioManager.MusicVolumePrefKey, 0.85f);
+
+            _audioManager.LoadSavedVolumes();
+
+            Assert.AreEqual(0.7f, _audioManager.GetMasterVolume(), 0.0001f);
+            Assert.AreEqual(0.35f, _audioManager.GetSfxVolume(), 0.0001f);
+            Assert.AreEqual(0.85f, _audioManager.GetMusicVolume(), 0.0001f);
+        }
+
+        [Test]
+        public void ResetVolumesToDefaults_RestoresFullVolumeAndPersists()
+        {
+            _audioManager.SetMasterVolume(0.2f);
+            _audioManager.SetSfxVolume(0.3f);
+            _audioManager.SetMusicVolume(0.4f);
+
+            int eventCount = 0;
+            _audioManager.VolumesChanged += () => eventCount++;
+            _audioManager.ResetVolumesToDefaults();
+
+            Assert.AreEqual(1f, _audioManager.GetMasterVolume(), 0.0001f);
+            Assert.AreEqual(1f, _audioManager.GetSfxVolume(), 0.0001f);
+            Assert.AreEqual(1f, _audioManager.GetMusicVolume(), 0.0001f);
+            Assert.AreEqual(1f, PlayerPrefs.GetFloat(AudioManager.MasterVolumePrefKey), 0.0001f);
+            Assert.AreEqual(1f, PlayerPrefs.GetFloat(AudioManager.SfxVolumePrefKey), 0.0001f);
+            Assert.AreEqual(1f, PlayerPrefs.GetFloat(AudioManager.MusicVolumePrefKey), 0.0001f);
+            Assert.AreEqual(1, eventCount);
+        }
+
+        [Test]
+        public void PlayOneShot_NullMixerFallback_ScalesByMasterAndSfxVolumes()
+        {
+            _audioManager.Mixer = null;
+            _audioManager.SetMasterVolume(0.5f);
+            _audioManager.SetSfxVolume(0.5f);
+
+            AudioClip clip = AudioClip.Create("FallbackSfx", 44100, 1, 44100, false);
+            try
+            {
+                AudioSource source = _audioManager.PlayOneShot(clip, volume: 0.8f);
+                Assert.IsNotNull(source);
+                Assert.AreEqual(0.2f, source.volume, 0.0001f);
+            }
+            finally
+            {
+                Object.DestroyImmediate(clip);
+            }
+        }
+
+        [Test]
+        public void PlayMusic_NullMixerFallback_ScalesByBaseTrimAndMixerSettings()
+        {
+            _audioManager.Mixer = null;
+            _audioManager.MusicVolume = 0.4f;
+            _audioManager.SetMasterVolume(0.5f);
+            _audioManager.SetMusicVolume(0.5f);
+
+            AudioClip clip = AudioClip.Create("FallbackMusic", 44100, 1, 44100, false);
+            try
+            {
+                _audioManager.PlayMusic(clip, fadeDuration: 0f);
+                Assert.IsNotNull(_audioManager.CurrentMusicSource);
+                Assert.AreEqual(0.1f, _audioManager.CurrentMusicSource.volume, 0.0001f);
+            }
+            finally
+            {
+                Object.DestroyImmediate(clip);
+            }
+        }
+
+        [Test]
+        public void GroupSetters_PropagateToExistingVoicesAndMusicSources()
+        {
+            var mixer = AssetDatabase.LoadAssetAtPath<AudioMixer>(MainMixerPath);
+            if (mixer == null)
+            {
+                Assert.Ignore($"MainMixer.mixer not found at {MainMixerPath}.");
+            }
+
+            AudioMixerGroup[] sfxMatches = mixer.FindMatchingGroups("SFX");
+            AudioMixerGroup[] musicMatches = mixer.FindMatchingGroups("Music");
+            Assert.IsNotEmpty(sfxMatches, "Expected SFX group on MainMixer.");
+            Assert.IsNotEmpty(musicMatches, "Expected Music group on MainMixer.");
+
+            AudioMixerGroup sfxGroup = System.Array.Find(sfxMatches, g => g != null && g.name == "SFX") ?? sfxMatches[0];
+            AudioMixerGroup musicGroup = System.Array.Find(musicMatches, g => g != null && g.name == "Music") ?? musicMatches[0];
+
+            AudioClip sfxClip = AudioClip.Create("PoolSfx", 44100, 1, 44100, false);
+            AudioClip musicClip = AudioClip.Create("PoolMusic", 44100, 1, 44100, false);
+            try
+            {
+                AudioSource voice = _audioManager.PlayOneShot(sfxClip);
+                _audioManager.PlayMusic(musicClip, fadeDuration: 0f);
+
+                _audioManager.SfxGroup = sfxGroup;
+                _audioManager.MusicGroup = musicGroup;
+
+                Assert.AreSame(sfxGroup, voice.outputAudioMixerGroup);
+                Assert.AreSame(musicGroup, _audioManager.CurrentMusicSource.outputAudioMixerGroup);
+            }
+            finally
+            {
+                Object.DestroyImmediate(sfxClip);
+                Object.DestroyImmediate(musicClip);
+            }
         }
     }
 }
