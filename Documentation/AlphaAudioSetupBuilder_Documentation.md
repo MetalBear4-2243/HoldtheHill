@@ -91,6 +91,7 @@ For each scene:
 | `_victorySfx` | `victory`, `win` |
 | `_defeatSfx` | `defeat`, `lose`, `game_over` |
 | `_bossAppearedSfx` | `boss`, `mantis` |
+| `_enemyDeathSfx` | `enemy_death`, `enemydeath`, `enemy_die`, `enemydie` |
 | `_centipedeSplitSfx`| `centipede`, `split` |
 | `_towerPlacedSfx` | `tower_place`, `towerplace`, `place_tower` |
 

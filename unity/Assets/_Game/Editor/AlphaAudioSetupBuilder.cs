@@ -163,6 +163,7 @@ namespace HoldTheHill.EditorTools
                 TryAssignSfx(directorSo, "_victorySfx", sfx, name.Contains("victory") || name.Contains("win"));
                 TryAssignSfx(directorSo, "_defeatSfx", sfx, name.Contains("defeat") || name.Contains("lose") || name.Contains("game_over"));
                 TryAssignSfx(directorSo, "_bossAppearedSfx", sfx, name.Contains("boss") || name.Contains("mantis"));
+                TryAssignSfx(directorSo, "_enemyDeathSfx", sfx, name.Contains("enemy_death") || name.Contains("enemydeath") || name.Contains("enemy_die") || name.Contains("enemydie"));
                 TryAssignSfx(directorSo, "_centipedeSplitSfx", sfx, name.Contains("centipede") || name.Contains("split"));
                 TryAssignSfx(directorSo, "_towerPlacedSfx", sfx, name.Contains("tower_place") || name.Contains("towerplace") || name.Contains("place_tower"));
             }

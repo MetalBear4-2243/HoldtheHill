@@ -84,6 +84,7 @@ classDiagram
         -SoundEffectSO _victorySfx
         -SoundEffectSO _defeatSfx
         -SoundEffectSO _bossAppearedSfx
+        -SoundEffectSO _enemyDeathSfx
         -SoundEffectSO _centipedeSplitSfx
         -SoundEffectSO _towerPlacedSfx
         +Run LevelRun
@@ -102,6 +103,7 @@ classDiagram
 | `_victorySfx` | `SoundEffectSO` | `null` | Triggered when the run outcome is `RunOutcome.Victory`. |
 | `_defeatSfx` | `SoundEffectSO` | `null` | Triggered when the run outcome is `RunOutcome.Defeat`. |
 | `_bossAppearedSfx` | `SoundEffectSO` | `null` | Triggered when a boss appears (`QueenMantisBoss.Appeared`). |
+| `_enemyDeathSfx` | `SoundEffectSO` | `null` | Triggered when any enemy dies (`BasicEnemy.OnAnyDied`), except when a `CentipedeEnemy` splits. Spatialized at the death position. |
 | `_centipedeSplitSfx` | `SoundEffectSO` | `null` | Triggered when a centipede segment splits (`OnAnyCentipedeSplit`). Spatialized at the split position. |
 | `_towerPlacedSfx` | `SoundEffectSO` | `null` | Triggered when a tower is placed (`TowerPlacer.TowerPlaced`). Spatialized at the tower position. |
 

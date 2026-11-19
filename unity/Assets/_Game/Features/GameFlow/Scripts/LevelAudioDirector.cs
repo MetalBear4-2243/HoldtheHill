@@ -44,6 +44,9 @@ namespace HoldTheHill.Features.GameFlow
         [Tooltip("Played when a boss appears (e.g. Queen Mantis).")]
         [SerializeField] private SoundEffectSO _bossAppearedSfx;
 
+        [Tooltip("Played when an enemy dies (excluding centipede splits).")]
+        [SerializeField] private SoundEffectSO _enemyDeathSfx;
+
         [Tooltip("Played when a Centipede splits into segments.")]
         [SerializeField] private SoundEffectSO _centipedeSplitSfx;
 
@@ -78,6 +81,7 @@ namespace HoldTheHill.Features.GameFlow
         public SoundEffectSO VictorySfx { get => _victorySfx; set => _victorySfx = value; }
         public SoundEffectSO DefeatSfx { get => _defeatSfx; set => _defeatSfx = value; }
         public SoundEffectSO BossAppearedSfx { get => _bossAppearedSfx; set => _bossAppearedSfx = value; }
+        public SoundEffectSO EnemyDeathSfx { get => _enemyDeathSfx; set => _enemyDeathSfx = value; }
         public SoundEffectSO CentipedeSplitSfx { get => _centipedeSplitSfx; set => _centipedeSplitSfx = value; }
         public SoundEffectSO TowerPlacedSfx { get => _towerPlacedSfx; set => _towerPlacedSfx = value; }
         public AudioClip LevelMusic { get => _levelMusic; set => _levelMusic = value; }
@@ -89,6 +93,7 @@ namespace HoldTheHill.Features.GameFlow
 
         private void OnEnable()
         {
+            BasicEnemy.OnAnyDied += HandleEnemyDied;
             CentipedeEnemy.OnAnyCentipedeSplit += HandleCentipedeSplit;
             QueenMantisBoss.Appeared += HandleBossAppeared;
 
@@ -110,6 +115,7 @@ namespace HoldTheHill.Features.GameFlow
 
         private void OnDisable()
         {
+            BasicEnemy.OnAnyDied -= HandleEnemyDied;
             CentipedeEnemy.OnAnyCentipedeSplit -= HandleCentipedeSplit;
             QueenMantisBoss.Appeared -= HandleBossAppeared;
 
@@ -272,6 +278,23 @@ namespace HoldTheHill.Features.GameFlow
         private void HandleBossAppeared(QueenMantisBoss boss)
         {
             _bossAppearedSfx?.Play();
+        }
+
+        private void HandleEnemyDied(BasicEnemy enemy)
+        {
+            if (enemy is CentipedeEnemy centipede && centipede.CanSplit())
+            {
+                return;
+            }
+
+            if (enemy != null)
+            {
+                _enemyDeathSfx?.Play(enemy.transform.position);
+            }
+            else
+            {
+                _enemyDeathSfx?.Play();
+            }
         }
 
         private void HandleCentipedeSplit(CentipedeEnemy parent, List<CentipedeEnemy> children)

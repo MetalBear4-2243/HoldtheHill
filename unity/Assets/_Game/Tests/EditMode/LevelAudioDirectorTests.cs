@@ -371,6 +371,158 @@ namespace HoldTheHill.Tests
                 Object.DestroyImmediate(audioMgrObj);
             }
         }
+
+        private static void InvokeDirectorLifecycle(LevelAudioDirector director, string methodName)
+        {
+            var method = typeof(LevelAudioDirector).GetMethod(
+                methodName,
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            Assert.IsNotNull(method, $"Expected {methodName} on LevelAudioDirector.");
+            method.Invoke(director, null);
+        }
+
+        [Test]
+        public void EnemyDeath_PlaysEnemyDeathSfx()
+        {
+            SoundEffectSO enemyDeathSfx = CreateTestSound("EnemyDeath");
+            _director.EnemyDeathSfx = enemyDeathSfx;
+            InvokeDirectorLifecycle(_director, "OnEnable");
+
+            var enemyObj = new GameObject("TestEnemy");
+            var enemy = enemyObj.AddComponent<BasicEnemy>();
+            enemy.SetMaxHealth(10.0, resetCurrentHealth: true);
+
+            try
+            {
+                enemy.TakeDamage(20.0);
+
+                Assert.AreEqual(1, _playedSoundCount);
+                Assert.AreSame(enemyDeathSfx, _lastPlayedSfx);
+            }
+            finally
+            {
+                InvokeDirectorLifecycle(_director, "OnDisable");
+                if (enemyObj != null)
+                {
+                    Object.DestroyImmediate(enemyObj);
+                }
+                DestroyTestSound(enemyDeathSfx);
+            }
+        }
+
+        [Test]
+        public void EnemyReachedDestination_DoesNotPlayEnemyDeathSfx()
+        {
+            SoundEffectSO enemyDeathSfx = CreateTestSound("EnemyDeath");
+            _director.EnemyDeathSfx = enemyDeathSfx;
+            InvokeDirectorLifecycle(_director, "OnEnable");
+
+            var enemyObj = new GameObject("TestEnemy");
+            var enemy = enemyObj.AddComponent<BasicEnemy>();
+
+            try
+            {
+                enemy.ReachDestination();
+
+                Assert.AreEqual(0, _playedSoundCount);
+                Assert.IsNull(_lastPlayedSfx);
+            }
+            finally
+            {
+                InvokeDirectorLifecycle(_director, "OnDisable");
+                if (enemyObj != null)
+                {
+                    Object.DestroyImmediate(enemyObj);
+                }
+                DestroyTestSound(enemyDeathSfx);
+            }
+        }
+
+        [Test]
+        public void CentipedeSplit_DoesNotPlayEnemyDeathSfx_TerminalCentipedePlaysEnemyDeathSfx()
+        {
+            SoundEffectSO enemyDeathSfx = CreateTestSound("EnemyDeath");
+            _director.EnemyDeathSfx = enemyDeathSfx;
+            InvokeDirectorLifecycle(_director, "OnEnable");
+
+            var playedSounds = new List<SoundEffectSO>();
+            SoundEffectSO.PlaybackHandler = (sfx, pos, blend) =>
+            {
+                _playedSoundCount++;
+                _lastPlayedSfx = sfx;
+                playedSounds.Add(sfx);
+            };
+
+            var centipedeObj = new GameObject("TestCentipede");
+            var centipede = centipedeObj.AddComponent<CentipedeEnemy>();
+            centipede.SetMaxHealth(4.0, resetCurrentHealth: true);
+            centipede.SplitsRemaining = 1;
+
+            var spawnedChildren = new List<CentipedeEnemy>();
+            centipede.OnSplit += (_, children) => spawnedChildren.AddRange(children);
+
+            try
+            {
+                // First death triggers split: should play centipede split SFX, NOT enemy death SFX.
+                centipede.TakeDamage(10.0);
+
+                Assert.AreEqual(1, playedSounds.Count);
+                Assert.AreSame(_centipedeSplitSfx, playedSounds[0]);
+                Assert.AreEqual(2, spawnedChildren.Count);
+
+                // Child has SplitsRemaining == 0: terminal death should play enemy death SFX.
+                playedSounds.Clear();
+                spawnedChildren[0].TakeDamage(10.0);
+
+                Assert.AreEqual(1, playedSounds.Count);
+                Assert.AreSame(enemyDeathSfx, playedSounds[0]);
+            }
+            finally
+            {
+                InvokeDirectorLifecycle(_director, "OnDisable");
+                for (int i = 0; i < spawnedChildren.Count; i++)
+                {
+                    if (spawnedChildren[i] != null)
+                    {
+                        Object.DestroyImmediate(spawnedChildren[i].gameObject);
+                    }
+                }
+                if (centipedeObj != null)
+                {
+                    Object.DestroyImmediate(centipedeObj);
+                }
+                DestroyTestSound(enemyDeathSfx);
+            }
+        }
+
+        [Test]
+        public void Disabled_Director_DoesNotPlayEnemyDeathSfx()
+        {
+            SoundEffectSO enemyDeathSfx = CreateTestSound("EnemyDeath");
+            _director.EnemyDeathSfx = enemyDeathSfx;
+            InvokeDirectorLifecycle(_director, "OnEnable");
+            InvokeDirectorLifecycle(_director, "OnDisable");
+
+            var enemyObj = new GameObject("TestEnemy");
+            var enemy = enemyObj.AddComponent<BasicEnemy>();
+            enemy.SetMaxHealth(10.0, resetCurrentHealth: true);
+
+            try
+            {
+                enemy.TakeDamage(20.0);
+
+                Assert.AreEqual(0, _playedSoundCount);
+                Assert.IsNull(_lastPlayedSfx);
+            }
+            finally
+            {
+                if (enemyObj != null)
+                {
+                    Object.DestroyImmediate(enemyObj);
+                }
+                DestroyTestSound(enemyDeathSfx);
+            }
+        }
     }
 }
 
