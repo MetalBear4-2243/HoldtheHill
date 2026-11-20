@@ -208,7 +208,7 @@ MonoBehaviour:
   _sfxGroup: {fileID: 0}
   _musicGroup: {fileID: 0}
   _sfxPoolSize: 16
-  _musicVolume: 0.34
+  _musicVolume: 0.58
   _defaultMusic: {fileID: 8300000, guid: 001842ca77430a843b83cb8a29b4ea55, type: 3}
   _playMusicOnStart: 0
   _loopMusic: 1

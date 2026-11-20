@@ -252,8 +252,16 @@ PrefabInstance:
       value: 35
       objectReference: {fileID: 0}
     - target: {fileID: 5625163934836188351, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
+      propertyPath: m_Inertia
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5625163934836188351, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
+      propertyPath: m_Elasticity
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5625163934836188351, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
       propertyPath: m_ScrollSensitivity
-      value: 20
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 6195917682725558685, guid: 4f399a5f3b7615a449c4dbfb019145be, type: 3}
       propertyPath: m_SizeDelta.x
