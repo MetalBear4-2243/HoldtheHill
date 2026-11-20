@@ -47,7 +47,8 @@ namespace HoldTheHill.EditorTools
         private const int ButtonFontSize = 28;
         internal static readonly Vector2 MenuButtonSize = new Vector2(320f, 72f);
         private static readonly Vector2 NextWaveButtonSize = new Vector2(240f, 64f);
-        private static readonly Vector2 WaveDescriptionSize = new Vector2(480f, 64f);
+        private static readonly Vector2 WaveDescriptionSize = new Vector2(680f, 64f);
+        private const float WaveDescriptionTopOffset = -168f;
 
         [MenuItem("Tools/Hold the Hill/Alpha/Build Run Frame (HUD, keys, win and lose)")]
         private static void Build()
@@ -318,15 +319,15 @@ namespace HoldTheHill.EditorTools
             else
             {
                 text = MakeText(hud, "Wave Description", string.Empty, WaveDescriptionFontSize,
-                    TextAlignmentOptions.TopRight, layer);
+                    TextAlignmentOptions.Top, layer);
                 text.enabled = false;
                 text.gameObject.AddComponent<WaveDescriptionLabel>();
             }
 
             if (text != null)
             {
-                text.alignment = TextAlignmentOptions.TopRight;
-                Anchor(text.rectTransform, new Vector2(1f, 1f), new Vector2(-Margin, -Margin - 46f), WaveDescriptionSize);
+                text.alignment = TextAlignmentOptions.Top;
+                Anchor(text.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, WaveDescriptionTopOffset), WaveDescriptionSize);
             }
         }
 
