@@ -96,6 +96,20 @@ namespace HoldTheHill.Features.Enemies
             return ring;
         }
 
+        // Switched off (a level ending, a test turning her off), she stops placing rings, so hide
+        // them: they sit beside her, not under her, and would otherwise stay on the ground.
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            for (int i = 0; i < _pool.Count; i++)
+            {
+                if (_pool[i] != null)
+                {
+                    _pool[i].enabled = false;
+                }
+            }
+        }
+
         private void OnDestroy()
         {
             for (int i = 0; i < _pool.Count; i++)

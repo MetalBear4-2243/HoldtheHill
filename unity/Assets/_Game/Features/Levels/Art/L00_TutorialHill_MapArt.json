@@ -1,0 +1,39 @@
+{
+  "id": "L00_TutorialHill",
+  "pixelsPerUnit": 64,
+  "worldRect": [
+    -12,
+    -11,
+    34,
+    22
+  ],
+  "waypoints": [
+    [
+      -9.5,
+      0.5
+    ],
+    [
+      0.5,
+      0.5
+    ],
+    [
+      0.5,
+      -2.5
+    ],
+    [
+      9.5,
+      -2.5
+    ]
+  ],
+  "waypointsFlat": [
+    -9.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    -2.5,
+    9.5,
+    -2.5
+  ],
+  "source": "B:/Projects/GameDev/Source/2D/hold-the-hill-map-art/map_art.py"
+}

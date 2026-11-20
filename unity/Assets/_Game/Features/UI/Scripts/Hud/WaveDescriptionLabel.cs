@@ -9,6 +9,8 @@ namespace HoldTheHill.Features.UI
     /// Shows the upcoming wave's description under the wave counter once a wave is cleared,
     /// and hides it when the next wave starts. Stays hidden when there is no next wave or
     /// the upcoming wave description is blank or still the default placeholder.
+    /// Before the first wave is sent it shows the first wave's description the same way, so a
+    /// level can open with a line of its own (Tutorial Hill uses it to say how to build and start).
     /// </summary>
     [RequireComponent(typeof(TMP_Text))]
     public class WaveDescriptionLabel : LevelRunListener
@@ -55,8 +57,15 @@ namespace HoldTheHill.Features.UI
                 _spawner.onWaveCleared = new UnityEvent<int>();
             }
 
+            if (_spawner.onMapChanged == null)
+            {
+                _spawner.onMapChanged = new UnityEvent<string>();
+            }
+
             _spawner.onWaveStarted.AddListener(HandleWaveStarted);
             _spawner.onWaveCleared.AddListener(HandleWaveCleared);
+            _spawner.onMapChanged.AddListener(HandleMapChanged);
+            ShowFirstWaveIfNotStarted();
         }
 
         /// <summary>
@@ -68,6 +77,7 @@ namespace HoldTheHill.Features.UI
             {
                 _spawner.onWaveStarted?.RemoveListener(HandleWaveStarted);
                 _spawner.onWaveCleared?.RemoveListener(HandleWaveCleared);
+                _spawner.onMapChanged?.RemoveListener(HandleMapChanged);
                 _spawner = null;
             }
 
@@ -87,7 +97,29 @@ namespace HoldTheHill.Features.UI
                 return;
             }
 
-            string description = _spawner.GetUpcomingWaveDescription(clearedWaveNumber);
+            Show(_spawner.GetUpcomingWaveDescription(clearedWaveNumber));
+        }
+
+        private void HandleMapChanged(string mapId)
+        {
+            ShowFirstWaveIfNotStarted();
+        }
+
+        // Shows wave 1's description while no wave has been sent yet; otherwise leaves the label alone.
+        private void ShowFirstWaveIfNotStarted()
+        {
+            if (_spawner == null
+                || _spawner.CurrentState != EnemySpawner.SpawnerState.Idle
+                || _spawner.CurrentWaveIndex != 0)
+            {
+                return;
+            }
+
+            Show(EnemySpawner.GetDisplayableWaveDescription(_spawner.GetWave(0)));
+        }
+
+        private void Show(string description)
+        {
             if (string.IsNullOrEmpty(description))
             {
                 Hide();

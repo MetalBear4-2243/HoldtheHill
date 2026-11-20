@@ -882,6 +882,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.Enemies.EnemyPath
   _roadWidth: 1
   _roadColor: {r: 0.55, g: 0.42, b: 0.3, a: 1}
+  _drawRoad: 0
 --- !u!4 &1729843957
 Transform:
   m_ObjectHideFlags: 0

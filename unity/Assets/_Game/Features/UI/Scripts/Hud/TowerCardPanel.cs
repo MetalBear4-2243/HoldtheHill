@@ -46,11 +46,18 @@ namespace HoldTheHill.Features.UI
         private Tower _tower;
         private RectTransform _card;
         private Vector2 _bottomLeftOffset;
+        private TMP_Text[] _orderLabels;
 
         private void Awake()
         {
             _card = (RectTransform)_panel.transform;
             _bottomLeftOffset = _card.anchoredPosition;
+
+            _orderLabels = new TMP_Text[_orderButtons.Length];
+            for (int i = 0; i < _orderButtons.Length; i++)
+            {
+                _orderLabels[i] = _orderButtons[i].GetComponentInChildren<TMP_Text>(includeInactive: true);
+            }
         }
 
         protected override void OnEnable()
@@ -173,10 +180,7 @@ namespace HoldTheHill.Features.UI
 
             _level.text = string.Format(UiStrings.TowerLevelFormat, _tower.Level, _tower.MaxLevel);
 
-            int honeydew = _honeydew != null ? _honeydew.Amount : int.MaxValue;
-            TowerUpgradeRule.Verdict verdict = TowerUpgradeRule.Check(
-                _tower.Level, _tower.MaxLevel, _tower.NextUpgradeCost, honeydew);
-            _upgrade.interactable = verdict == TowerUpgradeRule.Verdict.Ready;
+            TowerUpgradeRule.Verdict verdict = RefreshUpgradeButton();
             _upgradeLabel.text = verdict == TowerUpgradeRule.Verdict.AtMaxLevel
                 ? UiStrings.MaxLevel
                 : string.Format(UiStrings.UpgradeFormat, _tower.NextUpgradeCost);
@@ -202,7 +206,7 @@ namespace HoldTheHill.Features.UI
             {
                 _orderButtons[i].gameObject.SetActive(aims);
                 bool current = (int)_tower.Priority == i;
-                TMP_Text label = _orderButtons[i].GetComponentInChildren<TMP_Text>();
+                TMP_Text label = _orderLabels[i];
                 if (label != null)
                 {
                     // A mark as well as the colour, so the choice never rides on colour alone.
@@ -212,9 +216,23 @@ namespace HoldTheHill.Features.UI
             }
         }
 
+        // Honeydew only decides whether the upgrade is affordable; the level, prices, refund and
+        // order stay as they are, so only the button is updated.
         private void HandleHoneydewChanged(int amount)
         {
-            Refresh();
+            if (_tower != null)
+            {
+                RefreshUpgradeButton();
+            }
+        }
+
+        private TowerUpgradeRule.Verdict RefreshUpgradeButton()
+        {
+            int honeydew = _honeydew != null ? _honeydew.Amount : int.MaxValue;
+            TowerUpgradeRule.Verdict verdict = TowerUpgradeRule.Check(
+                _tower.Level, _tower.MaxLevel, _tower.NextUpgradeCost, honeydew);
+            _upgrade.interactable = verdict == TowerUpgradeRule.Verdict.Ready;
+            return verdict;
         }
 
         private void HandleUpgraded(int level)

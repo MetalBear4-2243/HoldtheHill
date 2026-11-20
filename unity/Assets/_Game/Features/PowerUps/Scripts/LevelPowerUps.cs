@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using HoldTheHill.Core;
 using HoldTheHill.Features.Enemies;
 using HoldTheHill.Features.Towers;
 using UnityEngine;
@@ -14,7 +15,10 @@ namespace HoldTheHill.Features.PowerUps
     /// the map collect a drop into the one <see cref="PowerUpSlot"/>, and carries out the slot when
     /// the HUD asks: Swarm Frenzy speeds every tower up through <see cref="TowerTempo"/> for a while;
     /// Royal Gift waits for a click on a standing tower and upgrades it for free.
+    /// A click it acts on claims <see cref="MapClick"/>, so the placer does not also build or select.
     /// </summary>
+    // After the silverfish reader (-10), before the placer (0): one map click does one thing.
+    [DefaultExecutionOrder(-5)]
     [DisallowMultipleComponent]
     public class LevelPowerUps : MonoBehaviour
     {
@@ -123,11 +127,17 @@ namespace HoldTheHill.Features.PowerUps
                 return;
             }
 
-            Vector3 where = enemy.transform.position;
+            Drop(kind, enemy.transform.position);
+        }
+
+        /// <summary>Puts a drop of <paramref name="kind"/> on the map at <paramref name="where"/>.</summary>
+        public PowerUpPickup Drop(PowerUpKind kind, Vector3 where)
+        {
             where.z = 0f;
             PowerUpPickup pickup = Instantiate(_pickupPrefab, where, Quaternion.identity, transform);
             pickup.Init(kind, _settings.IconFor(kind), _settings.ColorFor(kind), _settings.DropLifetime);
             _pickups.Add(pickup);
+            return pickup;
         }
 
         private void Update()
@@ -151,21 +161,43 @@ namespace HoldTheHill.Features.PowerUps
             // A click on the HUD (the slot itself, the card) is not a click on the map, and a click
             // that squashed a silverfish must not also collect the drop it may have left.
             bool overUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
-            if (!_place.WasPressedThisFrame() || overUi || SilverfishClickReader.ClickUsedThisFrame)
+            if (!_place.WasPressedThisFrame() || overUi || MapClick.TakenThisFrame)
             {
                 return;
             }
 
             Vector3 world = _camera.ScreenToWorldPoint(_point.ReadValue<Vector2>());
             world.z = 0f;
+            ClickAt(world);
+        }
 
+        /// <summary>
+        /// A left click on the map at <paramref name="world"/>. While a Royal Gift is waiting it goes
+        /// to the tower clicked; otherwise it collects the drop clicked. A click that lands on a drop
+        /// (even with the slot full) or, while gifting, on a tower claims <see cref="MapClick"/>, so the
+        /// placer neither builds, pays nor changes the selection. True if the click was claimed.
+        /// </summary>
+        public bool ClickAt(Vector3 world)
+        {
             if (PickingGiftTarget)
             {
-                GiftTowerAt(world);
-                return;
+                if (!GiftTowerAt(world))
+                {
+                    return false;
+                }
+
+                MapClick.Claim();
+                return true;
             }
 
+            if (PickupAt(world) == null)
+            {
+                return false;
+            }
+
+            MapClick.Claim();
             CollectAt(world);
+            return true;
         }
 
         private void TickFrenzy()
@@ -267,25 +299,27 @@ namespace HoldTheHill.Features.PowerUps
             TowerTempo.FireRateFactor = _settings.FrenzyFireRateFactor;
         }
 
-        private void GiftTowerAt(Vector3 world)
+        // True if the click landed on a tower, gifted or refused.
+        private bool GiftTowerAt(Vector3 world)
         {
             Tower tower = _placer != null ? _placer.TowerAt(world) : null;
             if (tower == null)
             {
                 // A click on empty ground keeps waiting; right-click (Cancel) gives up.
-                return;
+                return false;
             }
 
             if (!PowerUpRule.CanGift(tower.Level, tower.MaxLevel))
             {
                 GiftRefused?.Invoke();
-                return;
+                return true;
             }
 
             tower.Upgrade();
             _slot.Take();
             PickingGiftTarget = false;
             Changed?.Invoke();
+            return true;
         }
     }
 }
