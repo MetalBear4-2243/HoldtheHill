@@ -102,6 +102,12 @@ public class EnemySpawner : MonoBehaviour
     public bool IsSpawning { get { return currentState == SpawnerState.Spawning; } }
 
     /// <summary>
+    /// True while this map holds the next wave back until every living enemy is gone
+    /// (<c>requireEnemiesClearedBeforeNextWave</c>) and some are still alive. StartNextWave refuses then.
+    /// </summary>
+    public bool WaitingForClear { get { return requireEnemiesClearedBeforeNextWave && livingEnemyCount > 0; } }
+
+    /// <summary>
     /// Returns the wave at the zero-based index, or null if out of range.
     /// </summary>
     public Wave GetWave(int waveIndex)

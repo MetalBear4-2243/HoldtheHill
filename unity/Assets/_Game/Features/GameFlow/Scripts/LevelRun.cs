@@ -128,10 +128,13 @@ namespace HoldTheHill.Features.GameFlow
 
         /// <summary>
         /// True when a wave can be sent now: the run is on and not paused, and the spawner is waiting
-        /// for the next wave (not still sending one, not done). The Next Wave button reads it.
+        /// for the next wave (not still sending one, not done), and on a map that holds the next wave
+        /// until the last one is cleared, nothing is left alive. The Next Wave button reads it.
         /// </summary>
         public bool CanSendNextWave =>
-            _spawner != null && NextWaveRule.CanSend(Outcome, Clock.Paused, _spawner.CurrentState);
+            _spawner != null
+            && NextWaveRule.CanSend(Outcome, Clock.Paused, _spawner.CurrentState)
+            && !_spawner.WaitingForClear;
 
         /// <summary>
         /// Sends the next wave. Does nothing while paused, while a wave is still coming out, after the
