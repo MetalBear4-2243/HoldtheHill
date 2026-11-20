@@ -56,22 +56,22 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Events")]
     [Tooltip("Invoked whenever an enemy is instantiated.")]
-    public UnityEvent<GameObject> onEnemySpawned;
+    public UnityEvent<GameObject> onEnemySpawned = new UnityEvent<GameObject>();
 
     [Tooltip("Invoked when a wave starts spawning. Passes (currentWaveNumber, totalWaves).")]
-    public UnityEvent<int, int> onWaveStarted;
+    public UnityEvent<int, int> onWaveStarted = new UnityEvent<int, int>();
 
     [Tooltip("Invoked when all enemies in the current wave have finished spawning. Passes (completedWaveNumber).")]
-    public UnityEvent<int> onWaveCompleted;
+    public UnityEvent<int> onWaveCompleted = new UnityEvent<int>();
 
     [Tooltip("Invoked when all enemies in the current wave have finished spawning and no living enemies remain. Passes (clearedWaveNumber).")]
     public UnityEvent<int> onWaveCleared = new UnityEvent<int>();
 
     [Tooltip("Invoked when all waves for the active map have been finished.")]
-    public UnityEvent onAllWavesCompleted;
+    public UnityEvent onAllWavesCompleted = new UnityEvent();
 
     [Tooltip("Invoked when the active map changes. Passes (mapId).")]
-    public UnityEvent<string> onMapChanged;
+    public UnityEvent<string> onMapChanged = new UnityEvent<string>();
 
     // Runtime state
     private SpawnerState currentState = SpawnerState.Idle;
@@ -100,6 +100,54 @@ public class EnemySpawner : MonoBehaviour
     /// </summary>
     public int LivingEnemyCount { get { return livingEnemyCount; } }
     public bool IsSpawning { get { return currentState == SpawnerState.Spawning; } }
+
+    /// <summary>
+    /// Returns the wave at the zero-based index, or null if out of range.
+    /// </summary>
+    public Wave GetWave(int waveIndex)
+    {
+        if (activeWaves == null || waveIndex < 0 || waveIndex >= activeWaves.Count)
+        {
+            return null;
+        }
+
+        return activeWaves[waveIndex];
+    }
+
+    /// <summary>
+    /// Returns the displayable description for the wave following <paramref name="completedWaveNumber"/>,
+    /// or null if there is no next wave or its description is blank or default.
+    /// </summary>
+    public string GetUpcomingWaveDescription(int completedWaveNumber)
+    {
+        if (completedWaveNumber < 1)
+        {
+            return null;
+        }
+
+        // completedWaveNumber is 1-based (waveIdx + 1), which equals the 0-based index of the next wave.
+        Wave nextWave = GetWave(completedWaveNumber);
+        return GetDisplayableWaveDescription(nextWave);
+    }
+
+    /// <summary>
+    /// Returns a trimmed description if <paramref name="wave"/> has non-blank, non-default text; otherwise null.
+    /// </summary>
+    public static string GetDisplayableWaveDescription(Wave wave)
+    {
+        if (wave == null || string.IsNullOrWhiteSpace(wave.waveDescription))
+        {
+            return null;
+        }
+
+        string trimmed = wave.waveDescription.Trim();
+        if (string.Equals(trimmed, Wave.DefaultWaveDescription, System.StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return trimmed;
+    }
 
     private void Awake()
     {

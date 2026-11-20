@@ -15,6 +15,7 @@ MonoBehaviour:
   mapId: L01_Meadow
   waves:
   - waveName: Wave 1
+    waveDescription: Default Description
     enemies:
     - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
       delayBeforeNext: 1.2
@@ -32,6 +33,7 @@ MonoBehaviour:
       delayBeforeNext: 1.2
       spawnPointOverride: {fileID: 0}
   - waveName: Wave 2
+    waveDescription: Watch out! Scarabs move quick!
     enemies:
     - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
       delayBeforeNext: 0.35
@@ -73,6 +75,7 @@ MonoBehaviour:
       delayBeforeNext: 1
       spawnPointOverride: {fileID: 0}
   - waveName: Wave 3
+    waveDescription: Rhino Beetles have a regenerating shield.
     enemies:
     - enemyPrefab: {fileID: 7105141689097810667, guid: f4385d581b1ef3f40952803f2be0c75a, type: 3}
       delayBeforeNext: 1.6
@@ -96,6 +99,7 @@ MonoBehaviour:
       delayBeforeNext: 1
       spawnPointOverride: {fileID: 0}
   - waveName: Wave 4
+    waveDescription: Bees can only be targeted by bullets.
     enemies:
     - enemyPrefab: {fileID: 9083623440978163997, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
       delayBeforeNext: 1.2
@@ -122,6 +126,7 @@ MonoBehaviour:
       delayBeforeNext: 1
       spawnPointOverride: {fileID: 0}
   - waveName: Wave 5
+    waveDescription: Rolly Pollies curl up for defense and speed.
     enemies:
     - enemyPrefab: {fileID: 3026445683941992430, guid: 53f559db0be701644817e41297a6cbbd, type: 3}
       delayBeforeNext: 1.8
@@ -145,6 +150,7 @@ MonoBehaviour:
       delayBeforeNext: 1
       spawnPointOverride: {fileID: 0}
   - waveName: Wave 6
+    waveDescription: Silverfish can be clicked on for a quick kill.
     enemies:
     - enemyPrefab: {fileID: 4334611125077423612, guid: 8c0fe9a39079c2c41be596e41539ee4a, type: 3}
       delayBeforeNext: 1
@@ -183,6 +189,7 @@ MonoBehaviour:
       delayBeforeNext: 0.35
       spawnPointOverride: {fileID: 0}
   - waveName: Wave 7
+    waveDescription: Default Description
     enemies:
     - enemyPrefab: {fileID: 606357447812029990, guid: ed9db635b41773349a0ea887d67ee148, type: 3}
       delayBeforeNext: 0.6
@@ -221,6 +228,7 @@ MonoBehaviour:
       delayBeforeNext: 1
       spawnPointOverride: {fileID: 0}
   - waveName: Wave 8
+    waveDescription: Default Description
     enemies:
     - enemyPrefab: {fileID: 7105141689097810667, guid: f4385d581b1ef3f40952803f2be0c75a, type: 3}
       delayBeforeNext: 1.4
@@ -265,6 +273,7 @@ MonoBehaviour:
       delayBeforeNext: 0.8
       spawnPointOverride: {fileID: 0}
   - waveName: Wave 9
+    waveDescription: Default Description
     enemies:
     - enemyPrefab: {fileID: 4447544581239034331, guid: 90a4787c9f6421f42ad928fc3be8f9a2, type: 3}
       delayBeforeNext: 0.3
@@ -336,6 +345,7 @@ MonoBehaviour:
       delayBeforeNext: 1.2
       spawnPointOverride: {fileID: 0}
   - waveName: Wave 10
+    waveDescription: Queen Mantis incoming! Watch out for its healing and resurrection powers!
     enemies:
     - enemyPrefab: {fileID: 3026445683941992430, guid: 53f559db0be701644817e41297a6cbbd, type: 3}
       delayBeforeNext: 1.2
