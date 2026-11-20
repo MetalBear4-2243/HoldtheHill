@@ -4,10 +4,12 @@
 
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using HoldTheHill.Features.Towers;
 using TMPro;
 
-public class TowerCardUI : MonoBehaviour
+// Add the IPointerEnterHandler and IPointerExitHandler interfaces here
+public class TowerCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public TowerData towerData;
     public TowerPlacer towerPlacer;
@@ -18,6 +20,10 @@ public class TowerCardUI : MonoBehaviour
     [Header("Selection")]
     [Tooltip("The card's background tint while its tower is picked (the ghost is out for it).")]
     public Color selectedTint = new Color(1f, 0.82f, 0.3f, 1f);
+
+    [Header("Tooltip")]
+    public GameObject tooltipPanel;
+    public TextMeshProUGUI tooltipText;
 
     private Image _background;
     private Color _normalTint = Color.white;
@@ -30,6 +36,12 @@ public class TowerCardUI : MonoBehaviour
         if (_background != null)
         {
             _normalTint = _background.color;
+        }
+
+        // Ensure the tooltip is hidden when the card first spawns
+        if (tooltipPanel != null) 
+        {
+            tooltipPanel.SetActive(false);
         }
     }
 
@@ -99,6 +111,27 @@ public class TowerCardUI : MonoBehaviour
         else
         {
             towerPlacer.Select(towerData);
+        }
+    }
+
+    // --- HOVER FUNCTIONALITY ---
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (tooltipPanel != null && tooltipText != null && towerData != null)
+        {
+            // Note: You will need to add a "public string description;" variable 
+            // to your TowerData.cs script if it doesn't have one already!
+            tooltipText.text = towerData.towerDescription; 
+            tooltipPanel.SetActive(true);
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (tooltipPanel != null)
+        {
+            tooltipPanel.SetActive(false);
         }
     }
 }

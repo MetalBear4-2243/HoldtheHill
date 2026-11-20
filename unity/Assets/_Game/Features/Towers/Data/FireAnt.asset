@@ -15,3 +15,4 @@ MonoBehaviour:
   towerName: Fire Ant
   honeydewCost: 200
   towerIcon: {fileID: -616928818, guid: 45c12271588f2cd468f9b20d9a0cef07, type: 3}
+  towerDescription: 'Medium range ant who blows fire on enemies. '

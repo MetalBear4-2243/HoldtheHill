@@ -15,6 +15,7 @@ MonoBehaviour:
   mapId: L00_TutorialHill
   waves:
   - waveName: Wave 1
+    waveDescription: Pick a tower with 1-6 or a card, click the map to build it, then press Space to send the wave.
     enemies:
     - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
       delayBeforeNext: 1.4
@@ -29,6 +30,7 @@ MonoBehaviour:
       delayBeforeNext: 1.4
       spawnPointOverride: {fileID: 0}
   - waveName: Wave 2
+    waveDescription: Scarabs move quick and come in a crowd! Click a tower, then press U to upgrade it.
     enemies:
     - enemyPrefab: {fileID: 6967988903673393095, guid: 9b4bc3a2b094869499ab6bc2e58fb84d, type: 3}
       delayBeforeNext: 1.2
@@ -64,6 +66,7 @@ MonoBehaviour:
       delayBeforeNext: 0.35
       spawnPointOverride: {fileID: 0}
   - waveName: Wave 3
+    waveDescription: Rhino Beetles have a regenerating shield. Dust patches stun any tower inside them.
     enemies:
     - enemyPrefab: {fileID: 7105141689097810667, guid: f4385d581b1ef3f40952803f2be0c75a, type: 3}
       delayBeforeNext: 2
@@ -84,6 +87,7 @@ MonoBehaviour:
       delayBeforeNext: 1
       spawnPointOverride: {fileID: 0}
   - waveName: Wave 4
+    waveDescription: Wasps fly, so only towers that shoot straight can hit them. When the spray cloud gathers, press B to burrow.
     enemies:
     - enemyPrefab: {fileID: 9083623440978163997, guid: 391c5604219d8634fb6f7a40ec2b5247, type: 3}
       delayBeforeNext: 1.5
@@ -125,6 +129,7 @@ MonoBehaviour:
       delayBeforeNext: 0.35
       spawnPointOverride: {fileID: 0}
   - waveName: Wave 5
+    waveDescription: Centipede incoming! It splits in two when it dies. Click silverfish to squash them; burrow when a bird's shadow nears.
     enemies:
     - enemyPrefab: {fileID: 4334611125077423612, guid: 8c0fe9a39079c2c41be596e41539ee4a, type: 3}
       delayBeforeNext: 1.2

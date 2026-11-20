@@ -42,10 +42,13 @@ namespace HoldTheHill.EditorTools
 
         private const float Margin = 24f;
         private const int HudFontSize = 36;
+        private const int WaveDescriptionFontSize = 24;
         internal const int TitleFontSize = 64;
         private const int ButtonFontSize = 28;
         internal static readonly Vector2 MenuButtonSize = new Vector2(320f, 72f);
         private static readonly Vector2 NextWaveButtonSize = new Vector2(240f, 64f);
+        private static readonly Vector2 WaveDescriptionSize = new Vector2(680f, 64f);
+        private const float WaveDescriptionTopOffset = -168f;
 
         [MenuItem("Tools/Hold the Hill/Alpha/Build Run Frame (HUD, keys, win and lose)")]
         private static void Build()
@@ -89,7 +92,7 @@ namespace HoldTheHill.EditorTools
         }
 
         /// <summary>Opens the UI scene, adds whatever HUD piece is missing, and saves it.</summary>
-        internal static void WireUiSceneFile()
+        public static void WireUiSceneFile()
         {
             Scene ui = EditorSceneManager.OpenScene(UiScenePath, OpenSceneMode.Single);
             WireUiScene(ui);
@@ -254,6 +257,7 @@ namespace HoldTheHill.EditorTools
             RectTransform hud = EnsureStretchedChild(canvas.transform, "HUD", uiLayer);
             EnsureHoneydewLabel(scene, hud, uiLayer);
             EnsureWaveLabel(scene, hud, uiLayer);
+            EnsureWaveDescriptionLabel(scene, hud, uiLayer);
             EnsureQueenBar(scene, hud, uiLayer);
             EnsureNextWaveButton(scene, canvas, hud, uiLayer);
             EnsurePauseMenu(scene, canvas.transform, uiLayer);
@@ -302,6 +306,29 @@ namespace HoldTheHill.EditorTools
                 TextAlignmentOptions.Center, layer);
             Anchor(text.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -Margin), new Vector2(480f, 48f));
             text.gameObject.AddComponent<WaveLabel>();
+        }
+
+        private static void EnsureWaveDescriptionLabel(Scene scene, RectTransform hud, int layer)
+        {
+            WaveDescriptionLabel label = FindInScene<WaveDescriptionLabel>(scene);
+            TextMeshProUGUI text;
+            if (label != null)
+            {
+                text = label.GetComponent<TextMeshProUGUI>();
+            }
+            else
+            {
+                text = MakeText(hud, "Wave Description", string.Empty, WaveDescriptionFontSize,
+                    TextAlignmentOptions.Top, layer);
+                text.enabled = false;
+                text.gameObject.AddComponent<WaveDescriptionLabel>();
+            }
+
+            if (text != null)
+            {
+                text.alignment = TextAlignmentOptions.Top;
+                Anchor(text.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, WaveDescriptionTopOffset), WaveDescriptionSize);
+            }
         }
 
         private static void EnsureQueenBar(Scene scene, RectTransform hud, int layer)
@@ -571,6 +598,7 @@ namespace HoldTheHill.EditorTools
             Debug.Log($"HUD panel: {(hudPanel != null ? "hud = " + Name(new SerializedObject(hudPanel), "_hud") : "MISSING")}");
             Debug.Log($"HUD: Honeydew {(FindInScene<HoneydewLabel>(ui) != null ? "present" : "MISSING")}, "
                       + $"Wave {(FindInScene<WaveLabel>(ui) != null ? "present" : "MISSING")}, "
+                      + $"Wave description {(FindInScene<WaveDescriptionLabel>(ui) != null ? "present" : "MISSING")}, "
                       + $"Next Wave button {(FindInScene<NextWaveButton>(ui) != null ? "present" : "MISSING")}");
 
             QueenHealthBar bar = FindInScene<QueenHealthBar>(ui);

@@ -25,6 +25,23 @@ Copy this to the top of the log:
 **Next**
 - What you or the team should do next
 ```
+## 2026-11-12 — Tower descriptions
+**Who:** Adam / 1103-Montgomery-Adam
+**Branch:** AdamTowerDescriptions
+
+**Worked on**
+- Fixed minor black background visual issue with towerCard. Added a hover ability to 
+towers so players can preview the tower descriptions. 
+
+**Decisions**
+- Decided to do hover over click to familarize new players quicker, we can switch to click if we so desire.
+
+**Problems / blockers**
+- nothin broke
+
+**Next**
+- The tower preview description box is a bit dull, could use a UI touchup to look nice.
+Also might be nice to have the option to turn it off later.
 
 ## 2026-11-05 — Tower roles: dart, sap puddle, flamethrower, poison
 **Who:** Nilly (nilly-ctrl), with AI assistance — see [AI use log](AI_DEVLOG.md)

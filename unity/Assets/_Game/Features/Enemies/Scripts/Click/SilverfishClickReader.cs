@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using HoldTheHill.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -9,15 +10,14 @@ namespace HoldTheHill.Features.Enemies
     /// Kills a <see cref="SilverfishEnemy"/> with one click, read from the game's actions asset.
     /// Jason's #43 took out his <c>OnMouseDown</c> in favour of this reader, so it is the only kill
     /// path: one reader per level scene checks the <see cref="EnemyRegistry"/> under the pointer on
-    /// the Place action and deals all remaining health as damage. A click that kills is used up:
-    /// <see cref="ClickUsedThisFrame"/> tells the placer and the power-ups to leave it alone.
+    /// the Place action and deals all remaining health as damage. A click that kills is used up: it claims
+    /// <see cref="MapClick"/>, so the power-ups and the placer leave it alone.
     /// </summary>
-    // Before the placer and the power-ups (default order 0), so they can see the click was used.
+    // Before the power-ups (-5) and the placer (0), so they can see the click was used.
     [DefaultExecutionOrder(-10)]
     [DisallowMultipleComponent]
     public class SilverfishClickReader : MonoBehaviour
     {
-        private static int s_usedFrame = -1;
         [Tooltip("The game's actions asset. Uses its Gameplay map: Point and Place.")]
         [SerializeField] private InputActionAsset _actions;
 
@@ -32,8 +32,11 @@ namespace HoldTheHill.Features.Enemies
         /// <summary>Raised after a click has killed a silverfish.</summary>
         public event System.Action<SilverfishEnemy> SilverfishClicked;
 
-        /// <summary>True on the frame a click killed a silverfish: that click selects, builds and collects nothing.</summary>
-        public static bool ClickUsedThisFrame => s_usedFrame == Time.frameCount;
+        /// <summary>
+        /// True once this frame's map click is taken (by a silverfish kill or a power-up drop): that
+        /// click selects, builds and collects nothing more. Reads <see cref="MapClick.TakenThisFrame"/>.
+        /// </summary>
+        public static bool ClickUsedThisFrame => MapClick.TakenThisFrame;
 
         private void Awake()
         {
@@ -87,7 +90,7 @@ namespace HoldTheHill.Features.Enemies
             }
 
             // Marked before the kill: the kill can drop a power-up under the cursor this frame.
-            s_usedFrame = Time.frameCount;
+            MapClick.Claim();
 
             // The same kill Jason's OnMouseDown did.
             hit.TakeDamage(hit.CurrentHealth);
@@ -125,13 +128,6 @@ namespace HoldTheHill.Features.Enemies
             Vector3 centre = silverfish.transform.position;
             centre.z = 0f;
             return (centre - world).sqrMagnitude <= _fallbackRadius * _fallbackRadius;
-        }
-
-        // Domain reload is on, but clearing keeps Play mode safe if that ever changes.
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics()
-        {
-            s_usedFrame = -1;
         }
     }
 }

@@ -17,6 +17,9 @@ namespace HoldTheHill.Features.Enemies
 
         [SerializeField] private Color _roadColor = new Color(0.55f, 0.42f, 0.3f);
 
+        [Tooltip("Lay the plain coloured road when the game starts. Off on levels whose map art already draws the road.")]
+        [SerializeField] private bool _drawRoad = true;
+
         private readonly List<Vector3> _waypoints = new List<Vector3>();
 
         /// <summary>Waypoint positions in world space, in walking order.</summary>
@@ -30,7 +33,10 @@ namespace HoldTheHill.Features.Enemies
                 _waypoints.Add(child.position);
             }
 
-            CreateRoad();
+            if (_drawRoad)
+            {
+                CreateRoad();
+            }
         }
 
         /// <summary>True if a grid cell centered at <paramref name="cellCenter"/> overlaps the road.</summary>

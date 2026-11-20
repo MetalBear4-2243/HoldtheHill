@@ -9,7 +9,7 @@ namespace HoldTheHill.Features.Towers
     /// leaves; an attack that came without warning (an enemy walking into range of a ready tower) jumps
     /// straight to the hit frame. The Carpenter Ant plays it as it lays a mine, the Sap Ant while its
     /// aura slows someone. Stunned or burrowed, the tower goes back to idle. The idle
-    /// <see cref="SpriteFlipbook"/> is switched off while the attack plays. Frames come from Build Sprites.
+    /// <see cref="SpriteFlipbook"/> is held (keeps time, leaves the sprite alone) while the attack plays. Frames come from Build Sprites.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Tower))]
@@ -18,7 +18,7 @@ namespace HoldTheHill.Features.Towers
         [Tooltip("The renderer the tower is drawn with.")]
         [SerializeField] private SpriteRenderer _renderer;
 
-        [Tooltip("The idle loop, paused while the attack plays.")]
+        [Tooltip("The idle loop, held while the attack plays.")]
         [SerializeField] private SpriteFlipbook _idle;
 
         [Tooltip("The attack row, in order.")]
@@ -146,7 +146,7 @@ namespace HoldTheHill.Features.Towers
             _shown = -1;
             if (_idle != null)
             {
-                _idle.enabled = false;
+                _idle.Held = true;
             }
         }
 
@@ -161,8 +161,9 @@ namespace HoldTheHill.Features.Towers
             _shown = -1;
             if (_idle != null)
             {
-                // Its OnEnable shows an idle frame at once.
-                _idle.enabled = true;
+                // Released, it shows its current frame at once. It kept time while held, so it
+                // carries on where it was instead of starting again on a random frame.
+                _idle.Held = false;
             }
         }
 

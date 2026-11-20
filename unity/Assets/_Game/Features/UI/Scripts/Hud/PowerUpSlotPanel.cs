@@ -24,6 +24,18 @@ namespace HoldTheHill.Features.UI
         private readonly TimedNotice _notice = new TimedNotice();
         private LevelPowerUps _powerUps;
         private bool _noticeShown;
+        private int _frenzySecondsShown = NoCountdown;
+
+        private const int NoCountdown = -1;
+
+        /// <summary>
+        /// The whole seconds the frenzy countdown shows for <paramref name="secondsLeft"/> (rounded
+        /// up, so it reads 1 until the end), or -1 when no frenzy runs.
+        /// </summary>
+        public static int CountdownSeconds(float secondsLeft)
+        {
+            return secondsLeft > 0f ? (int)System.Math.Ceiling(secondsLeft) : NoCountdown;
+        }
 
         protected override void OnEnable()
         {
@@ -69,9 +81,11 @@ namespace HoldTheHill.Features.UI
 
         private void Update()
         {
-            // Only the countdown and the notice change without an event. A notice that was up at
-            // the last refresh gets one more, on the frame it runs out, to put the label back.
-            if (_powerUps != null && (_powerUps.FrenzyActive || _noticeShown))
+            // Only the countdown and the notice change without an event. The countdown is redrawn
+            // when its shown second changes, not every frame. A notice that was up at the last
+            // refresh gets one more, on the frame it runs out, to put the label back.
+            if (_powerUps != null
+                && (_noticeShown || CountdownSeconds(_powerUps.FrenzySecondsLeft) != _frenzySecondsShown))
             {
                 Refresh();
             }
@@ -81,6 +95,7 @@ namespace HoldTheHill.Features.UI
         {
             string notice = _notice.TextAt(Time.unscaledTime);
             _noticeShown = notice != null;
+            _frenzySecondsShown = _powerUps != null ? CountdownSeconds(_powerUps.FrenzySecondsLeft) : NoCountdown;
 
             PowerUpKind? held = _powerUps != null ? _powerUps.Slot.Held : null;
             bool hasIcon = held != null && _powerUps.Settings != null;
@@ -111,7 +126,7 @@ namespace HoldTheHill.Features.UI
 
             if (_powerUps != null && _powerUps.FrenzyActive)
             {
-                return string.Format(UiStrings.FrenzyActiveFormat, Mathf.CeilToInt(_powerUps.FrenzySecondsLeft));
+                return string.Format(UiStrings.FrenzyActiveFormat, CountdownSeconds(_powerUps.FrenzySecondsLeft));
             }
 
             return UiStrings.PowerUpEmpty;
