@@ -107,6 +107,43 @@ namespace HoldTheHill.Tests
             Assert.AreEqual(string.Empty, _label.text);
         }
 
+        [Test]
+        public void BeforeFirstWave_DisplaysFirstWaveDescription_AndHidesWhenItStarts()
+        {
+            _waveData.waves = new List<Wave>
+            {
+                MakeWave("Wave 1", "  Build a tower, then press Space.  ", delayBeforeNext: 0f),
+                MakeWave("Wave 2", "Second wave", delayBeforeNext: 0f)
+            };
+
+            LoadWavesAndBind();
+
+            Assert.IsTrue(_label.enabled);
+            Assert.AreEqual("Build a tower, then press Space.", _label.text);
+
+            _spawner.StartNextWave();
+
+            Assert.IsFalse(_label.enabled);
+            Assert.AreEqual(string.Empty, _label.text);
+        }
+
+        [TestCase(Wave.DefaultWaveDescription)]
+        [TestCase("")]
+        [TestCase(null)]
+        public void BeforeFirstWave_DisplaysNothing_WhenFirstDescriptionIsBlankOrDefault(string firstDescription)
+        {
+            _waveData.waves = new List<Wave>
+            {
+                MakeWave("Wave 1", firstDescription, delayBeforeNext: 0f),
+                MakeWave("Wave 2", "Second wave", delayBeforeNext: 0f)
+            };
+
+            LoadWavesAndBind();
+
+            Assert.IsFalse(_label.enabled);
+            Assert.AreEqual(string.Empty, _label.text);
+        }
+
         [TestCase(Wave.DefaultWaveDescription)]
         [TestCase("default description")]
         [TestCase("")]
