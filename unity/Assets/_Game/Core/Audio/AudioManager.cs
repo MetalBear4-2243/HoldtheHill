@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using HoldTheHill.Core.Save;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -168,6 +169,12 @@ namespace HoldTheHill.Core.Audio
             }
         }
 
+        // Start, not Awake: the mixer ignores SetFloat calls made in Awake.
+        private void Start()
+        {
+            ApplySavedVolumes();
+        }
+
         private void OnDisable()
         {
             if (SoundEffectSO.PlaybackHandler == HandlePlaybackRequest)
@@ -311,17 +318,58 @@ namespace HoldTheHill.Core.Audio
 
         // --- AudioMixer UI Volume Controls ---
 
-        /// <summary>Sets Master volume from a linear 0..1 slider.</summary>
-        public void SetMasterVolume(float linear01) => SetVolume(MasterVolumeParam, linear01);
+        /// <summary>Sets Master volume from a linear 0..1 slider, and saves it.</summary>
+        public void SetMasterVolume(float linear01)
+        {
+            SetVolume(MasterVolumeParam, linear01);
+            RememberVolumes(master: linear01);
+        }
 
-        /// <summary>Sets SFX bus volume from a linear 0..1 slider.</summary>
-        public void SetSfxVolume(float linear01) => SetVolume(SfxVolumeParam, linear01);
+        /// <summary>Sets SFX bus volume from a linear 0..1 slider, and saves it.</summary>
+        public void SetSfxVolume(float linear01)
+        {
+            SetVolume(SfxVolumeParam, linear01);
+            RememberVolumes(sfx: linear01);
+        }
 
-        /// <summary>Sets Music bus volume from a linear 0..1 slider.</summary>
+        /// <summary>Sets Music bus volume from a linear 0..1 slider, and saves it.</summary>
         public void SetMusicVolume(float linear01)
         {
             MusicVolume = linear01;
             SetVolume(MusicVolumeParam, linear01);
+            RememberVolumes(music: linear01);
+        }
+
+        // Only in Play mode: EditMode tests call the setters and must not write the player's save file.
+        private void RememberVolumes(float? master = null, float? sfx = null, float? music = null)
+        {
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+
+            AudioSettingsData saved = SaveStore.Data.audio;
+            saved.set = true;
+            saved.master = Mathf.Clamp01(master ?? saved.master);
+            saved.sfx = Mathf.Clamp01(sfx ?? saved.sfx);
+            // The music level lives on this component too, so it is always current.
+            saved.music = Mathf.Clamp01(music ?? MusicVolume);
+            SaveStore.Save();
+        }
+
+        // Leaves the authored mixer levels alone until the player has moved a slider once.
+        private void ApplySavedVolumes()
+        {
+            AudioSettingsData saved = SaveStore.Data.audio;
+            if (!saved.set)
+            {
+                return;
+            }
+
+            SetVolume(MasterVolumeParam, saved.master);
+            SetVolume(SfxVolumeParam, saved.sfx);
+            MusicVolume = saved.music;
+            SetVolume(MusicVolumeParam, saved.music);
         }
 
         /// <summary>
