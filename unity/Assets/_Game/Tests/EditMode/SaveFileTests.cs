@@ -36,17 +36,14 @@ namespace HoldTheHill.Tests
 
             Assert.AreEqual(SaveMigrations.CurrentVersion, save.Data.version);
             Assert.IsEmpty(save.Data.levels);
-            Assert.IsFalse(save.Data.audio.set);
             Assert.IsFalse(save.ReadOnly);
         }
 
         [Test]
-        public void SaveThenLoad_RoundTripsSettingsAndLevels()
+        public void SaveThenLoad_RoundTripsLevels()
         {
             var save = new SaveFile(_path);
             save.Load();
-            save.Data.audio.set = true;
-            save.Data.audio.music = 0.25f;
             save.Data.RecordWin("L01_Meadow", 0.75f);
             Assert.IsTrue(save.Save());
 
@@ -54,8 +51,6 @@ namespace HoldTheHill.Tests
             again.Load();
 
             Assert.AreEqual(SaveMigrations.CurrentVersion, again.Data.version);
-            Assert.IsTrue(again.Data.audio.set);
-            Assert.AreEqual(0.25f, again.Data.audio.music, 1e-5f);
             LevelRecord meadow = again.Data.FindLevel("L01_Meadow");
             Assert.IsNotNull(meadow);
             Assert.IsTrue(meadow.completed);
@@ -119,7 +114,6 @@ namespace HoldTheHill.Tests
             save.Load();
 
             Assert.AreEqual(SaveMigrations.CurrentVersion, save.Data.version);
-            Assert.IsNotNull(save.Data.audio);
             Assert.IsTrue(save.Data.FindLevel("L00_TutorialHill").completed);
             Assert.IsFalse(save.ReadOnly);
         }

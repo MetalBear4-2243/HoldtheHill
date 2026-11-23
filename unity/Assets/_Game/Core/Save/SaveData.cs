@@ -4,8 +4,9 @@ using System.Collections.Generic;
 namespace HoldTheHill.Core.Save
 {
     /// <summary>
-    /// Everything the game keeps between sessions, as written to the save file by
-    /// <see cref="SaveFile"/>. Plain fields so <c>JsonUtility</c> can read and write it.
+    /// Progress the game keeps between sessions, as written to the save file by
+    /// <see cref="SaveFile"/>. Plain fields so <c>JsonUtility</c> can read and write it. Volume
+    /// settings are not here: AudioManager keeps them.
     /// </summary>
     [Serializable]
     public class SaveData
@@ -15,9 +16,6 @@ namespace HoldTheHill.Core.Save
         /// here so a file with no version field reads as 0; <see cref="CreateNew"/> sets the current one.
         /// </summary>
         public int version;
-
-        /// <summary>Volume sliders.</summary>
-        public AudioSettingsData audio = new AudioSettingsData();
 
         /// <summary>One entry per level the player has finished at least once.</summary>
         public List<LevelRecord> levels = new List<LevelRecord>();
@@ -63,20 +61,6 @@ namespace HoldTheHill.Core.Save
             record.bestHillHealth = Math.Max(record.bestHillHealth, clamped);
             return changed;
         }
-    }
-
-    /// <summary>Volume sliders, linear 0..1.</summary>
-    [Serializable]
-    public class AudioSettingsData
-    {
-        /// <summary>
-        /// False until the player moves a slider; until then the mixer keeps its authored levels.
-        /// </summary>
-        public bool set;
-
-        public float master = 1f;
-        public float sfx = 1f;
-        public float music = 0.5f;
     }
 
     /// <summary>How the player has done on one level.</summary>

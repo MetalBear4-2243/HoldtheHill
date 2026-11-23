@@ -54,13 +54,12 @@ namespace HoldTheHill.Tests
         }
 
         [Test]
-        public void Upgrade_FillsMissingLists()
+        public void Upgrade_FillsAMissingLevelList()
         {
-            var data = new SaveData { version = 0, audio = null, levels = null };
+            var data = new SaveData { version = 0, levels = null };
 
             Assert.IsTrue(SaveMigrations.Upgrade(data));
             Assert.AreEqual(SaveMigrations.CurrentVersion, data.version);
-            Assert.IsNotNull(data.audio);
             Assert.IsNotNull(data.levels);
         }
     }

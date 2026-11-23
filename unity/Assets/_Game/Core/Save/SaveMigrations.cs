@@ -25,7 +25,7 @@ namespace HoldTheHill.Core.Save
                 switch (data.version)
                 {
                     // 0: a file with no version field. Version 1 added nothing it lacks; the
-                    // missing lists are filled in below.
+                    // missing list is filled in below.
                     case 0:
                         data.version = 1;
                         break;
@@ -36,7 +36,6 @@ namespace HoldTheHill.Core.Save
                 }
             }
 
-            data.audio ??= new AudioSettingsData();
             data.levels ??= new System.Collections.Generic.List<LevelRecord>();
             return true;
         }
