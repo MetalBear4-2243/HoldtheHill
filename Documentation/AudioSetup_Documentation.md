@@ -87,7 +87,7 @@ Before wiring any sound into gameplay, create its `SoundEffectSO` asset card:
 2. Right-click $\rightarrow$ **Create > Hold the Hill > Audio > Sound Effect** (prefix with `sfx_`).
 3. Configure the asset in the Inspector:
    * **Audio Clips:** Add 1 to 4 clip variations. The asset randomly cycles through them without playing the same clip twice in succession.
-   * **Mixer Group:** Assign the target bus (`SFX` or `UI`).
+   * **Mixer Group:** Assign the `SFX` bus from `MainMixer.mixer` (used for both gameplay and UI sounds; if left unassigned, `AudioManager` falls back to its `_sfxGroup`).
    * **Volume:** Set base gain ($0.0$ to $1.0$).
    * **Pitch Variance:** Set jitter bounds centered at $1.0$ (e.g. `X: 0.95`, `Y: 1.05`). This gives organic variety to repeated sounds.
    * **Cooldown:** Set anti-spam threshold (recommended $0.05\text{s}$ for combat impacts, $0.5\text{s}$ for wave chimes) to prevent audio stacking and distortion.
@@ -132,8 +132,8 @@ Matching is **case-insensitive** (using `ToLowerInvariant()`) and uses **substri
 
 | Manager Slot Property | Asset Query Filter | Matched Asset / Group Name | Purpose |
 | :--- | :--- | :--- | :--- |
-| `_mixer` | `t:AudioMixer` | `MainMixer.mixer` (first matching mixer found in project) | Primary AudioMixer controlling volume attenuation |
-| `_sfxGroup` | `mixer.FindMatchingGroups("SFX")` | AudioMixerGroup named `SFX` | Sound effects bus routed to `AudioManager` |
+| `_mixer` | `Assets/_Game/Shared/Audio/MainMixer.mixer` (fallback `t:AudioMixer` in `Assets/_Game`) | `MainMixer.mixer` | Primary AudioMixer controlling volume attenuation |
+| `_sfxGroup` | `mixer.FindMatchingGroups("SFX")` | AudioMixerGroup named `SFX` | Sound effects & UI bus routed to `AudioManager` and shared `SoundEffectSO` assets |
 | `_musicGroup` | `mixer.FindMatchingGroups("Music")` | AudioMixerGroup named `Music` | Music bus routed to `AudioManager` |
 
 > [!NOTE]
@@ -252,18 +252,18 @@ private void Start()
 
 ## 6. AudioMixer & Volume Controls
 
-The `AudioManager` connects player volume preferences to Unity's `AudioMixer`:
+The `AudioManager` connects player volume preferences to Unity's `AudioMixer` (`Assets/_Game/Shared/Audio/MainMixer.mixer`):
 
-1. **Hierarchy:**
-   * `Master` (Master volume attenuation)
-     * `SFX` (Sound effects bus)
-     * `Music` (Background music bus)
-2. **Settings Sliders:**
+1. **Hierarchy (3 Buses):**
+   * `Master` (Master volume attenuation; exposed parameter `MasterVolume`)
+     * `SFX` (Gameplay sound effects and UI audio; exposed parameter `SfxVolume`)
+     * `Music` (Background music channels; exposed parameter `MusicVolume`)
+2. **Settings Sliders & Persistence:**
    Connect UI sliders directly to `AudioManager`:
    * Master Slider $\rightarrow$ `AudioManager.Current.SetMasterVolume(slider.value)`
    * SFX Slider $\rightarrow$ `AudioManager.Current.SetSfxVolume(slider.value)`
    * Music Slider $\rightarrow$ `AudioManager.Current.SetMusicVolume(slider.value)`
-   Values are automatically mapped to decibels logarithmically ($0.0 \rightarrow -80\text{ dB}$, $1.0 \rightarrow 0\text{ dB}$).
+   Values are mapped logarithmically to decibels ($0.0 \rightarrow -80\text{ dB}$, $1.0 \rightarrow 0\text{ dB}$), persisted in `PlayerPrefs` (`Awake()` load, `Start()` mixer application after DSP initialization), and stored separately from `AudioManager._musicVolume` so the base music trim is preserved without double attenuation.
 
 ---
 
