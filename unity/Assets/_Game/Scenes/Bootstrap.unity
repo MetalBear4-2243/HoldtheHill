@@ -208,8 +208,8 @@ MonoBehaviour:
   _sfxGroup: {fileID: 4559588099896856248, guid: 574da966c6954f64ea8bbe678b8385c0, type: 2}
   _musicGroup: {fileID: -2373798999924380123, guid: 574da966c6954f64ea8bbe678b8385c0, type: 2}
   _sfxPoolSize: 16
-  _musicVolume: 0.58
-  _defaultMusic: {fileID: 8300000, guid: 001842ca77430a843b83cb8a29b4ea55, type: 3}
+  _musicVolume: 1
+  _defaultMusic: {fileID: 8300000, guid: 4a552d701feafa64f8ac4a35172a7fde, type: 3}
   _playMusicOnStart: 0
   _loopMusic: 1
 --- !u!4 &608791189
