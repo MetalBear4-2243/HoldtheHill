@@ -631,7 +631,7 @@ MonoBehaviour:
   _enemyDeathSfx: {fileID: 11400000, guid: d27f8dfc938b0b54da8b7a067ef89814, type: 2}
   _centipedeSplitSfx: {fileID: 11400000, guid: 3a1afe4297e280d46b2330f7f223bf46, type: 2}
   _towerPlacedSfx: {fileID: 11400000, guid: 557b056353339c84ea4cae94d545088e, type: 2}
-  _levelMusic: {fileID: 0}
+  _levelMusic: {fileID: 8300000, guid: 001842ca77430a843b83cb8a29b4ea55, type: 3}
   _playMusicDuringLevel: 1
   _musicFadeDuration: 1
 --- !u!1 &1456482059

@@ -35,13 +35,14 @@ flowchart TD
         CheckAM -->|Yes| CheckListener{"AudioListener exists?"}
         CreateAM --> CheckListener
         CheckListener -->|No| AddListener["Add AudioListener to Camera/Manager"]
-        CheckListener -->|Yes| ScanMixer["Scan Project for AudioMixer"]
+        CheckListener -->|Yes| ScanMixer["Locate MainMixer.mixer"]
         AddListener --> ScanMixer
-        ScanMixer --> WireMixer["Auto-wire Mixer, SFX group, Music group"]
+        ScanMixer --> WireMixer["Independently wire Mixer, SFX, Music groups\nValidate exposed volume parameters"]
         WireMixer --> SaveBoot["Save Bootstrap.unity"]
     end
 
-    SaveBoot --> Step2["2. Loop Gameplay Scenes\n(Hill01, L00_TutorialHill, L01_Meadow)"]
+    SaveBoot --> WireSfxAssets["Assign SFX group to unassigned\nShared/Audio/SFX/*.asset files"]
+    WireSfxAssets --> Step2["2. Loop Gameplay Scenes\n(Hill01, L00_TutorialHill, L01_Meadow)"]
 
     subgraph GameplayStep["Gameplay Scenes Setup"]
         Step2 --> FindRun["Find 'Level Run' GameObject"]
@@ -64,12 +65,14 @@ flowchart TD
 
 When executed, the builder performs three sequential steps:
 
-### Step 1: Persistent Bootstrap Configuration (`Bootstrap.unity`)
+### Step 1: Persistent Bootstrap Configuration (`Bootstrap.unity`) & Shared SFX Routing
 1. Opens `Assets/_Game/Scenes/Bootstrap.unity` in single mode.
 2. Checks for an `AudioManager` using `AlphaRunFrameBuilder.FindInScene<AudioManager>(bootstrap)`. If missing, creates a GameObject named `Audio Manager` and attaches the component.
 3. Checks for an active `AudioListener`. If none is found, adds one to the Bootstrap camera (or to the Audio Manager if no camera exists).
-4. Searches the project's `AssetDatabase` for any `AudioMixer` asset (`t:AudioMixer`). If found and the manager's `_mixer` is unassigned, it auto-assigns the mixer and matches groups named `"SFX"` and `"Music"`.
-5. Marks the scene dirty and saves `Bootstrap.unity`.
+4. Locates `Assets/_Game/Shared/Audio/MainMixer.mixer` (falling back to any `AudioMixer` under `Assets/_Game/`), then independently populates unassigned `_mixer`, `_sfxGroup` (`"SFX"`), and `_musicGroup` (`"Music"`) fields on `AudioManager`.
+5. Validates that `Master`, `SFX`, and `Music` groups and exposed parameters `MasterVolume`, `SfxVolume`, and `MusicVolume` exist on the mixer, logging an error if any are missing.
+6. Marks the scene dirty and saves `Bootstrap.unity`.
+7. Scans `Assets/_Game/Shared/Audio/SFX/` for `SoundEffectSO` assets and non-destructively assigns the `SFX` `AudioMixerGroup` to any asset whose `_mixerGroup` is unassigned.
 
 ### Step 2: Level Director Configuration (Gameplay Scenes)
 Iterates through all level gameplay scenes:
@@ -99,8 +102,8 @@ For each scene:
 
 ### Step 3: Verification & Reload
 1. Re-opens `Bootstrap.unity`.
-2. Inspects all saved scenes and compiles a status log string.
-3. Logs a consolidated report to the Unity Console (e.g., `Audio Setup Complete: Bootstrap AudioManager = yes, AudioListener = yes, L00_TutorialHill_Gameplay Director = yes...`).
+2. Inspects all saved scenes and compiles a status log string including `Mixer`, `SFX Group`, `Music Group`, and exposed-parameter validation status.
+3. Logs a consolidated report to the Unity Console (e.g., `Audio Setup Complete: Bootstrap AudioManager = yes, AudioListener = yes, Mixer = MainMixer, SFX Group = SFX, Music Group = Music, Mixer Validation = valid...`).
 4. Leaves `Bootstrap.unity` open in the Editor, adhering to the project convention so pressing Play starts the full additive game loop.
 
 ---

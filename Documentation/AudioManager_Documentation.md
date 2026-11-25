@@ -78,10 +78,10 @@ flowchart TD
    If all voices in the pool are actively playing during an intense combat wave, the manager identifies the voice with the highest normalized playback progress ($\frac{\text{time}}{\text{clip.length}}$), stops it, and repurposes it for the newest request. This ensures high-priority new sounds are never dropped.
 4. **Dual-Channel Music Crossfading:**
    Maintains two dedicated `AudioSource` channels (`_musicSourceA` and `_musicSourceB`). Transitioning tracks fades out the active source while fading in the target source over a configurable duration using unscaled delta time (functional even when game simulation is paused).
-5. **Logarithmic AudioMixer Decibel Math:**
-   Exposes volume slider methods (`SetMasterVolume`, `SetSfxVolume`, `SetMusicVolume`) that translate linear UI slider values ($0.0$ to $1.0$) into logarithmic decibels:
+5. **Logarithmic AudioMixer Decibel Math & Persistence:**
+   Exposes volume slider methods (`SetMasterVolume`, `SetSfxVolume`, `SetMusicVolume`) that translate linear UI slider values ($0.0$ to $1.0$) into logarithmic decibels via `LinearToDecibels`:
    $$\text{dB} = 20 \times \log_{10}(\max(0.0001, \text{sliderValue}))$$
-   This matches human hearing perception, ensuring a slider at $0.5$ sounds like half volume rather than muting abruptly.
+   Values at or below $0.0001$ map to $-80\text{ dB}$. Player settings are stored independently from `_musicVolume` (the base mix trim on music `AudioSource`s) so `MainMixer.mixer` (`Master` $\rightarrow$ `SFX`, `Music`) does not double-attenuate music. Preferences load from `PlayerPrefs` in `Awake()` and apply to the mixer in `Start()` once Unity's DSP graph is initialized.
 
 ---
 
@@ -94,11 +94,14 @@ classDiagram
         -AudioMixerGroup _sfxGroup
         -AudioMixerGroup _musicGroup
         -int _sfxPoolSize
+        -float _musicVolume
         -AudioClip _defaultMusic
         -bool _playMusicOnStart
+        -bool _loopMusic
         +PoolSize int
         +ActiveVoiceCount int
         +CurrentMusicSource AudioSource
+        +VolumesChanged Action
         +PlayOneShot(SoundEffectSO, Vector3, float) AudioSource
         +PlayOneShot(AudioClip, float, float, Vector3, float, AudioMixerGroup) AudioSource
         +PlayMusic(AudioClip, float, bool) void
@@ -107,17 +110,28 @@ classDiagram
         +SetSfxVolume(float) void
         +SetMusicVolume(float) void
         +SetVolume(string, float) void
+        +GetMasterVolume() float
+        +GetSfxVolume() float
+        +GetMusicVolume() float
+        +LoadSavedVolumes() void
+        +ApplyAllVolumesToMixer() void
+        +ResetVolumesToDefaults() void
+        +SaveVolumeSettings() void
+        +LinearToDecibels(float) float
+        +DecibelsToLinear(float) float
     }
 ```
 
 | Field | Type | Default | Attributes | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `_mixer` | `AudioMixer` | `null` | `[SerializeField]` | The master `AudioMixer` asset containing exposed volume parameters. |
-| `_sfxGroup` | `AudioMixerGroup` | `null` | `[SerializeField]` | The default mixer bus routing for all pooled SFX voices. |
+| `_mixer` | `AudioMixer` | `null` | `[SerializeField]` | The master `AudioMixer` asset (`Assets/_Game/Shared/Audio/MainMixer.mixer`) containing exposed volume parameters. |
+| `_sfxGroup` | `AudioMixerGroup` | `null` | `[SerializeField]` | The default mixer bus routing for all pooled SFX voices (including UI sounds). |
 | `_musicGroup` | `AudioMixerGroup` | `null` | `[SerializeField]` | The mixer bus routing for background music channels A and B. |
 | `_sfxPoolSize` | `int` | `16` | `[SerializeField]`, `[Min(4)]` | Total pre-warmed `AudioSource` voices created in the child pool. |
+| `_musicVolume` | `float` | `0.5` | `[SerializeField]`, `[Range(0f, 1f)]` | Base mix trim for background music `AudioSource`s (preserved independently from `MusicVolume`). |
 | `_defaultMusic` | `AudioClip` | `null` | `[SerializeField]` | Background track to trigger when the manager enables. |
 | `_playMusicOnStart`| `bool` | `false`| `[SerializeField]` | Whether to automatically play `_defaultMusic` on `OnEnable()`. |
+| `_loopMusic` | `bool` | `true` | `[SerializeField]` | Whether background music loops indefinitely. |
 
 ---
 
@@ -151,11 +165,18 @@ AudioManager.Current.PlayMusic(_waveCombatTrack, fadeDuration: 1.5f);
 #### `void StopMusic(float fadeDuration = 1f)`
 Fades out and stops any actively playing music track over `fadeDuration` seconds.
 
-### Mixer Volume Controls
-* `void SetMasterVolume(float linear01)`: Controls the `"MasterVolume"` parameter.
-* `void SetSfxVolume(float linear01)`: Controls the `"SfxVolume"` parameter.
-* `void SetMusicVolume(float linear01)`: Controls the `"MusicVolume"` parameter.
-* `void SetVolume(string parameterName, float linear01)`: Generic method converting $0.0..1.0$ into $-80\text{ dB}..0\text{ dB}$.
+### Mixer Volume Controls & Persistence
+* `void SetMasterVolume(float linear01)`: Clamps and saves `"HoldTheHill.Audio.MasterVolume"`, updates `"MasterVolume"`, and raises `VolumesChanged`.
+* `void SetSfxVolume(float linear01)`: Clamps and saves `"HoldTheHill.Audio.SfxVolume"`, updates `"SfxVolume"`, and raises `VolumesChanged`.
+* `void SetMusicVolume(float linear01)`: Clamps and saves `"HoldTheHill.Audio.MusicVolume"`, updates `"MusicVolume"`, preserves `_musicVolume` base trim, and raises `VolumesChanged`.
+* `void SetVolume(string parameterName, float linear01)`: Generic method converting $0.0..1.0$ into $-80\text{ dB}..0\text{ dB}$ via `LinearToDecibels`.
+* `float GetMasterVolume()`, `float GetSfxVolume()`, `float GetMusicVolume()`: Return the stored linear `0..1` settings.
+* `void LoadSavedVolumes()`: Reads persisted `PlayerPrefs` values (called automatically in `Awake()`).
+* `void ApplyAllVolumesToMixer()`: Pushes all three stored settings to `_mixer` (called automatically in `Start()` so the DSP graph is ready).
+* `void ResetVolumesToDefaults()`: Resets all three settings to `1.0`, writes and flushes `PlayerPrefs`, applies to `_mixer`, and raises `VolumesChanged`.
+* `void SaveVolumeSettings()`: Flushes pending `PlayerPrefs` changes to disk (also called on `OnDisable()` and `OnApplicationQuit()`).
+* `static float LinearToDecibels(float linear01)` / `static float DecibelsToLinear(float decibels)`: Pure logarithmic conversion helpers (`0.0001f` floor $\leftrightarrow -80\text{ dB}$, `1.0f` $\leftrightarrow 0\text{ dB}$).
+* **Null-Mixer Fallback:** When `_mixer` is `null` (such as isolated tests), `PlayOneShot` and `PlayMusic` scale `AudioSource.volume` by the stored Master and channel settings instead.
 
 ---
 
@@ -180,7 +201,7 @@ Scenes/Bootstrap
 
 ## 5. Unit Testing & Verification
 
-The component's core functionality is verified by [AudioManagerTests.cs](file:///c:/Users/metal/Documents/GitHub/HoldtheHill/HoldtheHill/unity/Assets/_Game/Tests/EditMode/AudioManagerTests.cs):
+The component and mixer configuration are verified by [AudioManagerTests.cs](../unity/Assets/_Game/Tests/EditMode/AudioManagerTests.cs) and [AudioMixerDataTests.cs](../unity/Assets/_Game/Tests/EditMode/AudioMixerDataTests.cs):
 
 | Test Case | Description |
 | :--- | :--- |
@@ -191,3 +212,13 @@ The component's core functionality is verified by [AudioManagerTests.cs](file://
 | `PlayOneShot_SoundEffectSO_RoutesThroughPlaybackHandler` | Verifies end-to-end routing from `sfx.Play()` into the pooled voice manager. |
 | `PlayMusic_AssignsClipToMusicSource` | Confirms assignment and looping configuration on the music channel. |
 | `SetVolume_HandlesNullMixerGracefully` | Verifies null-safety of volume methods when running in headless tests without an AudioMixer. |
+| `LinearToDecibels_MapsBoundariesAndMidpointCorrectly` | Checks dB mapping at `0`, `0.0001`, `0.5`, `1`, and out-of-range inputs. |
+| `DecibelsToLinear_InvertsLinearToDecibels` | Verifies inverse dB-to-linear clamping and mute floor handling. |
+| `SetVolumes_ClampsPersistsAndRaisesEvent` | Confirms clamping, `PlayerPrefs` storage, getters, and `VolumesChanged` firing. |
+| `SetMusicVolume_PreservesBaseMusicVolumeTrim` | Confirms slider updates do not overwrite `_musicVolume` base trim. |
+| `LoadSavedVolumes_RestoresPersistedPlayerPrefs` | Confirms saved preferences reload cleanly into memory. |
+| `ResetVolumesToDefaults_RestoresFullVolumeAndPersists` | Confirms reset restores `1.0` across all channels and persists. |
+| `PlayOneShot_NullMixerFallback_ScalesByMasterAndSfxVolumes` | Verifies scalar fallback volume math for SFX when `_mixer` is unassigned. |
+| `PlayMusic_NullMixerFallback_ScalesByBaseTrimAndMixerSettings` | Verifies scalar fallback volume math for music when `_mixer` is unassigned. |
+| `GroupSetters_PropagateToExistingVoicesAndMusicSources` | Verifies runtime `SfxGroup`/`MusicGroup` assignment updates pooled voices and music channels. |
+| `AudioMixerDataTests` (5 tests) | Verifies `MainMixer.mixer` path, 3-group layout (`Master`, `SFX`, `Music`), exposed volume parameters, `Bootstrap.unity` wiring, and shared `SoundEffectSO` routing. |
