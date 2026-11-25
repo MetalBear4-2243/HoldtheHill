@@ -6250,6 +6250,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1847788230}
   - component: {fileID: 1847788229}
+  - component: {fileID: 1847788231}
   m_Layer: 0
   m_Name: Dev Keys
   m_TagString: Untagged
@@ -6287,6 +6288,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1847788231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847788228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b413e140c6cffb4cbc4574494c87632, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HoldTheHill.Runtime::HoldTheHill.Features.DebugTools.DevConsole
+  _logLines: 14
 --- !u!1 &1852041767
 GameObject:
   m_ObjectHideFlags: 0

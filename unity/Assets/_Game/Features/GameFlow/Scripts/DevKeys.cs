@@ -46,9 +46,9 @@ namespace HoldTheHill.Features.GameFlow
                 SendCentipedeAtQueen(run);
             }
 
-            if (keys.f6Key.wasPressedThisFrame && run.Wallet != null)
+            if (keys.f6Key.wasPressedThisFrame)
             {
-                run.Wallet.Honeydew.Earn(_honeydewGift);
+                GiveHoneydew(run);
             }
 
             if (keys.f7Key.wasPressedThisFrame)
@@ -67,8 +67,18 @@ namespace HoldTheHill.Features.GameFlow
             }
         }
 
+        /// <summary>F6: adds the Honeydew gift to the run's wallet. The dev console calls it too.</summary>
+        public void GiveHoneydew(LevelRun run)
+        {
+            if (run != null && run.Wallet != null)
+            {
+                run.Wallet.Honeydew.Earn(_honeydewGift);
+            }
+        }
+
+        /// <summary>F8: sends a Queen Mantis down the whole road. The dev console calls it too.</summary>
         // From the first waypoint, like a spawned one, so she walks in with her escort.
-        private void SendQueenMantis(LevelRun run)
+        public void SendQueenMantis(LevelRun run)
         {
             EnemyPath path = FindAnyObjectByType<EnemyPath>();
             if (_queenMantisPrefab == null || path == null || path.Waypoints.Count < 2)
@@ -84,7 +94,8 @@ namespace HoldTheHill.Features.GameFlow
 
         // A third of her maximum, so each press crosses one shade change; a hair more, so rounding
         // never leaves her just above the line.
-        private static void HurtQueenMantisByAThird()
+        /// <summary>F9: takes a third of the first Queen Mantis's health. The dev console calls it too.</summary>
+        public static void HurtQueenMantisByAThird()
         {
             if (QueenMantisBoss.Live.Count == 0)
             {
@@ -98,7 +109,8 @@ namespace HoldTheHill.Features.GameFlow
 
         // Starts on the next-to-last waypoint, so the centipede walks only the final stretch: the
         // place to see what a hit on the arrival frame does (EN-1).
-        private void SendCentipedeAtQueen(LevelRun run)
+        /// <summary>F5: sends a centipede down the last stretch to the Queen. The dev console calls it too.</summary>
+        public void SendCentipedeAtQueen(LevelRun run)
         {
             EnemyPath path = FindAnyObjectByType<EnemyPath>();
             if (_centipedePrefab == null || path == null || path.Waypoints.Count < 2)

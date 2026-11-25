@@ -1,3 +1,4 @@
+using HoldTheHill.Features.DebugTools;
 using HoldTheHill.Features.Enemies;
 using HoldTheHill.Features.GameFlow;
 using HoldTheHill.Features.Levels;
@@ -10,8 +11,8 @@ namespace HoldTheHill.EditorTools
 {
     /// <summary>
     /// What the 10-31 play pass asked for in the scenes: <see cref="DevKeys"/> in the UI scene, with
-    /// the centipede its F5 key sends, and a <see cref="LevelCameraFit"/> on each level's camera so
-    /// the map clears the HUD. Leaves the Bootstrap scene open, ready for Play.
+    /// the centipede its F5 key sends and the <see cref="DevConsole"/> beside it, and a
+    /// <see cref="LevelCameraFit"/> on each level's camera so the map clears the HUD. Leaves the Bootstrap scene open, ready for Play.
     /// </summary>
     /// <remarks>Safe to run again: each piece is added only when missing.</remarks>
     internal static class AlphaPlaytestToolsBuilder
@@ -82,6 +83,11 @@ namespace HoldTheHill.EditorTools
                 keys = holder.AddComponent<DevKeys>();
             }
 
+            if (keys.GetComponent<DevConsole>() == null)
+            {
+                keys.gameObject.AddComponent<DevConsole>();
+            }
+
             // Loaded after OpenScene: opening a scene unloads loose assets loaded before it.
             var centipede = AssetDatabase.LoadAssetAtPath<GameObject>(CentipedePrefabPath);
             if (centipede == null)
@@ -103,7 +109,8 @@ namespace HoldTheHill.EditorTools
             Scene ui = EditorSceneManager.OpenScene(UiScenePath, OpenSceneMode.Single);
             DevKeys keys = AlphaRunFrameBuilder.FindInScene<DevKeys>(ui);
             Object centipede = keys != null ? new SerializedObject(keys).FindProperty("_centipedePrefab").objectReferenceValue : null;
-            string report = $"Play-test tools: dev keys = {(keys != null ? "yes" : "MISSING")}, centipede = {(centipede != null ? centipede.name : "none")}";
+            bool console = keys != null && keys.GetComponent<DevConsole>() != null;
+            string report = $"Play-test tools: dev keys = {(keys != null ? "yes" : "MISSING")}, dev console = {(console ? "yes" : "MISSING")}, centipede = {(centipede != null ? centipede.name : "none")}";
 
             foreach (string path in LevelGameplayScenes)
             {
