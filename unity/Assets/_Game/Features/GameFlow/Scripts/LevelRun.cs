@@ -250,6 +250,22 @@ namespace HoldTheHill.Features.GameFlow
             }
         }
 
+        /// <summary>
+        /// Dev console only: ends the run now as won or lost, as if it had played out. Does nothing
+        /// in a release build or once the run is over.
+        /// </summary>
+        internal void EndRunForDev(RunOutcome outcome)
+        {
+            if (!Debug.isDebugBuild || Outcome != RunOutcome.Playing || outcome == RunOutcome.Playing)
+            {
+                return;
+            }
+
+            Outcome = outcome;
+            Clock.SetPaused(true);
+            Finished?.Invoke(outcome);
+        }
+
         private void HandleQueenDefeated()
         {
             _queenDefeated = true;
